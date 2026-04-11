@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portfolio component library — v4 (post-audit, with gestalt critique)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* Royal Tonal */
+    --royal-1:  #0E0F1C;
+    --royal-2:  #121428;
+    --royal-3:  #181B36;
+    --royal-4:  #1E2346;
+    --royal-5:  #252C58;
+    --royal-6:  #2D366C;
+    --royal-7:  #364280;
+    --royal-8:  #3B5BDB;
+    --royal-9:  #4D6DE8;
+    --royal-10: #6C85FF;
+    --royal-11: #A5B4FF;
+    --royal-12: #D5DCFA;
+
+    /* Violet Signal (5 steps) */
+    --violet-8:  #8C3BDB;
+    --violet-9:  #9D4DE8;
+    --violet-10: #B47CFF;
+    --violet-11: #C89BFF;
+    --violet-12: #E6D4FF;
+
+    /* Signature gradient */
+    --grad-rv:      linear-gradient(135deg, var(--royal-8) 0%, var(--violet-8) 100%);
+    --grad-rv-line: linear-gradient(180deg, var(--royal-8) 0%, var(--violet-8) 100%);
+    --grad-rv-soft: linear-gradient(135deg, var(--royal-10) 0%, var(--violet-10) 100%);
+
+    /* Ink */
+    --ink:       #E6E2D9;
+    --ink-dim:   #9C968A;
+    --ink-faint: #5E584F;  /* decorative only per accessibility rules */
+
+    /* Semantic */
+    --bg:         var(--royal-2);
+    --bg-subtle:  var(--royal-3);
+    --card:       var(--royal-4);
+    --card-hover: var(--royal-5);
+    --border:     var(--royal-7);
+    --primary:    var(--royal-8);
+    --button-fg:  #FFFFFF;  /* NOT royal-12 — see accessibility rules */
+
+    /* Fonts */
+    --font-serif: 'Fraunces', Georgia, serif;
+    --font-sans:  'Geist', -apple-system, system-ui, sans-serif;
+    --font-mono:  'Geist Mono', 'SF Mono', Menlo, monospace;
+
+    /* Spacing */
+    --s1: 0.25rem; --s2: 0.5rem; --s3: 0.75rem; --s4: 1rem;
+    --s5: 1.5rem; --s6: 2rem; --s7: 3rem; --s8: 4.5rem; --s9: 6rem;
+
+    /* Radius */
+    --radius-sm: 2px;
+    --radius:    8px;
+    --radius-lg: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-optical-sizing: auto; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 1280px; margin: 0 auto; padding: var(--s8) var(--s6); }
+
+  /* ============================================ */
+  /* Doc header                                    */
+  /* ============================================ */
+  .doc-kicker {
+    font-family: var(--font-mono);
+    font-size: 11px; font-weight: 500;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--royal-11);
+    margin-bottom: var(--s3);
+  }
+  .doc-title {
+    font-family: var(--font-serif);
+    font-size: 4rem; font-weight: 400;
+    line-height: 0.98; letter-spacing: -0.025em;
+    margin-bottom: var(--s5);
+  }
+  .doc-intro {
+    font-size: 1.0625rem; color: var(--ink-dim);
+    max-width: 62ch; line-height: 1.65;
+  }
+  .doc-intro + .doc-intro { margin-top: var(--s4); }
+  .doc-intro strong { color: var(--ink); font-weight: 500; }
+
+  /* ============================================ */
+  /* Section structure                             */
+  /* ============================================ */
+  .section { margin-top: var(--s9); padding-top: var(--s7); border-top: 1px solid var(--border); }
+  .section:first-of-type { border-top: none; padding-top: 0; }
+  .section-label {
+    font-family: var(--font-mono);
+    font-size: 0.75rem; color: var(--ink-dim);
+    letter-spacing: 0.08em; text-transform: uppercase;
+    margin-bottom: var(--s2);
+  }
+  .section-title {
+    font-family: var(--font-serif);
+    font-size: 2.25rem; font-weight: 400;
+    line-height: 1.1; letter-spacing: -0.015em;
+    margin-bottom: var(--s3);
+  }
+  .section-blurb {
+    color: var(--ink-dim);
+    max-width: 62ch;
+    margin-bottom: var(--s6);
+    font-size: 0.9375rem;
+  }
+
+  /* ============================================ */
+  /* Component slot wrapper                        */
+  /* ============================================ */
+  .slot {
+    background: var(--royal-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: var(--s6);
+    margin-bottom: var(--s5);
+  }
+  .slot-label {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--ink-dim);
+    margin-bottom: var(--s2);
+    display: flex;
+    align-items: baseline;
+    gap: var(--s3);
+  }
+  .slot-label .slot-num {
+    color: var(--ink-faint);
+    font-weight: 500;
+  }
+  .slot-desc {
+    font-size: 0.8125rem;
+    color: var(--ink-dim);
+    margin-bottom: var(--s5);
+    max-width: 64ch;
+  }
+  .slot-desc strong { color: var(--ink); font-weight: 500; }
+  .slot-demo {
+    padding: var(--s5);
+    background: var(--bg);
+    border-radius: var(--radius-sm);
+    border: 1px dashed var(--royal-7);
+  }
+  .slot-notes {
+    margin-top: var(--s4);
+    padding-top: var(--s3);
+    border-top: 1px solid var(--royal-7);
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    color: var(--ink-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .slot-notes span { color: var(--royal-11); }
+
+  /* 2-col component grid */
+  .col-2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s5); }
+  .col-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--s4); }
+  @media (max-width: 960px) { .col-2, .col-3 { grid-template-columns: 1fr; } }
+
+  /* ============================================ */
+  /* FOUNDATIONS                                   */
+  /* ============================================ */
+  .swatch-strip {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: var(--s1);
+    margin-bottom: var(--s2);
+  }
+  @media (max-width: 780px) { .swatch-strip { grid-template-columns: repeat(6, 1fr); } }
+  .swatch {
+    aspect-ratio: 1;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--royal-7);
+    position: relative;
+  }
+  .swatch-label {
+    position: absolute;
+    bottom: 4px; left: 4px;
+    font-family: var(--font-mono);
+    font-size: 0.5625rem;
+    color: var(--ink);
+    background: rgba(0,0,0,0.4);
+    padding: 1px 3px;
+    border-radius: 1px;
+  }
+  .swatch-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--s2); max-width: 360px; }
+  .swatch-5 .swatch { aspect-ratio: 1.4; }
+
+  .type-scale { display: flex; flex-direction: column; gap: var(--s3); }
+  .type-row {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    align-items: baseline;
+    gap: var(--s4);
+    padding: var(--s2) 0;
+    border-top: 1px solid var(--royal-7);
+  }
+  .type-row:first-child { border-top: none; }
+  .type-row .type-label {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    color: var(--ink-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .type-row .type-spec {
+    color: var(--ink-faint);
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    margin-left: var(--s3);
+  }
+
+  /* ============================================ */
+  /* HERO                                          */
+  /* ============================================ */
+  .hero {
+    padding: var(--s7) var(--s6);
+    background: var(--bg);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+  }
+  .hero .hero-kicker {
+    font-size: 11px; font-weight: 500;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--royal-11);
+    margin-bottom: var(--s4);
+  }
+  .hero h1 {
+    font-family: var(--font-serif);
+    font-size: 3rem; font-weight: 400;
+    line-height: 1.0; letter-spacing: -0.025em;
+    margin-bottom: var(--s5);
+    color: var(--ink);
+  }
+  .hero .hero-meta {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--ink-dim);
+    margin-bottom: var(--s5);
+    letter-spacing: 0.04em;
+  }
+  .grad-underline {
+    background-image: var(--grad-rv-soft);
+    background-repeat: no-repeat;
+    background-position: 0 92%;
+    background-size: 100% 3px;
+  }
+
+  /* ============================================ */
+  /* BUTTONS                                       */
+  /* ============================================ */
+  .btn {
+    display: inline-flex; align-items: center; gap: var(--s2);
+    padding: var(--s3) var(--s5);
+    font-family: var(--font-sans);
+    font-size: 1.125rem;  /* 18px — fixed per accessibility rules */
+    font-weight: 500;
+    border-radius: var(--radius);
+    text-decoration: none;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background 120ms ease, border-color 120ms ease;
+  }
+  .btn-primary {
+    background: var(--primary);
+    color: var(--button-fg);
+    border-color: var(--primary);
+  }
+  .btn-primary:hover {
+    background: var(--royal-9);
+    border-color: var(--royal-9);
+  }
+  .btn-primary-grad {
+    background: var(--grad-rv);
+    color: var(--button-fg);
+    border-color: var(--violet-8);
+  }
+  .btn-ghost {
+    background: transparent;
+    color: var(--royal-10);
+    border-color: var(--royal-7);
+  }
+  .btn-ghost:hover {
+    background: var(--royal-4);
+    border-color: var(--royal-8);
+  }
+  .btn-thinking {
+    background: var(--violet-8);
+    color: var(--button-fg);
+    border-color: var(--violet-8);
+  }
+  .btn-thinking:hover {
+    background: var(--violet-9);
+    border-color: var(--violet-9);
+  }
+  .btn-row { display: flex; flex-wrap: wrap; gap: var(--s4); align-items: center; }
+
+  /* ============================================ */
+  /* CARDS                                         */
+  /* ============================================ */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: var(--s5);
+    display: flex; flex-direction: column; gap: var(--s3);
+    position: relative;
+  }
+  .card .kicker {
+    font-size: 11px; font-weight: 500;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--royal-11);
+  }
+  .card h3 {
+    font-family: var(--font-serif);
+    font-size: 1.5rem; font-weight: 500;
+    line-height: 1.15; letter-spacing: -0.01em;
+  }
+  .card p {
+    font-size: 0.9375rem;
+    color: var(--ink-dim);
+    line-height: 1.6;
+  }
+  .card .tags { display: flex; gap: var(--s2); flex-wrap: wrap; }
+  .card .arrow {
+    color: var(--royal-10);
+    font-size: 0.9375rem;
+    font-weight: 500;
+  }
+
+  .card.featured {
+    background:
+      linear-gradient(var(--card), var(--card)) padding-box,
+      var(--grad-rv) border-box;
+    border: 1px solid transparent;
+  }
+  .card .featured-pin {
+    position: absolute;
+    top: var(--s3); right: var(--s3);
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    color: var(--violet-11);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    padding: 2px 6px;
+    border: 1px solid var(--violet-8);
+    border-radius: var(--radius-sm);
+    background: rgba(140, 59, 219, 0.1);
+  }
+
+  .card.writing {
+    border-left: 3px solid var(--violet-8);
+  }
+  .card.writing .kicker { color: var(--violet-11); }
+  .card.writing .arrow { color: var(--violet-10); }
+
+  /* ============================================ */
+  /* TAGS                                          */
+  /* ============================================ */
+  .tag {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--royal-8);
+    color: var(--royal-11);
+    background: rgba(59, 91, 219, 0.08);
+  }
+  .tag.thinking {
+    border-color: var(--violet-8);
+    color: var(--violet-11);
+    background: rgba(140, 59, 219, 0.10);
+  }
+
+  /* ============================================ */
+  /* KICKER                                        */
+  /* ============================================ */
+  .kicker-example {
+    font-size: 11px; font-weight: 500;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--royal-11);
+  }
+  .kicker-example.thinking { color: var(--violet-11); }
+
+  /* ============================================ */
+  /* INLINE LINK                                   */
+  /* ============================================ */
+  a.inline {
+    color: var(--royal-10);
+    text-decoration: underline;
+    text-decoration-color: rgba(108, 133, 255, 0.4);
+    text-underline-offset: 3px;
+  }
+  a.inline:hover {
+    text-decoration-color: var(--royal-10);
+  }
+  a.inline.thinking {
+    color: var(--violet-10);
+    text-decoration-color: rgba(180, 124, 255, 0.4);
+  }
+  a.inline.thinking:hover { text-decoration-color: var(--violet-10); }
+
+  /* ============================================ */
+  /* BODY PROSE                                    */
+  /* ============================================ */
+  .prose {
+    font-size: 1.0625rem;
+    line-height: 1.72;
+    color: var(--ink);
+    max-width: 62ch;
+  }
+  .prose p + p { margin-top: var(--s4); }
+  .prose code {
+    font-family: var(--font-mono);
+    font-size: 0.9375rem;
+    background: var(--royal-1);
+    color: var(--royal-11);
+    padding: 1px 6px;
+    border-radius: var(--radius-sm);
+  }
+
+  /* ============================================ */
+  /* HEADING                                       */
+  /* ============================================ */
+  .heading-h2 {
+    font-family: var(--font-serif);
+    font-size: 2rem;
+    font-weight: 500;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+  }
+  .heading-h3 {
+    font-family: var(--font-serif);
+    font-size: 1.5rem;
+    font-weight: 500;
+    line-height: 1.2;
+    letter-spacing: -0.005em;
+  }
+
+  /* ============================================ */
+  /* BUILD LOG TICKER                              */
+  /* ============================================ */
+  .ticker {
+    background: var(--bg-subtle);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: var(--s5);
+  }
+  .ticker-head {
+    display: flex; align-items: center; gap: var(--s3);
+    margin-bottom: var(--s4);
+    padding-bottom: var(--s3);
+    border-bottom: 1px solid var(--royal-7);
+  }
+  .live-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--royal-10);
+  }
+  .ticker-title {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--ink-dim);
+  }
+  .ticker-entry {
+    display: grid;
+    grid-template-columns: 96px 1fr;
+    gap: var(--s3);
+    padding: var(--s2) 0;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+  }
+  .ticker-entry + .ticker-entry { border-top: 1px solid var(--royal-7); }
+  .ticker-entry .date { color: var(--ink-dim); }
+  .ticker-entry .action { color: var(--ink-dim); }
+  .ticker-entry .project { color: var(--royal-11); }
+  .ticker-entry .project.thinking { color: var(--violet-11); }
+
+  /* ============================================ */
+  /* CHAT TRANSCRIPT (variant D2)                  */
+  /* ============================================ */
+  .transcript {
+    background:
+      linear-gradient(var(--bg-subtle), var(--bg-subtle)) padding-box,
+      var(--grad-rv) border-box;
+    border: 1px solid transparent;
+    border-radius: var(--radius);
+    padding: var(--s5);
+  }
+  .t-head {
+    display: flex; justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--ink-dim);
+    margin-bottom: var(--s4);
+    padding-bottom: var(--s3);
+    border-bottom: 1px solid var(--royal-7);
+  }
+  .turn { padding: var(--s4) 0; }
+  .turn + .turn { border-top: 1px solid var(--royal-7); }
+  .turn .role {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-weight: 500;
+    margin-bottom: var(--s2);
+  }
+  .turn.dylan .role { color: var(--royal-11); }
+  .turn.claude .role { color: var(--violet-11); }
+  .turn.dylan .body {
+    font-family: var(--font-sans);
+    font-size: 0.9375rem;
+    line-height: 1.65;
+    color: var(--ink);
+  }
+  .turn.claude .body {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    line-height: 1.7;
+    color: var(--ink);
+  }
+  .turn .body code {
+    font-family: var(--font-mono);
+    background: var(--royal-1);
+    color: var(--royal-11);
+    padding: 1px 4px;
+    border-radius: 2px;
+  }
+
+  /* ============================================ */
+  /* DIAGRAM FRAME                                 */
+  /* ============================================ */
+  .diagram {
+    background: var(--bg-subtle);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: var(--s5);
+  }
+  .diagram svg { width: 100%; height: auto; display: block; }
+  .figure-caption {
+    margin-top: var(--s3);
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    color: var(--ink-dim);
+    text-align: center;
+    letter-spacing: 0.06em;
+  }
+
+  /* ============================================ */
+  /* SCREENSHOT FRAME                              */
+  /* ============================================ */
+  .screenshot {
+    background: linear-gradient(145deg, #1A1D3A 0%, #14172E 100%);
+    border-radius: var(--radius);
+    padding: var(--s5);
+    box-shadow: 0 16px 48px rgba(0,0,0,0.45);
+    border: 1px solid var(--border);
+  }
+  .screenshot-inner {
+    background: var(--royal-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: var(--s4) var(--s5);
+  }
+  .screenshot-head {
+    display: flex; align-items: center; gap: var(--s2);
+    padding-bottom: var(--s3);
+    margin-bottom: var(--s3);
+    border-bottom: 1px solid var(--royal-7);
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    color: var(--ink-dim);
+  }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot.r { background: #FF5F57; }
+  .dot.y { background: #FEBB2E; }
+  .dot.g { background: #28C840; }
+  .screenshot-head .filename { margin-left: var(--s3); }
+  .screenshot-body {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    line-height: 1.6;
+    color: var(--ink);
+    white-space: pre;
+  }
+  .scr-prompt { color: var(--royal-10); }
+  .scr-ok { color: #7BD88F; }
+  .scr-warn { color: var(--violet-11); }
+  .scr-dim { color: var(--ink-dim); }
+
+  /* ============================================ */
+  /* CODE BLOCK                                    */
+  /* ============================================ */
+  .codeblock {
+    background: var(--royal-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: var(--s4) var(--s5);
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    line-height: 1.65;
+    color: var(--ink);
+    overflow-x: auto;
+    white-space: pre;
+  }
+  .c-kw { color: var(--royal-10); }
+  .c-str { color: var(--royal-11); }
+  .c-com { color: var(--ink-dim); }
+
+  /* ============================================ */
+  /* GRADIENT DIVIDER                              */
+  /* ============================================ */
+  .grad-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, var(--royal-8) 25%, var(--violet-8) 75%, transparent 100%);
+    margin: var(--s6) 0;
+  }
+
+  /* ============================================ */
+  /* META ROW                                      */
+  /* ============================================ */
+  .meta-row {
+    display: flex;
+    gap: var(--s4);
+    flex-wrap: wrap;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    padding-bottom: var(--s4);
+    border-bottom: 1px solid var(--border);
+  }
+  .meta-row span { display: inline-flex; gap: var(--s2); }
+  .meta-row .label { color: var(--ink-dim); }
+  .meta-row .value { color: var(--ink); }
+
+  /* ============================================ */
+  /* GESTALT CRITIQUE                              */
+  /* ============================================ */
+  .critique {
+    margin-top: var(--s9);
+    padding-top: var(--s7);
+    border-top: 1px solid var(--border);
+  }
+  .critique-entry {
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    gap: var(--s5);
+    padding: var(--s5) 0;
+    border-top: 1px solid var(--royal-7);
+  }
+  .critique-entry:first-of-type { border-top: none; }
+  @media (max-width: 780px) { .critique-entry { grid-template-columns: 1fr; } }
+
+  .critique-principle {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--violet-11);
+  }
+  .critique-principle .sub {
+    display: block;
+    margin-top: var(--s1);
+    font-size: 0.6875rem;
+    color: var(--ink-dim);
+    text-transform: none;
+    letter-spacing: 0.02em;
+    font-family: var(--font-sans);
+  }
+  .critique-body h4 {
+    font-family: var(--font-serif);
+    font-size: 1.25rem;
+    font-weight: 500;
+    margin-bottom: var(--s3);
+    color: var(--ink);
+  }
+  .critique-body p {
+    font-size: 0.9375rem;
+    color: var(--ink-dim);
+    line-height: 1.65;
+    margin-bottom: var(--s3);
+  }
+  .critique-body strong { color: var(--ink); font-weight: 500; }
+  .critique-body .verdict {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+    margin-top: var(--s2);
+  }
+  .verdict.fix { background: rgba(180, 124, 255, 0.15); color: var(--violet-11); border: 1px solid var(--violet-8); }
+  .verdict.watch { background: rgba(108, 133, 255, 0.1); color: var(--royal-11); border: 1px solid var(--royal-7); }
+  .verdict.keep { background: rgba(123, 216, 143, 0.1); color: #7BD88F; border: 1px solid #2F5C3D; }
+
+  .summary-box {
+    margin-top: var(--s7);
+    padding: var(--s6);
+    background:
+      linear-gradient(var(--royal-1), var(--royal-1)) padding-box,
+      var(--grad-rv) border-box;
+    border: 1px solid transparent;
+    border-radius: var(--radius-lg);
+  }
+  .summary-box h2 {
+    font-family: var(--font-serif);
+    font-size: 1.625rem;
+    font-weight: 500;
+    margin-bottom: var(--s4);
+  }
+  .summary-box ol {
+    padding-left: var(--s5);
+    color: var(--ink-dim);
+    font-size: 0.9375rem;
+    line-height: 1.7;
+  }
+  .summary-box li { margin-bottom: var(--s2); }
+  .summary-box strong { color: var(--ink); font-weight: 500; }
+
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HEADER -->
+  <header>
+    <div class="doc-kicker">Portfolio · component library · v4 · 2026-04-12</div>
+    <h1 class="doc-title">Component library<br>+ gestalt critique</h1>
+    <p class="doc-intro">
+      Post-audit, post-decisions. Royal + Violet Signal is locked. Accessibility fixes from the WCAG 2.1 AA audit are applied (<strong>ink-faint restricted to decorative</strong>, <strong>button labels use #FFFFFF</strong>, <strong>transcript role labels mandatory</strong>). This doc mocks every reusable component the portfolio will need, then critiques the library through gestalt and other visual principles, with a prioritised fix list.
+    </p>
+    <p class="doc-intro">
+      Structure: foundations → content blocks → interactive → cards → artefacts → structural. Each component has a label, one-line purpose, a rendered demo, and a "uses" footnote naming the tokens it consumes. Critique section starts after the library.
+    </p>
+  </header>
+
+  <!-- ============================================ -->
+  <!-- 01 · FOUNDATIONS                              -->
+  <!-- ============================================ -->
+  <section class="section">
+    <div class="section-label">01 · foundations</div>
+    <h2 class="section-title">Colour scales &amp; type scale at a glance</h2>
+
+    <div class="slot">
+      <div class="slot-label"><span class="slot-num">01a</span> Royal Tonal · 12 steps</div>
+      <div class="slot-desc">Chrome + work register. Step 8 is the brand solid; steps 10–12 are text-on-dark variants; steps 1–7 are surface/background tones.</div>
+      <div class="slot-demo">
+        <div class="swatch-strip">
+          <div class="swatch" style="background:#0E0F1C"><span class="swatch-label">1</span></div>
+          <div class="swatch" style="background:#121428"><span class="swatch-label">2</span></div>
+          <div class="swatch" style="background:#181B36"><span class="swatch-label">3</span></div>
+          <div class="swatch" style="background:#1E2346"><span class="swatch-label">4</span></div>
+          <div class="swatch" style="background:#252C58"><span class="swatch-label">5</span></div>
+          <div class="swatch" style="background:#2D366C"><span class="swatch-label">6</span></div>
+          <div class="swatch" style="background:#364280"><span class="swatch-label">7</span></div>
+          <div class="swatch" style="background:#3B5BDB"><span class="swatch-label">8</span></div>
+          <div class="swatch" style="background:#4D6DE8"><span class="swatch-label">9</span></div>
+          <div class="swatch" style="background:#6C85FF"><span class="swatch-label">10</span></div>
+          <div class="swatch" style="background:#A5B4FF"><span class="swatch-label">11</span></div>
+          <div class="swatch" style="background:#D5DCFA"><span class="swatch-label">12</span></div>
+        </div>
+      </div>
+      <div class="slot-notes">uses · <span>--royal-1 → --royal-12</span></div>
+    </div>
+
+    <div class="slot">
+      <div class="slot-label"><span class="slot-num">01b</span> Violet Signal · 5 steps</div>
+      <div class="slot-desc">Thinking/writing register. Only 8–12 exist (no chrome tones); violet never fills a background, only carries text, borders, or brand surfaces.</div>
+      <div class="slot-demo">
+        <div class="swatch-5">
+          <div class="swatch" style="background:#8C3BDB"><span class="swatch-label">8</span></div>
+          <div class="swatch" style="background:#9D4DE8"><span class="swatch-label">9</span></div>
+          <div class="swatch" style="background:#B47CFF"><span class="swatch-label">10</span></div>
+          <div class="swatch" style="background:#C89BFF"><span class="swatch-label">11</span></div>
+          <div class="swatch" style="background:#E6D4FF"><span class="swatch-label">12</span></div>
+        </div>
+      </div>
+      <div class="slot-notes">uses · <span>--violet-8 → --violet-12</span></div>
+    </div>
+
+    <div class="slot">
+      <div class="slot-label"><span class="slot-num">01c</span> Signature gradient</div>
+      <div class="slot-desc">Royal 8 → Violet 8 at 135°. Used only in hero CTA and structural divider per gradient placement rules.</div>
+      <div class="slot-demo">
+        <div style="height:48px; border-radius: var(--radius); background: var(--grad-rv);"></div>
+      </div>
+      <div class="slot-notes">uses · <span>--grad-rv</span></div>
+    </div>
+
+    <div class="slot">
+      <div class="slot-label"><span class="slot-num">01d</span> Type scale</div>
+      <div class="slot-desc">Fraunces (serif display) × Geist (sans body) × Geist Mono (code + metadata). Weights: Fraunces 400/500, Geist 400/500/600, Geist Mono 400/500.</div>
+      <div class="slot-demo">
+        <div class="type-scale">
+          <div class="type-row">
+            <div class="type-label">Hero · 72/0.98</div>
+            <div style="font-family: var(--font-serif); font-size: 4.5rem; font-weight: 400; line-height: 0.98; letter-spacing: -0.025em;">Shipping with care</div>
+          </div>
+          <div class="type-row">
+            <div class="type-label">Display · 48/1.1</div>
+            <div style="font-family: var(--font-serif); font-size: 3rem; font-weight: 400; line-height: 1.1;">Section heading</div>
+          </div>
+          <div class="type-row">
+            <div class="type-label">Case · 32/1.15</div>
+            <div style="font-family: var(--font-serif); font-size: 2rem; font-weight: 500;">Case study title</div>
+          </div>
+          <div class="type-row">
+            <div class="type-label">H3 · 24/1.2</div>
+            <div style="font-family: var(--font-serif); font-size: 1.5rem; font-weight: 500;">Subhead</div>
+          </div>
+          <div class="type-row">
+            <div class="type-label">Body · 17/1.72</div>
+            <div style="font-family: var(--font-sans); font-size: 1.0625rem;">Body prose as it appears in writing posts and case studies.</div>
+          </div>
+          <div class="type-row">
+            <div class="type-label">Small · 15/1.6</div>
+            <div style="font-family: var(--font-sans); font-size: 0.9375rem; color: var(--ink-dim);">Card body, tldr text, secondary UI.</div>
+          </div>
+          <div class="type-row">
+            <div class="type-label">Meta · 12/1.55</div>
+            <div style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--ink-dim);">build-log / meta rows / screenshot filenames</div>
+          </div>
+          <div class="type-row">
+            <div class="type-label">Kicker · 11/1.55</div>
+            <div class="kicker-example">— SELECTED WORK · 01 / ESSAY · ARCHITECTURE</div>
+          </div>
+        </div>
+      </div>
+      <div class="slot-notes">uses · <span>Fraunces, Geist, Geist Mono</span></div>
+    </div>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- 02 · HERO                                     -->
+  <!-- ============================================ -->
+  <section class="section">
+    <div class="section-label">02 · hero</div>
+    <h2 class="section-title">Landing hero</h2>
+    <p class="section-blurb">Exactly one hero per page. Uses the signature gradient in one place (CTA button). Optional keyword underline in <code style="font-family:var(--font-mono);color:var(--royal-11)">--grad-rv-soft</code> for a stronger signature move.</p>
+
+    <div class="slot">
+      <div class="slot-label"><span class="slot-num">02</span> Hero block · with signature CTA &amp; keyword</div>
+      <div class="slot-desc">The opening move of the landing page. Gradient CTA + gradient underline on one keyword. Everything else is solid royal.</div>
+      <div class="slot-demo" style="padding: 0">
+        <div class="hero">
+          <div class="hero-kicker">— Product thinker · shipping with AI</div>
+          <h1>I design product decisions, then <span class="grad-underline">ship them</span> with Claude&nbsp;Code.</h1>
+          <div class="hero-meta">SYDNEY · AVAILABLE FOR WORK · Q2 2026</div>
+          <a class="btn btn-primary-grad" href="#">Get in touch →</a>
+        </div>
+      </div>
+      <div class="slot-notes">uses · <span>--grad-rv · --grad-rv-soft · --button-fg · Fraunces 400</span></div>
+    </div>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- 03 · BUTTONS & LINKS                          -->
+  <!-- ============================================ -->
+  <section class="section">
+    <div class="section-label">03 · interactive</div>
+    <h2 class="section-title">Buttons, links, tags</h2>
+    <p class="section-blurb">All button labels are 18px minimum (post-audit fix) and use <code style="font-family:var(--font-mono);color:var(--royal-11)">#FFFFFF</code> rather than <code style="font-family:var(--font-mono);color:var(--royal-11)">--royal-12</code> / <code style="font-family:var(--font-mono);color:var(--royal-11)">--violet-12</code>. Ghost button is the low-emphasis variant for secondary actions.</p>
+
+    <div class="slot">
+      <div class="slot-label"><span class="slot-num">03a</span> Buttons · primary, thinking, ghost, signature</div>
+      <div class="slot-demo">
+        <div class="btn-row">
+          <a class="btn btn-primary" href="#">Get in touch →</a>
+          <a class="btn btn-thinking" href="#">Read the essay →</a>
+          <a class="btn btn-ghost" href="#">View all work</a>
+          <a class="btn btn-primary-grad" href="#">Hero CTA ↗</a>
+        </div>
+      </div>
+      <div class="slot-notes">uses · <span>--primary · --thinking · --button-fg (#FFFFFF) · --grad-rv</span></div>
+    </div>
+
+    <div class="slot">
+      <div class="slot-label"><span class="slot-num">03b</span> Inline link · royal &amp; thinking variants</div>
+      <div class="slot-demo">
+        <p style="font-size: 1.0625rem; line-height: 1.7; color: var(--ink);">In the planner app, I learned to <a class="inline" href="#">put paid API calls behind a single choke point</a> so that budget caps and killswitches can't be bypassed. The full writeup is in <a class="inline thinking" href="#">the essay on defense in depth</a>.</p>
+      </div>
+      <div class="slot-notes">uses · <span>--royal-10 · --violet-10</span></div>
+    </div>
+
+    <div class="slot">
+      <div class="slot-label"><span class="slot-num">03c</span> Tags · work (royal) &amp; thinking (violet)</div>
+      <div class="slot-demo">
+        <div style="display: flex; gap: var(--s2); flex-wrap: wrap;">
+          <span class="tag">CLOUDFLARE</span>
+          <span class="tag">TYPESCRIPT</span>
+          <span class="tag">D1</span>
+          <span class="tag thinking">ARCHITECTURE</span>
+          <span class="tag thinking">POSTMORTEM</span>
+        </div>
+      </div>
+      <div class="slot-notes">uses · <span>--tag-border / --thinking-tag-border</span></div>
+    </div>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- 04 · CARDS                                    -->
+  <!-- ============================================ -->
+  <section class="section">
+    <div class="section-label">04 · cards</div>
+    <h2 class="section-title">Case study, featured, writing</h2>
+    <p class="section-blurb">Three card variants. Case study (royal) is the default. Featured is case study + gradient border, at most one per landing. Writing card uses a violet left rail to signal the thinking register.</p>
+
+    <div class="col-3" style="margin-bottom: var(--s5)">
+      <div class="card">
+        <div class="kicker">Selected work · 02</div>
+        <h3>The Weekly App</h3>
+        <p>Meal-kit POC pulling Coles recipes into a consolidated trolley. Static React/TS/Vite/Tailwind, Netlify deploy.</p>
+        <div class="tags">
+          <span class="tag">REACT</span>
+          <span class="tag">VITE</span>
+          <span class="tag">NETLIFY</span>
+        </div>
+        <div class="arrow">Read case study →</div>
+      </div>
+
+      <div class="card featured">
+        <span class="featured-pin">FEATURED</span>
+        <div class="kicker">Selected work · 01</div>
+        <h3>Planner App</h3>
+        <p>GTD planner with persistent SMS reminders. Migrated Python/Railway to TypeScript/Cloudflare with single-choke-point spend protection.</p>
+        <div class="tags">
+          <span class="tag">CLOUDFLARE</span>
+          <span class="tag">TYPESCRIPT</span>
+          <span class="tag">D1</span>
+        </div>
+        <div class="arrow">Read case study →</div>
+      </div>
+
+      <div class="card writing">
+        <div class="kicker">Essay · architecture</div>
+        <h3>Three guardrails that saved the spend budget</h3>
+        <p>Shipping a paid-API product without a single "oh god what have I done" moment. Defense in depth, with real numbers.</p>
+        <div class="tags">
+          <span class="tag thinking">ARCHITECTURE</span>
+          <span class="tag thinking">POSTMORTEM</span>
+        </div>
+        <div class="arrow">Read the essay →</div>
+      </div>
+    </div>
+    <div class="slot-notes" style="padding: var(--s3) 0 0; border-top: 1px solid var(--border);">uses · <span>--card · --grad-rv (border-image) · --violet-8 (left rail)</span></div>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- 05 · CONTENT BLOCKS                           -->
+  <!-- ============================================ -->
+  <section class="section">
+    <div class="section-label">05 · content blocks</div>
+    <h2 class="section-title">Headings, prose, meta row</h2>
+
+    <div class="slot">
+      <div class="slot-label"><span class="slot-num">05a</span> Section headings (h2 &amp; h3)</div>
+      <div class="slot-demo">
+        <div class="heading-h2">The insert-before-send pattern</div>
+        <div style="height: var(--s4)"></div>
+        <div class="heading-h3">Why the constraint runs before the vendor call</div>
+      </div>
+      <div class="slot-notes">uses · <span>Fraunces 500 · --ink</span></div>
+    </div>
+
+    <div class="slot">
+      <div class="slot-label"><span class="slot-num">05b</span> Body prose · with inline code</div>
+      <div class="slot-demo">
+        <div class="prose">
+          <p>The idempotency layer turned out to be the most interesting one. The naive approach is to check "have I sent this already" before calling Twilio, but that leaves a race window: two concurrent invocations both see no prior send, both insert the log after, both call Twilio.</p>
+          <p>The fix is to invert the check: insert a row representing the intent to send first, with a <code>UNIQUE</code> constraint on <code>(recipient, occurrence_id, date)</code>, then call Twilio.</p>
+        </div>
+      </div>
+      <div class="slot-notes">uses · <span>Geist 400/17px · --ink · --royal-11 inline code</span></div>
+    </div>
+
+    <div class="slot">
+      <div class="slot-label"><span class="slot-num">05c</span> Article meta row</div>
+      <div class="slot-demo">
+        <div class="meta-row">
+          <span><span class="label">Published</span> <span class="value">2026-04-10</span></span>
+          <span><span class="label">Reading</span> <span class="value">6 min</span></span>
+          <span><span class="label">Tags</span> <span class="value">architecture · spend · cloudflare</span></span>
+        </div>
+      </div>
+      <div class="slot-notes">uses · <span>Geist Mono 12px · --ink-dim label · --ink value</span></div>
+    </div>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- 06 · STRUCTURAL                               -->
+  <!-- ============================================ -->
+  <section class="section">
+    <div class="section-label">06 · structural</div>
+    <h2 class="section-title">Ticker, divider</h2>
+
+    <div class="slot">
+      <div class="slot-label"><span class="slot-num">06a</span> Build log ticker · live indicator + entries</div>
+      <div class="slot-desc">Each entry is a single date + project + action row. The live dot in the header signals the most recent commit. Project names colour-code by register (royal for work, violet for thinking).</div>
+      <div class="slot-demo">
+        <div class="ticker">
+          <div class="ticker-head">
+            <div class="live-dot"></div>
+            <div class="ticker-title">Build log · live</div>
+          </div>
+          <div class="ticker-entry">
+            <span class="date">2026-04-12</span>
+            <span class="action"><span class="project">portfolio</span> — component library v4 committed</span>
+          </div>
+          <div class="ticker-entry">
+            <span class="date">2026-04-11</span>
+            <span class="action"><span class="project">design-system</span> — chunk 3 emitter shipped</span>
+          </div>
+          <div class="ticker-entry">
+            <span class="date">2026-04-10</span>
+            <span class="action"><span class="project thinking">writing</span> — draft on defense-in-depth started</span>
+          </div>
+          <div class="ticker-entry">
+            <span class="date">2026-04-10</span>
+            <span class="action"><span class="project">planner-app</span> — phase F scheduler, 111 tests passing</span>
+          </div>
+        </div>
+      </div>
+      <div class="slot-notes">uses · <span>--bg-subtle · --royal-10 (live dot) · --royal-11 / --violet-11 (project)</span></div>
+    </div>
+
+    <div class="slot">
+      <div class="slot-label"><span class="slot-num">06b</span> Signature gradient divider</div>
+      <div class="slot-desc">Structural marker separating the work zone from the thinking zone on the landing page. Used exactly once per page.</div>
+      <div class="slot-demo">
+        <div style="font-family: var(--font-serif); font-size: 1.5rem; color: var(--ink);">Selected work</div>
+        <div style="font-size: 0.9375rem; color: var(--ink-dim); margin-top: var(--s2);">Case study cards go above this line.</div>
+        <div class="grad-divider"></div>
+        <div style="font-family: var(--font-serif); font-size: 1.5rem; color: var(--violet-11);">Writing</div>
+        <div style="font-size: 0.9375rem; color: var(--ink-dim); margin-top: var(--s2);">Essay cards go below this line.</div>
+      </div>
+      <div class="slot-notes">uses · <span>linear-gradient(90deg, transparent → royal-8 → violet-8 → transparent)</span></div>
+    </div>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- 07 · ARTEFACTS                                -->
+  <!-- ============================================ -->
+  <section class="section">
+    <div class="section-label">07 · artefacts (inside case studies)</div>
+    <h2 class="section-title">Transcript, diagram, screenshot, code block</h2>
+    <p class="section-blurb">The four artefact types that live inside case study bodies. All share a figure caption, padding system, and break out of the 62ch text column.</p>
+
+    <div class="slot">
+      <div class="slot-label"><span class="slot-num">07a</span> Chat transcript · variant D2 (no left border)</div>
+      <div class="slot-desc">Gradient container, role label in brand colour, typography split: Dylan = Geist sans, Claude = Geist Mono. <strong>Role label is mandatory</strong> per accessibility rules (WCAG 1.4.1). Typography split carries identity in greyscale and high-contrast mode.</div>
+      <div class="slot-demo">
+        <div class="transcript">
+          <div class="t-head">
+            <span>Transcript · idempotency design</span>
+            <span>2026-04-09 · 4 turns</span>
+          </div>
+          <div class="turn dylan">
+            <div class="role">Dylan</div>
+            <div class="body">The spend module needs idempotency or the whole thing is a liability. How do I make "send twice" structurally impossible rather than probabilistically unlikely?</div>
+          </div>
+          <div class="turn claude">
+            <div class="role">Claude</div>
+            <div class="body">Insert the row before calling Twilio. Put a <code>UNIQUE</code> constraint on <code>(recipient, occurrence_id, date)</code> and let the database reject the second write. On vendor failure after the insert, delete the row or mark it failed; never leave it in limbo.</div>
+          </div>
+          <div class="turn dylan">
+            <div class="role">Dylan</div>
+            <div class="body">Does this need to be in a transaction?</div>
+          </div>
+          <div class="turn claude">
+            <div class="role">Claude</div>
+            <div class="body">No. The constraint does the work. A transaction would actually hurt: it holds the row lock across the Twilio call, which might take hundreds of milliseconds.</div>
+          </div>
+        </div>
+      </div>
+      <div class="slot-notes">uses · <span>--grad-rv border · --royal-11 / --violet-11 role · Geist / Geist Mono split</span></div>
+    </div>
+
+    <div class="slot">
+      <div class="slot-label"><span class="slot-num">07b</span> Diagram frame · 4-layer flow (with critical path)</div>
+      <div class="slot-desc">Flow chart with one node highlighted violet (the critical path). Title uses serif italic to feel hand-drawn.</div>
+      <div class="slot-demo">
+        <div class="diagram">
+          <svg viewBox="0 0 680 220" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <marker id="arrow-lib" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M0,0 L10,5 L0,10 z" fill="#6C85FF"/>
+              </marker>
+            </defs>
+            <rect x="20" y="80" width="130" height="60" rx="8" fill="#1E2346" stroke="#3B5BDB" stroke-width="1.5"/>
+            <text x="85" y="108" text-anchor="middle" fill="#A5B4FF" font-family="Geist Mono" font-size="11" font-weight="500">01 · KILLSWITCH</text>
+            <text x="85" y="126" text-anchor="middle" fill="#9C968A" font-family="Geist Mono" font-size="9">boolean check</text>
+            <rect x="190" y="80" width="130" height="60" rx="8" fill="#1E2346" stroke="#3B5BDB" stroke-width="1.5"/>
+            <text x="255" y="108" text-anchor="middle" fill="#A5B4FF" font-family="Geist Mono" font-size="11" font-weight="500">02 · BUDGET</text>
+            <text x="255" y="126" text-anchor="middle" fill="#9C968A" font-family="Geist Mono" font-size="9">atomic increment</text>
+            <rect x="360" y="80" width="130" height="60" rx="8" fill="#1E2346" stroke="#8C3BDB" stroke-width="2"/>
+            <text x="425" y="108" text-anchor="middle" fill="#C89BFF" font-family="Geist Mono" font-size="11" font-weight="500">03 · INSERT</text>
+            <text x="425" y="126" text-anchor="middle" fill="#9C968A" font-family="Geist Mono" font-size="9">UNIQUE constraint</text>
+            <rect x="530" y="80" width="130" height="60" rx="8" fill="#1E2346" stroke="#3B5BDB" stroke-width="1.5"/>
+            <text x="595" y="108" text-anchor="middle" fill="#A5B4FF" font-family="Geist Mono" font-size="11" font-weight="500">04 · EXECUTE</text>
+            <text x="595" y="126" text-anchor="middle" fill="#9C968A" font-family="Geist Mono" font-size="9">Twilio call</text>
+            <path d="M 150 110 L 186 110" stroke="#6C85FF" stroke-width="1.5" fill="none" marker-end="url(#arrow-lib)"/>
+            <path d="M 320 110 L 356 110" stroke="#6C85FF" stroke-width="1.5" fill="none" marker-end="url(#arrow-lib)"/>
+            <path d="M 490 110 L 526 110" stroke="#6C85FF" stroke-width="1.5" fill="none" marker-end="url(#arrow-lib)"/>
+            <text x="340" y="50" text-anchor="middle" fill="#E6E2D9" font-family="Fraunces" font-size="14" font-style="italic">defense in depth · order matters</text>
+          </svg>
+          <div class="figure-caption">Figure · four-layer spend protection</div>
+        </div>
+      </div>
+      <div class="slot-notes">uses · <span>--bg-subtle · --royal-8 / --violet-8 strokes · --royal-11 / --violet-11 text</span></div>
+    </div>
+
+    <div class="slot">
+      <div class="slot-label"><span class="slot-num">07c</span> Screenshot frame · terminal output</div>
+      <div class="slot-desc">Per imagery standards: gradient outer, radius, padding, shadow. Inner is the raw screenshot content (here mocked with styled mono text).</div>
+      <div class="slot-demo">
+        <div class="screenshot">
+          <div class="screenshot-inner">
+            <div class="screenshot-head">
+              <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+              <span class="filename">audit-query.sh · planner-app</span>
+            </div>
+<div class="screenshot-body"><span class="scr-prompt">$</span> wrangler d1 execute planner --remote --command \
+  "SELECT outcome, COUNT(*) FROM sms_log WHERE date = '2026-04-08'"
+
+<span class="scr-dim">┌──────────────────────┬──────────┐</span>
+<span class="scr-dim">│ outcome              │ COUNT(*) │</span>
+<span class="scr-dim">├──────────────────────┼──────────┤</span>
+<span class="scr-dim">│</span> <span class="scr-ok">sent</span>                 <span class="scr-dim">│</span> 47       <span class="scr-dim">│</span>
+<span class="scr-dim">│</span> <span class="scr-warn">rejected_duplicate</span>   <span class="scr-dim">│</span> 47       <span class="scr-dim">│</span>
+<span class="scr-dim">└──────────────────────┴──────────┘</span>
+
+<span class="scr-dim">[ok]</span> <span class="scr-ok">47 sends</span>, <span class="scr-warn">47 rejections caught by UNIQUE constraint</span>
+</div>
+          </div>
+          <div class="figure-caption" style="color: var(--ink); opacity: 0.6;">Figure · audit query output</div>
+        </div>
+      </div>
+      <div class="slot-notes">uses · <span>outer gradient 145deg · --royal-1 inner · shadow 48px</span></div>
+    </div>
+
+    <div class="slot">
+      <div class="slot-label"><span class="slot-num">07d</span> Code block</div>
+      <div class="slot-desc">Inline code is token sized. Block code uses mono 13px with syntax colours that align with the palette.</div>
+      <div class="slot-demo">
+<div class="codeblock"><span class="c-com">// Insert-before-send: UNIQUE constraint does the dedupe</span>
+<span class="c-kw">async function</span> sendReminder(userId, occurrenceId) {
+  <span class="c-kw">const</span> result = <span class="c-kw">await</span> db.prepare(
+    <span class="c-str">`INSERT INTO sms_log (recipient, occurrence_id, date)
+     VALUES (?, ?, ?)`</span>
+  ).bind(userId, occurrenceId, today()).run();
+
+  <span class="c-kw">if</span> (!result.success) <span class="c-kw">return</span> { ok: <span class="c-kw">false</span>, reason: <span class="c-str">'duplicate'</span> };
+  <span class="c-kw">return</span> twilio.send(...);
+}</div>
+      </div>
+      <div class="slot-notes">uses · <span>--royal-1 bg · --royal-10 keywords · --royal-11 strings · --ink-dim comments</span></div>
+    </div>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- CRITIQUE                                      -->
+  <!-- ============================================ -->
+  <div class="critique">
+    <div class="section-label">08 · critique</div>
+    <h2 class="section-title">Gestalt critique &amp; what to improve</h2>
+    <p class="section-blurb" style="margin-bottom: var(--s7)">
+      Each entry names a principle, diagnoses where the library succeeds or falls short against it, and gives a concrete action. Verdict tags: <span class="verdict fix">FIX</span> = change before shipping; <span class="verdict watch">WATCH</span> = monitor in context; <span class="verdict keep">KEEP</span> = working as intended.
+    </p>
+
+    <div class="critique-entry">
+      <div class="critique-principle">Proximity<span class="sub">group what belongs together</span></div>
+      <div class="critique-body">
+        <h4>Card kicker sits too close to title</h4>
+        <p>In the case study card, the kicker ("Selected work · 01") has only 12px of space below it before the title. The kicker acts as a <strong>label for the title</strong>, so tight proximity is correct, but the tags sit 12px below the body paragraph as well, meaning tags and body are proximity-grouped with the title instead of reading as separate metadata. This collapses the card into one visual group instead of three (label, content, metadata).</p>
+        <p><strong>Action:</strong> increase the gap above <code style="font-family:var(--font-mono);background:var(--royal-1);padding:1px 6px;border-radius:2px;color:var(--royal-11)">.tags</code> to 20px (space-5), keep kicker→title at 12px. Creates three clear proximity groups: label / content / metadata.</p>
+        <span class="verdict fix">FIX</span>
+      </div>
+    </div>
+
+    <div class="critique-entry">
+      <div class="critique-principle">Similarity<span class="sub">like things look alike</span></div>
+      <div class="critique-body">
+        <h4>Writing card and case study card diverge too quietly</h4>
+        <p>The writing card is distinguished only by a 3px left border and a violet kicker. In the 3-card grid, the three cards look almost identical at a glance; the writing card barely registers as a different <em>kind</em> of artefact. Similarity is working too hard — the cards look so alike that the meaningful difference (work vs thinking) disappears.</p>
+        <p><strong>Action:</strong> widen the left rail on writing cards to 4px, and consider adding a small violet dot or label prefix ("ESSAY ·") that's typographically distinct from "Selected work ·". The kicker itself should feel different, not just be a different colour.</p>
+        <span class="verdict fix">FIX</span>
+      </div>
+    </div>
+
+    <div class="critique-entry">
+      <div class="critique-principle">Figure / ground<span class="sub">foreground must separate</span></div>
+      <div class="critique-body">
+        <h4>Cards rely on border only; fill contrast is 1.20:1</h4>
+        <p>The accessibility audit flagged that <code style="font-family:var(--font-mono);background:var(--royal-1);padding:1px 6px;border-radius:2px;color:var(--royal-11)">--card</code> vs <code style="font-family:var(--font-mono);background:var(--royal-1);padding:1px 6px;border-radius:2px;color:var(--royal-11)">--bg</code> is 1.20:1 — technically exempt from WCAG, but users with low vision will perceive the card as "a rectangle floating on a slightly different void". The border saves it, but the border is also low contrast (1.94:1). Together they work; either alone would fail to separate figure from ground.</p>
+        <p><strong>Action:</strong> add a subtle inner shadow (or brighter top edge highlight) on card hover so the card lifts off the page on interaction. Static cards rely on border + fill together, which is OK but borderline. Do not remove either.</p>
+        <span class="verdict watch">WATCH</span>
+      </div>
+    </div>
+
+    <div class="critique-entry">
+      <div class="critique-principle">Hierarchy<span class="sub">clear reading order</span></div>
+      <div class="critique-body">
+        <h4>Kicker (11px) is brighter than body (17px) — unusual inversion</h4>
+        <p>The kicker uses <code style="font-family:var(--font-mono);background:var(--royal-1);padding:1px 6px;border-radius:2px;color:var(--royal-11)">--royal-11 #A5B4FF</code> at 9.14:1 contrast; the body uses <code style="font-family:var(--font-mono);background:var(--royal-1);padding:1px 6px;border-radius:2px;color:var(--royal-11)">--ink-dim</code> on card at 5.16:1. The small, decorative element is more luminous than the primary content. Classic hierarchy says bright = important; here, bright = label. This is defensible (the kicker is a wayfinding device) but unusual. It works because the kicker is <em>physically small</em> and uses small-caps; the eye reads it as an annotation, not a headline.</p>
+        <p><strong>Action:</strong> keep as-is for now, but watch in user testing. If readers report confusion about what to read first, swap card body text to <code style="font-family:var(--font-mono);background:var(--royal-1);padding:1px 6px;border-radius:2px;color:var(--royal-11)">--ink</code> (6.18+:1) on the card variants so body is brighter than kicker. For now, keep.</p>
+        <span class="verdict watch">WATCH</span>
+      </div>
+    </div>
+
+    <div class="critique-entry">
+      <div class="critique-principle">Continuity<span class="sub">eye follows smooth paths</span></div>
+      <div class="critique-body">
+        <h4>Card arrow ("Read case study →") is orphaned from the title</h4>
+        <p>In the card layout, the arrow sits at the bottom below tags, separated from the title it references by body text and tag pills. The eye path from title → arrow breaks across three intervening elements. The arrow is also the same size and weight as the body text; nothing draws the eye back to it after reading the body.</p>
+        <p><strong>Action:</strong> either (a) attach the arrow directly to the card title so the whole title is clickable and has a trailing arrow inline, or (b) pull the arrow out as a distinct "read more" strip at the card foot with its own visual treatment (slightly indented, accent colour, maybe a subtle left divider line). Option (a) is simpler and more web-native.</p>
+        <span class="verdict fix">FIX</span>
+      </div>
+    </div>
+
+    <div class="critique-entry">
+      <div class="critique-principle">Closure<span class="sub">mind completes shapes</span></div>
+      <div class="critique-body">
+        <h4>Transcript container's gradient border reads as "closed system"</h4>
+        <p>The gradient border on the transcript creates a strong closure — the conversation feels contained, discrete, set apart from the surrounding prose. This is exactly right: transcripts are verbatim quotes and should feel bounded rather than mixed into the author voice. Closure is doing identity work here, not just decoration.</p>
+        <p><strong>Action:</strong> keep. The gradient border is not decorative; it carries the closure principle. Confirm that the transcript always renders with the gradient border applied even in long-form case studies where other figures use plain frames.</p>
+        <span class="verdict keep">KEEP</span>
+      </div>
+    </div>
+
+    <div class="critique-entry">
+      <div class="critique-principle">Rhythm / repetition<span class="sub">consistent intervals</span></div>
+      <div class="critique-body">
+        <h4>Vertical rhythm drifts between components</h4>
+        <p>The spacing scale (<code style="font-family:var(--font-mono);background:var(--royal-1);padding:1px 6px;border-radius:2px;color:var(--royal-11)">--s1</code> to <code style="font-family:var(--font-mono);background:var(--royal-1);padding:1px 6px;border-radius:2px;color:var(--royal-11)">--s9</code>) is well-defined, but I'm not always hitting it. The hero uses 48px between kicker and title; the card uses 12px between kicker and title. That ratio difference is correct (the hero is bigger) but the kicker-to-title gap as a <em>fraction</em> of the title size drifts between components. This is a rhythm crack.</p>
+        <p><strong>Action:</strong> define a rule: kicker-to-title gap is always equal to the kicker's line-height × 1.5. Apply this everywhere a kicker precedes a serif display. Documents a relationship rather than a fixed pixel value.</p>
+        <span class="verdict fix">FIX</span>
+      </div>
+    </div>
+
+    <div class="critique-entry">
+      <div class="critique-principle">Alignment<span class="sub">shared edges anchor the eye</span></div>
+      <div class="critique-body">
+        <h4>Build log ticker date column is fixed-width — good, but edge alignment is off</h4>
+        <p>The date column is 96px fixed, which creates a clean left-edge alignment for all dates and a consistent action column. However, the actions wrap and their left edge (column 2 start) does not align with anything else in the library — not the ticker title, not the live dot, not the bottom-padding edge. The ticker has a local alignment grid that doesn't connect to the surrounding layout.</p>
+        <p><strong>Action:</strong> align the ticker title and live dot to the 96px date-column edge, so the vertical stroke runs title → date column → action column all sharing a left edge. Pulls the ticker into a single unified rhythm.</p>
+        <span class="verdict fix">FIX</span>
+      </div>
+    </div>
+
+    <div class="critique-entry">
+      <div class="critique-principle">Scale &amp; proportion<span class="sub">relative sizing creates hierarchy</span></div>
+      <div class="critique-body">
+        <h4>Tag pills feel slightly cramped against card body</h4>
+        <p>Tag pills are 11px mono with 2px × 8px padding. Under a 17px serif title and a 15px body paragraph, they read as the smallest element in the card — which is correct, they're tertiary. But the vertical padding (2px) is tight enough that descenders in lowercase mono characters almost touch the bottom border. Reads as "type trapped in a box".</p>
+        <p><strong>Action:</strong> bump vertical padding on <code style="font-family:var(--font-mono);background:var(--royal-1);padding:1px 6px;border-radius:2px;color:var(--royal-11)">.tag</code> from 2px to 3px. Trivial change, visible improvement in the "breathing" of the pill.</p>
+        <span class="verdict fix">FIX</span>
+      </div>
+    </div>
+
+    <div class="critique-entry">
+      <div class="critique-principle">Contrast (visual, not colour)<span class="sub">dynamics between elements</span></div>
+      <div class="critique-body">
+        <h4>Palette is all-cool; no warm anchor anywhere in the system</h4>
+        <p>Royal, violet, and the off-white ink are all cool. The palette has no warm relief — every surface, accent, and text colour sits in the blue/purple/cool-grey range. This is intentional (monochromatic discipline) but it means long reading sessions can feel "chilled" or clinical. There's nothing to anchor warmth, which is part of what makes a portfolio feel human.</p>
+        <p><strong>Action:</strong> this is a deliberate trade-off, not a fix. The off-white <code style="font-family:var(--font-mono);background:var(--royal-1);padding:1px 6px;border-radius:2px;color:var(--royal-11)">#E6E2D9</code> is slightly warm (hinted toward cream), which is what's preventing the palette from reading as "sterile". Keep ink as-is, and resist the temptation to add a warm status colour just for relief. If reader warmth becomes a concern, address it through the writing voice rather than the colour.</p>
+        <span class="verdict keep">KEEP</span>
+      </div>
+    </div>
+
+    <div class="critique-entry">
+      <div class="critique-principle">Signal-to-noise<span class="sub">what earns its pixels</span></div>
+      <div class="critique-body">
+        <h4>Meta row has three segments; most readers only care about one</h4>
+        <p>"Published · Reading · Tags" is three distinct data points across the meta row. Published date is load-bearing (trust + freshness); reading time is nice-to-have; tags are redundant with the kicker and the card tags. Three equal-weight segments means none of them gets emphasis — the row reads as a strip of grey metadata rather than useful orientation.</p>
+        <p><strong>Action:</strong> either (a) drop the tags from the meta row (the kicker and inline tags already do that job), or (b) weight the three segments so published date is brighter (<code style="font-family:var(--font-mono);background:var(--royal-1);padding:1px 6px;border-radius:2px;color:var(--royal-11)">--ink</code>) and the others dim to <code style="font-family:var(--font-mono);background:var(--royal-1);padding:1px 6px;border-radius:2px;color:var(--royal-11)">--ink-dim</code>. Option (a) is cleaner.</p>
+        <span class="verdict fix">FIX</span>
+      </div>
+    </div>
+
+    <div class="critique-entry">
+      <div class="critique-principle">Focal point<span class="sub">where does the eye land first</span></div>
+      <div class="critique-body">
+        <h4>Hero has no single clear focal point</h4>
+        <p>The hero currently has four elements competing for first attention: the kicker, the large serif title, the gradient keyword underline within the title, and the gradient CTA button. The underline and the CTA both carry the gradient signature, so they visually echo each other — this is good (repetition creates pattern) but it fragments the focal moment. The eye doesn't land; it ping-pongs.</p>
+        <p><strong>Action:</strong> pick one. Either (a) keep the gradient CTA and drop the keyword underline (CTA is the commitment; word highlight is decoration), or (b) keep the keyword underline and make the CTA solid royal (the title becomes the signature, the CTA becomes quiet). Option (b) is more sophisticated: it lets the title carry meaning and makes the CTA functional-not-decorative. Recommend (b).</p>
+        <span class="verdict fix">FIX</span>
+      </div>
+    </div>
+
+    <div class="critique-entry">
+      <div class="critique-principle">Prägnanz<span class="sub">simplicity; the simplest reading wins</span></div>
+      <div class="critique-body">
+        <h4>Button collection is one variant too many</h4>
+        <p>Four button variants (primary, thinking, ghost, gradient signature) on display. In practice, the page only needs three: primary royal (everyday CTA), ghost (secondary action), and gradient signature (the one hero CTA). The thinking-violet button is tempting but it duplicates what a ghost button + a "Read the essay →" link already do. Adding it as a full button variant increases the decision surface without adding clarity.</p>
+        <p><strong>Action:</strong> drop <code style="font-family:var(--font-mono);background:var(--royal-1);padding:1px 6px;border-radius:2px;color:var(--royal-11)">.btn-thinking</code> from the component library. Writing pages use inline "Read the essay →" links and the gradient hero CTA. If a writing-specific full-button CTA ever appears, promote ghost + violet border as the pattern rather than a solid violet fill — violet solids compete with the identity of royal as "the" primary brand.</p>
+        <span class="verdict fix">FIX</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ============================================ -->
+  <!-- SUMMARY                                       -->
+  <!-- ============================================ -->
+  <div class="summary-box">
+    <h2>Prioritised fix list</h2>
+    <ol>
+      <li><strong>Hero focal point:</strong> drop gradient CTA or drop keyword underline (not both). Recommend keeping underline; CTA becomes solid royal.</li>
+      <li><strong>Card proximity:</strong> add 20px above tags so kicker/title, body, and tags form three clear groups instead of one.</li>
+      <li><strong>Card arrow continuity:</strong> inline the arrow with the title so the whole title reads as the clickable target, or break it out as a distinct foot element.</li>
+      <li><strong>Writing card differentiation:</strong> widen violet rail to 4px, add a typographically distinct kicker prefix ("ESSAY · " instead of just a colour change).</li>
+      <li><strong>Meta row signal:</strong> drop tags (redundant with kicker/tags), or dim everything except published date.</li>
+      <li><strong>Ticker alignment:</strong> align title and live dot to the 96px date-column edge.</li>
+      <li><strong>Kicker-to-title rhythm rule:</strong> define gap as kicker line-height × 1.5; apply everywhere.</li>
+      <li><strong>Tag breathing:</strong> bump vertical padding 2px → 3px.</li>
+      <li><strong>Drop <code style="font-family:var(--font-mono);color:var(--royal-11)">.btn-thinking</code></strong>: three button variants, not four.</li>
+    </ol>
+    <p style="color: var(--ink-dim); margin-top: var(--s5); font-size: 0.9375rem;">Nothing in the critique undermines the palette decisions or the overall structure. These are component-level fit-and-finish items that become much cheaper to fix now (before <code style="font-family:var(--font-mono);color:var(--royal-11)">globals.css</code> gets written) than after.</p>
+  </div>
+
+</div>
+</body>
+</html>

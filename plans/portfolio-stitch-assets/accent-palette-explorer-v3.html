@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Transcript variant D — with vs without left border · in-article mock</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* Royal Tonal */
+    --royal-1:  #0E0F1C;
+    --royal-2:  #121428;
+    --royal-3:  #181B36;
+    --royal-4:  #1E2346;
+    --royal-5:  #252C58;
+    --royal-6:  #2D366C;
+    --royal-7:  #364280;
+    --royal-8:  #3B5BDB;
+    --royal-9:  #4D6DE8;
+    --royal-10: #6C85FF;
+    --royal-11: #A5B4FF;
+    --royal-12: #D5DCFA;
+
+    /* Violet (signal) */
+    --violet-8:  #8C3BDB;
+    --violet-9:  #9D4DE8;
+    --violet-10: #B47CFF;
+    --violet-11: #C89BFF;
+    --violet-12: #E6D4FF;
+
+    /* Ink */
+    --ink:       #E6E2D9;
+    --ink-dim:   #9C968A;
+    --ink-faint: #5E584F;
+
+    /* Fonts */
+    --font-serif: 'Fraunces', Georgia, serif;
+    --font-sans:  'Geist', -apple-system, system-ui, sans-serif;
+    --font-mono:  'Geist Mono', 'SF Mono', Menlo, monospace;
+
+    /* Spacing */
+    --s1: 0.25rem;
+    --s2: 0.5rem;
+    --s3: 0.75rem;
+    --s4: 1rem;
+    --s5: 1.5rem;
+    --s6: 2rem;
+    --s7: 3rem;
+    --s8: 4.5rem;
+    --s9: 6rem;
+
+    --radius-sm: 2px;
+    --radius:    8px;
+    --radius-lg: 12px;
+
+    --grad-rv:      linear-gradient(135deg, var(--royal-8) 0%, var(--violet-8) 100%);
+    --grad-rv-soft: linear-gradient(135deg, var(--royal-10) 0%, var(--violet-10) 100%);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-optical-sizing: auto; }
+  body {
+    background: var(--royal-2);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ============================================ */
+  /* Doc header (not part of article)            */
+  /* ============================================ */
+  .doc-header {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: var(--s8) var(--s6) var(--s6);
+  }
+  .doc-kicker {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--royal-11);
+    margin-bottom: var(--s3);
+  }
+  .doc-title {
+    font-family: var(--font-serif);
+    font-size: 3.25rem;
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: -0.025em;
+    margin-bottom: var(--s5);
+  }
+  .doc-intro {
+    font-size: 1rem;
+    color: var(--ink-dim);
+    line-height: 1.65;
+    max-width: 62ch;
+  }
+  .doc-intro strong { color: var(--ink); font-weight: 500; }
+  .doc-intro + .doc-intro { margin-top: var(--s3); }
+
+  /* ============================================ */
+  /* Article frame (simulates writing post page) */
+  /* ============================================ */
+  .article-frame {
+    background: var(--royal-2);
+    border-top: 1px solid var(--royal-7);
+    margin-top: var(--s8);
+    padding-bottom: var(--s9);
+  }
+
+  .article {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: var(--s8) var(--s5) 0;
+  }
+
+  /* Article meta header */
+  .art-kicker {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--violet-11);
+    margin-bottom: var(--s4);
+  }
+  .art-title {
+    font-family: var(--font-serif);
+    font-size: 3rem;
+    font-weight: 400;
+    line-height: 1.02;
+    letter-spacing: -0.025em;
+    margin-bottom: var(--s5);
+    color: var(--ink);
+  }
+  .art-meta {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--ink-faint);
+    letter-spacing: 0.04em;
+    padding-bottom: var(--s6);
+    margin-bottom: var(--s6);
+    border-bottom: 1px solid var(--royal-7);
+    display: flex;
+    gap: var(--s4);
+    flex-wrap: wrap;
+  }
+  .art-meta span { display: inline-flex; gap: var(--s2); }
+  .art-meta .label { color: var(--ink-faint); }
+  .art-meta .value { color: var(--ink-dim); }
+
+  /* Article prose */
+  .lede {
+    font-family: var(--font-serif);
+    font-size: 1.375rem;
+    font-weight: 300;
+    line-height: 1.45;
+    color: var(--ink);
+    margin-bottom: var(--s7);
+    letter-spacing: -0.005em;
+  }
+
+  .art h2 {
+    font-family: var(--font-serif);
+    font-size: 1.625rem;
+    font-weight: 500;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    margin-top: var(--s7);
+    margin-bottom: var(--s5);
+    color: var(--ink);
+  }
+  .art p {
+    font-size: 1.0625rem;
+    line-height: 1.72;
+    color: var(--ink);
+    margin-bottom: var(--s5);
+  }
+  .art p code {
+    font-family: var(--font-mono);
+    font-size: 0.9375rem;
+    color: var(--royal-11);
+    background: var(--royal-1);
+    padding: 1px 6px;
+    border-radius: var(--radius-sm);
+  }
+
+  /* ============================================ */
+  /* Figure wrapper — breaks out of text column  */
+  /* ============================================ */
+  .figure {
+    margin: var(--s7) -60px;
+  }
+  @media (max-width: 840px) {
+    .figure { margin-left: 0; margin-right: 0; }
+  }
+  .figure-caption {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-top: var(--s3);
+    text-align: center;
+  }
+
+  /* ============================================ */
+  /* Diagram frame                                 */
+  /* ============================================ */
+  .diagram {
+    background: var(--royal-3);
+    border: 1px solid var(--royal-7);
+    border-radius: var(--radius);
+    padding: var(--s6) var(--s5);
+  }
+  .diagram svg { width: 100%; height: auto; display: block; }
+
+  /* ============================================ */
+  /* Screenshot frame (per imagery standards)    */
+  /* ============================================ */
+  .screenshot {
+    background: linear-gradient(145deg, #1A1D3A 0%, #14172E 100%);
+    border-radius: var(--radius);
+    padding: var(--s5);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45);
+    border: 1px solid var(--royal-7);
+  }
+  .screenshot-inner {
+    background: var(--royal-1);
+    border-radius: var(--radius-sm);
+    padding: var(--s4) var(--s5);
+    border: 1px solid var(--royal-7);
+  }
+  .screenshot-head {
+    display: flex;
+    align-items: center;
+    gap: var(--s2);
+    padding-bottom: var(--s3);
+    margin-bottom: var(--s3);
+    border-bottom: 1px solid var(--royal-7);
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    color: var(--ink-faint);
+  }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot.r { background: #FF5F57; }
+  .dot.y { background: #FEBB2E; }
+  .dot.g { background: #28C840; }
+  .screenshot-head .filename {
+    margin-left: var(--s3);
+    color: var(--ink-dim);
+  }
+  .screenshot-body {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    line-height: 1.6;
+    color: var(--ink);
+    white-space: pre;
+    overflow-x: auto;
+  }
+  .scr-prompt { color: var(--royal-10); }
+  .scr-cmd { color: var(--ink); }
+  .scr-ok { color: #7BD88F; }
+  .scr-warn { color: var(--violet-11); }
+  .scr-dim { color: var(--ink-faint); }
+  .scr-kw { color: var(--royal-11); }
+
+  /* ============================================ */
+  /* Transcript component — variant D base       */
+  /* ============================================ */
+  .transcript {
+    background:
+      linear-gradient(var(--royal-3), var(--royal-3)) padding-box,
+      var(--grad-rv) border-box;
+    border: 1px solid transparent;
+    border-radius: var(--radius);
+    padding: var(--s5);
+  }
+  .t-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--ink-faint);
+    margin-bottom: var(--s4);
+    padding-bottom: var(--s3);
+    border-bottom: 1px solid var(--royal-7);
+  }
+  .t-head .t-meta { color: var(--ink-dim); }
+
+  .turn { padding: var(--s4) 0; }
+  .turn .role {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-weight: 500;
+    margin-bottom: var(--s2);
+  }
+  .turn.dylan .role { color: var(--royal-11); }
+  .turn.claude .role { color: var(--violet-11); }
+  .turn.dylan .body {
+    font-family: var(--font-sans);
+    font-size: 0.9375rem;
+    line-height: 1.65;
+    color: var(--ink);
+  }
+  .turn.claude .body {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    line-height: 1.7;
+    color: var(--ink);
+  }
+  .turn .body code {
+    font-family: var(--font-mono);
+    background: var(--royal-1);
+    padding: 1px 4px;
+    border-radius: 2px;
+    color: var(--royal-11);
+  }
+
+  /* Variant D1 — WITH left border strip per turn */
+  .transcript.d1 .turn {
+    padding: var(--s4) 0 var(--s4) var(--s4);
+    border-left: 2px solid transparent;
+  }
+  .transcript.d1 .turn + .turn { margin-top: var(--s1); }
+  .transcript.d1 .turn.dylan { border-left-color: var(--royal-8); }
+  .transcript.d1 .turn.claude { border-left-color: var(--violet-8); }
+
+  /* Variant D2 — WITHOUT left border strip, hairline divider between turns */
+  .transcript.d2 .turn + .turn {
+    border-top: 1px solid var(--royal-7);
+  }
+
+  /* Figure label above transcript (for this doc only — wouldn't exist on real site) */
+  .variant-label {
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--ink-faint);
+    padding: var(--s2) var(--s3);
+    border: 1px dashed var(--royal-7);
+    border-radius: var(--radius-sm);
+    display: inline-block;
+    margin-bottom: var(--s3);
+  }
+  .variant-label strong {
+    color: var(--violet-11);
+    font-weight: 500;
+  }
+
+  /* ============================================ */
+  /* Comparison callout (after the article)       */
+  /* ============================================ */
+  .comparison-wrap {
+    max-width: 860px;
+    margin: var(--s9) auto 0;
+    padding: 0 var(--s6) var(--s9);
+  }
+  .comparison {
+    padding: var(--s6);
+    background:
+      linear-gradient(var(--royal-1), var(--royal-1)) padding-box,
+      var(--grad-rv) border-box;
+    border: 1px solid transparent;
+    border-radius: var(--radius-lg);
+  }
+  .comparison h2 {
+    font-family: var(--font-serif);
+    font-size: 1.5rem;
+    font-weight: 500;
+    margin-bottom: var(--s4);
+  }
+  .comparison .split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--s5);
+    margin-top: var(--s5);
+  }
+  @media (max-width: 780px) { .comparison .split { grid-template-columns: 1fr; } }
+  .comparison h4 {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--ink-dim);
+    margin-bottom: var(--s3);
+    font-weight: 500;
+  }
+  .comparison p {
+    font-size: 0.9375rem;
+    color: var(--ink-dim);
+    line-height: 1.65;
+  }
+  .comparison p + p { margin-top: var(--s3); }
+  .comparison strong { color: var(--ink); font-weight: 500; }
+</style>
+</head>
+<body>
+
+  <div class="doc-header">
+    <div class="doc-kicker">Portfolio · design exploration · v3 · 2026-04-12</div>
+    <h1 class="doc-title">Transcript variant D<br>in-article mock</h1>
+    <p class="doc-intro">
+      v2 picked variant D for the chat transcript component (gradient border container, role colour, typography split). The open question: does each turn also need a 2px left border strip in its role colour, or does the typography split plus role label carry the identity on its own.
+    </p>
+    <p class="doc-intro">
+      Below is a single fake writing post showing both variants <strong>in place</strong>. The first transcript uses D1 (with left border strip). The second transcript uses D2 (without). Everything else (prose, diagram, screenshot) is identical. A brief comparison callout sits at the end.
+    </p>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- FAKE ARTICLE                                 -->
+  <!-- ============================================ -->
+  <div class="article-frame">
+    <article class="article art">
+
+      <div class="art-kicker">Writing · architecture · planner-app</div>
+      <h1 class="art-title">The four layers that made paid&nbsp;API calls safe to ship</h1>
+      <div class="art-meta">
+        <span><span class="label">Published</span> <span class="value">2026-04-10</span></span>
+        <span><span class="label">Reading</span> <span class="value">6 min</span></span>
+        <span><span class="label">Tags</span> <span class="value">architecture · spend · cloudflare</span></span>
+      </div>
+
+      <p class="lede">
+        I spent three sessions planning the migration from Railway to Cloudflare Workers before I wrote a single line of the new spend module. Most of that time went to answering one question: how do I make it structurally impossible to send a paid SMS twice for the same reminder.
+      </p>
+
+      <h2>The problem</h2>
+      <p>
+        The planner app sends SMS reminders through Twilio on a schedule. Every SMS costs real money. Under the old Railway architecture the scheduler was a single long-running Python process; a bug in the loop would get noticed inside a minute because logs scrolled past in the terminal. Under Cloudflare, the scheduler runs as a <code>Cron Trigger</code> every minute, in a fresh Worker with no memory of previous invocations. A bug that retried the same send without protection could send the same reminder fifty times before I noticed.
+      </p>
+      <p>
+        I wrote down what "protected" had to mean, and it came out as four layers: a killswitch to stop everything, a budget cap per user, an idempotency guarantee so retries don't double-send, and only then the actual vendor call. Any one of those layers catches a different failure mode; skipping any one of them means a bug in the others becomes expensive.
+      </p>
+      <p>
+        Before I wrote a single line, I wanted the idempotency layer specifically right. I knew the naive "check if sent, then send" pattern had a race condition in it, but I hadn't built the mental model for what replaced it. Here's the conversation that closed the gap.
+      </p>
+
+      <!-- ============================================ -->
+      <!-- TRANSCRIPT 1 — VARIANT D1 (WITH LEFT BORDER) -->
+      <!-- ============================================ -->
+      <div class="figure">
+        <div class="variant-label">Variant <strong>D1</strong> · with left border strip</div>
+        <div class="transcript d1">
+          <div class="t-head">
+            <span>Transcript · idempotency design</span>
+            <span class="t-meta">2026-04-09 · 4 turns</span>
+          </div>
+          <div class="turn dylan">
+            <div class="role">Dylan</div>
+            <div class="body">The spend module needs idempotency or the whole thing is a liability. How do I make "send twice" structurally impossible rather than probabilistically unlikely?</div>
+          </div>
+          <div class="turn claude">
+            <div class="role">Claude</div>
+            <div class="body">Insert the row before calling Twilio. Put a <code>UNIQUE</code> constraint on <code>(recipient, occurrence_id, date)</code> and let the database reject the second write. On vendor failure after the insert, delete the row or mark it failed; never leave it in limbo.</div>
+          </div>
+          <div class="turn dylan">
+            <div class="role">Dylan</div>
+            <div class="body">Does this need to be in a transaction?</div>
+          </div>
+          <div class="turn claude">
+            <div class="role">Claude</div>
+            <div class="body">No. The constraint does the work. A transaction would actually hurt: it holds the row lock across the Twilio call, which might take hundreds of milliseconds.</div>
+          </div>
+        </div>
+        <div class="figure-caption">Transcript 1 · shown with variant D1</div>
+      </div>
+
+      <h2>The insert-before-send pattern</h2>
+      <p>
+        The idempotency layer turned out to be the most interesting one. The naive approach is to check "have I sent this already" before calling Twilio, but that leaves a race window: two concurrent invocations both see no prior send, both insert the log after, both call Twilio. The fix is to invert the check: insert a row representing the intent to send first, with a <code>UNIQUE</code> constraint on <code>(recipient, occurrence_id, date)</code>, then call Twilio. If two invocations race, exactly one succeeds at the <code>INSERT</code>; the other fails cleanly with a constraint violation and exits without sending.
+      </p>
+      <p>
+        The other three layers (killswitch, budget cap, vendor call) are easier to reason about individually but only work if they compose in the right order. Put the killswitch first, the budget cap second, the idempotency insert third, the vendor call fourth. Reverse any two and you get a bug that costs money instead of a bug that costs nothing.
+      </p>
+
+      <!-- ============================================ -->
+      <!-- DIAGRAM                                       -->
+      <!-- ============================================ -->
+      <div class="figure">
+        <div class="diagram">
+          <svg viewBox="0 0 680 220" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <marker id="arrow-diag" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M0,0 L10,5 L0,10 z" fill="#6C85FF"/>
+              </marker>
+            </defs>
+
+            <!-- Layer 1 · Killswitch -->
+            <rect x="20" y="80" width="130" height="60" rx="8" fill="#1E2346" stroke="#3B5BDB" stroke-width="1.5"/>
+            <text x="85" y="108" text-anchor="middle" fill="#A5B4FF" font-family="Geist Mono" font-size="11" font-weight="500">01 · KILLSWITCH</text>
+            <text x="85" y="126" text-anchor="middle" fill="#9C968A" font-family="Geist Mono" font-size="9">boolean check</text>
+
+            <!-- Layer 2 · Budget -->
+            <rect x="190" y="80" width="130" height="60" rx="8" fill="#1E2346" stroke="#3B5BDB" stroke-width="1.5"/>
+            <text x="255" y="108" text-anchor="middle" fill="#A5B4FF" font-family="Geist Mono" font-size="11" font-weight="500">02 · BUDGET</text>
+            <text x="255" y="126" text-anchor="middle" fill="#9C968A" font-family="Geist Mono" font-size="9">atomic increment</text>
+
+            <!-- Layer 3 · Idempotency (highlighted) -->
+            <rect x="360" y="80" width="130" height="60" rx="8" fill="#1E2346" stroke="#8C3BDB" stroke-width="2"/>
+            <text x="425" y="108" text-anchor="middle" fill="#C89BFF" font-family="Geist Mono" font-size="11" font-weight="500">03 · INSERT</text>
+            <text x="425" y="126" text-anchor="middle" fill="#9C968A" font-family="Geist Mono" font-size="9">UNIQUE constraint</text>
+
+            <!-- Layer 4 · Execute -->
+            <rect x="530" y="80" width="130" height="60" rx="8" fill="#1E2346" stroke="#3B5BDB" stroke-width="1.5"/>
+            <text x="595" y="108" text-anchor="middle" fill="#A5B4FF" font-family="Geist Mono" font-size="11" font-weight="500">04 · EXECUTE</text>
+            <text x="595" y="126" text-anchor="middle" fill="#9C968A" font-family="Geist Mono" font-size="9">Twilio call</text>
+
+            <!-- Arrows -->
+            <path d="M 150 110 L 186 110" stroke="#6C85FF" stroke-width="1.5" fill="none" marker-end="url(#arrow-diag)"/>
+            <path d="M 320 110 L 356 110" stroke="#6C85FF" stroke-width="1.5" fill="none" marker-end="url(#arrow-diag)"/>
+            <path d="M 490 110 L 526 110" stroke="#6C85FF" stroke-width="1.5" fill="none" marker-end="url(#arrow-diag)"/>
+
+            <!-- Reject arrow from idempotency -->
+            <path d="M 425 140 Q 425 190 360 190 L 100 190" stroke="#C89BFF" stroke-width="1" stroke-dasharray="3,3" fill="none"/>
+            <text x="230" y="208" text-anchor="middle" fill="#C89BFF" font-family="Geist Mono" font-size="9">constraint violation → exit silently</text>
+
+            <!-- Top label -->
+            <text x="340" y="50" text-anchor="middle" fill="#E6E2D9" font-family="Fraunces" font-size="14" font-style="italic">defense in depth · order matters</text>
+          </svg>
+        </div>
+        <div class="figure-caption">Figure 1 · four-layer spend protection, insert before execute</div>
+      </div>
+
+      <h2>What this bought me</h2>
+      <p>
+        Two weeks after the migration shipped, a bug in the reminder scheduler caused the same cron to fire twice in a 60-second window. Without the idempotency layer, that would have been two SMS sends for every active reminder in the system. With it, the second invocation hit the <code>UNIQUE</code> constraint, logged the rejection, and exited. Zero user-visible impact, zero duplicate sends, zero budget impact. I learned about the bug from an audit log query I ran the next day.
+      </p>
+      <p>
+        The query that surfaced it looked like this:
+      </p>
+
+      <!-- ============================================ -->
+      <!-- SCREENSHOT                                   -->
+      <!-- ============================================ -->
+      <div class="figure">
+        <div class="screenshot">
+          <div class="screenshot-inner">
+            <div class="screenshot-head">
+              <span class="dot r"></span>
+              <span class="dot y"></span>
+              <span class="dot g"></span>
+              <span class="filename">audit-query.sh · planner-app</span>
+            </div>
+<div class="screenshot-body"><span class="scr-prompt">$</span> <span class="scr-cmd">wrangler d1 execute planner --remote --command \</span>
+  <span class="scr-cmd">"SELECT outcome, COUNT(*) FROM sms_log WHERE date = '2026-04-08'"</span>
+
+<span class="scr-dim">┌──────────────────────┬──────────┐</span>
+<span class="scr-dim">│ outcome              │ COUNT(*) │</span>
+<span class="scr-dim">├──────────────────────┼──────────┤</span>
+<span class="scr-dim">│</span> <span class="scr-ok">sent</span>                 <span class="scr-dim">│</span> 47       <span class="scr-dim">│</span>
+<span class="scr-dim">│</span> <span class="scr-warn">rejected_duplicate</span>   <span class="scr-dim">│</span> 47       <span class="scr-dim">│</span>
+<span class="scr-dim">└──────────────────────┴──────────┘</span>
+
+<span class="scr-dim">[ok]</span> <span class="scr-ok">47 sends</span>, <span class="scr-warn">47 rejections caught by UNIQUE constraint</span>
+<span class="scr-dim">[ok]</span> budget impact: <span class="scr-kw">$0.00</span>  ·  user impact: <span class="scr-kw">none</span>
+</div>
+          </div>
+        </div>
+        <div class="figure-caption">Figure 2 · audit query output · every send matched by a rejected duplicate</div>
+      </div>
+
+      <h2>What I'd do differently</h2>
+      <p>
+        Principle 2 in my workspace architecture rules (defense in depth for spend protection) came out of this work. The thing I'd emphasise more, if I wrote it again: insert-before-send has to be the third layer at the earliest, never the last. If the <code>UNIQUE</code> constraint is downstream of the budget check and the budget check has a bug, the constraint still saves you. The other way around is not true.
+      </p>
+      <p>
+        A week after shipping the pattern, I checked in with Claude about whether the approach generalised beyond SMS:
+      </p>
+
+      <!-- ============================================ -->
+      <!-- TRANSCRIPT 2 — VARIANT D2 (NO LEFT BORDER)  -->
+      <!-- ============================================ -->
+      <div class="figure">
+        <div class="variant-label">Variant <strong>D2</strong> · no left border strip</div>
+        <div class="transcript d2">
+          <div class="t-head">
+            <span>Transcript · pattern generalisation</span>
+            <span class="t-meta">2026-04-10 · 4 turns</span>
+          </div>
+          <div class="turn dylan">
+            <div class="role">Dylan</div>
+            <div class="body">The cron double-fired yesterday. Idempotency layer caught it, zero user impact. I think this pattern generalises?</div>
+          </div>
+          <div class="turn claude">
+            <div class="role">Claude</div>
+            <div class="body">Yes. Any "send something external, exactly once" requirement reduces to: pre-insert with <code>UNIQUE</code> constraint, then call the vendor, then roll back the insert on failure. Same shape for SMS, email, webhook dispatch, and background job enqueueing. The key insight is that the constraint runs before the expensive call, not after.</div>
+          </div>
+          <div class="turn dylan">
+            <div class="role">Dylan</div>
+            <div class="body">What about at-least-once vs exactly-once semantics?</div>
+          </div>
+          <div class="turn claude">
+            <div class="role">Claude</div>
+            <div class="body">This is exactly-once from the user's perspective. At-least-once semantics from the vendor are fine, because the retry will hit the same constraint and get rejected identically. The cost of one failed <code>INSERT</code> is trivial compared to the cost of a duplicate send.</div>
+          </div>
+        </div>
+        <div class="figure-caption">Transcript 2 · shown with variant D2</div>
+      </div>
+
+      <p style="margin-top: var(--s6)">
+        The pattern is in the workspace architecture rules now. Every spend-touching module in this portfolio inherits it by default, and the principle number is cited in every relevant diary entry. The cost was three planning sessions and one small refactor; the return is a class of bug that can no longer happen.
+      </p>
+
+    </article>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- COMPARISON CALLOUT                            -->
+  <!-- ============================================ -->
+  <div class="comparison-wrap">
+    <div class="comparison">
+      <h2>Direct comparison</h2>
+      <p>Both variants share: the gradient Royal → Violet container border, coloured role labels (royal for Dylan, violet for Claude), and the typography split (Dylan in Geist sans, Claude in Geist Mono). The only difference is whether each turn has a 2px solid left border strip in its role colour.</p>
+      <div class="split">
+        <div>
+          <h4>D1 · with left border strip</h4>
+          <p><strong>Scannability:</strong> higher. The left border is a second redundant cue that survives peripheral vision and greyscale printing. Role identity is legible even if the reader skips the role label.</p>
+          <p><strong>Visual weight:</strong> heavier. Each turn reads as its own "card within the card". More chat-UI in feel.</p>
+          <p><strong>Best when:</strong> transcripts are long (6 or 7 turns), or embedded alongside other heavy figures where the extra cue helps.</p>
+        </div>
+        <div>
+          <h4>D2 · no left border strip</h4>
+          <p><strong>Scannability:</strong> still good. Role label colour + typography split already does the identity work; the border was a belt-and-braces layer on top.</p>
+          <p><strong>Visual weight:</strong> lighter. Reads as a conversation inside a single container rather than stacked chat bubbles. Prose-adjacent.</p>
+          <p><strong>Best when:</strong> transcripts are short (2 to 4 turns) and sit inside a reading flow rather than as a punctuation mark.</p>
+        </div>
+      </div>
+      <p style="margin-top: var(--s5)"><strong>Recommendation:</strong> D2 for the portfolio's default transcript. Transcripts are capped at 8 turns and usually land in the 2 to 4 range; the typography split is distinctive enough that the left border becomes noise rather than signal. If a specific case study later has a long transcript that justifies the heavier treatment, promote it to D1 on a per-instance basis (or add a <code style="font-family:var(--font-mono);color:var(--royal-11)">variant="scannable"</code> prop on <code style="font-family:var(--font-mono);color:var(--royal-11)">&lt;ChatTranscript&gt;</code>). Start with the lighter default and earn the heavier one when needed.</p>
+    </div>
+  </div>
+
+</body>
+</html>

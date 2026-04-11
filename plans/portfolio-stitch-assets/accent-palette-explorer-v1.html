@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portfolio accent palette explorer — v1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* Royal Tonal — baseline */
+    --royal-1:  #0E0F1C;
+    --royal-2:  #121428;
+    --royal-3:  #181B36;
+    --royal-4:  #1E2346;
+    --royal-5:  #252C58;
+    --royal-6:  #2D366C;
+    --royal-7:  #364280;
+    --royal-8:  #3B5BDB;
+    --royal-9:  #4D6DE8;
+    --royal-10: #6C85FF;
+    --royal-11: #A5B4FF;
+    --royal-12: #D5DCFA;
+
+    --ink:       #E6E2D9;
+    --ink-dim:   #9C968A;
+    --ink-faint: #5E584F;
+
+    --font-serif: 'Fraunces', Georgia, serif;
+    --font-sans:  'Geist', -apple-system, system-ui, sans-serif;
+    --font-mono:  'Geist Mono', 'SF Mono', Menlo, monospace;
+
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 0.75rem;
+    --space-4: 1rem;
+    --space-5: 1.5rem;
+    --space-6: 2rem;
+    --space-7: 3rem;
+    --space-8: 4.5rem;
+
+    --radius-sm: 2px;
+    --radius:    8px;
+    --radius-lg: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-optical-sizing: auto; }
+  body {
+    background: var(--royal-2);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 1280px; margin: 0 auto; padding: var(--space-8) var(--space-6); }
+
+  /* ==== Document-level type ==== */
+  .doc-kicker {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--royal-11);
+    margin-bottom: var(--space-3);
+  }
+  .doc-title {
+    font-family: var(--font-serif);
+    font-size: 4rem;
+    font-weight: 400;
+    line-height: 0.98;
+    letter-spacing: -0.025em;
+    color: var(--ink);
+    margin-bottom: var(--space-5);
+  }
+  .doc-intro {
+    font-size: 1.0625rem;
+    color: var(--ink-dim);
+    max-width: 62ch;
+    line-height: 1.65;
+  }
+  .doc-intro + .doc-intro { margin-top: var(--space-4); }
+
+  /* ==== Section structure ==== */
+  .section { margin-top: var(--space-8); padding-top: var(--space-7); border-top: 1px solid var(--royal-7); }
+  .section:first-of-type { border-top: none; padding-top: 0; }
+
+  .section-label {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--ink-faint);
+    letter-spacing: 0.05em;
+    margin-bottom: var(--space-2);
+  }
+  .section-title {
+    font-family: var(--font-serif);
+    font-size: 2rem;
+    font-weight: 400;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    margin-bottom: var(--space-3);
+    color: var(--ink);
+  }
+  .section-blurb {
+    color: var(--ink-dim);
+    max-width: 60ch;
+    margin-bottom: var(--space-6);
+  }
+
+  /* ==== Scheme block ==== */
+  .scheme { margin-top: var(--space-7); }
+  .scheme-head {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-4);
+    margin-bottom: var(--space-4);
+  }
+  .scheme-num {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--ink-faint);
+  }
+  .scheme-name {
+    font-family: var(--font-serif);
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: var(--ink);
+  }
+  .scheme-meta {
+    font-size: 0.875rem;
+    color: var(--ink-dim);
+  }
+  .scheme-desc {
+    color: var(--ink-dim);
+    max-width: 70ch;
+    margin-bottom: var(--space-5);
+    font-size: 0.9375rem;
+  }
+
+  /* ==== Swatch strip ==== */
+  .swatches {
+    display: flex;
+    gap: var(--space-3);
+    margin-bottom: var(--space-6);
+    flex-wrap: wrap;
+  }
+  .swatch {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  .swatch-chip {
+    width: 96px;
+    height: 96px;
+    border-radius: var(--radius);
+    border: 1px solid var(--royal-7);
+  }
+  .swatch-label {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    color: var(--ink-dim);
+  }
+  .swatch-role {
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  /* ==== Surface grid ==== */
+  .surfaces {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: var(--space-5);
+    margin-bottom: var(--space-5);
+  }
+  .surfaces-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-5);
+    margin-bottom: var(--space-5);
+  }
+  @media (max-width: 960px) {
+    .surfaces, .surfaces-row { grid-template-columns: 1fr; }
+  }
+
+  /* ==== Hero mock ==== */
+  .mock-hero {
+    background: var(--royal-2);
+    border: 1px solid var(--royal-7);
+    border-radius: var(--radius);
+    padding: var(--space-7) var(--space-6);
+  }
+  .mock-hero .kicker {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--royal-11);
+    margin-bottom: var(--space-4);
+  }
+  .mock-hero h2 {
+    font-family: var(--font-serif);
+    font-size: 2.75rem;
+    font-weight: 400;
+    line-height: 1.02;
+    letter-spacing: -0.025em;
+    color: var(--ink);
+    margin-bottom: var(--space-5);
+  }
+  .mock-hero .hero-meta {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--ink-faint);
+    margin-bottom: var(--space-5);
+  }
+  .mock-hero .cta {
+    display: inline-block;
+    padding: var(--space-3) var(--space-5);
+    background: var(--royal-8);
+    color: var(--royal-12);
+    font-weight: 600;
+    font-size: 0.9375rem;
+    border-radius: var(--radius);
+    text-decoration: none;
+    border: 1px solid var(--royal-8);
+  }
+
+  /* ==== Case card mock ==== */
+  .mock-card {
+    background: var(--royal-4);
+    border: 1px solid var(--royal-7);
+    border-radius: var(--radius);
+    padding: var(--space-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    position: relative;
+    overflow: hidden;
+  }
+  .mock-card .kicker {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--royal-11);
+  }
+  .mock-card h3 {
+    font-family: var(--font-serif);
+    font-size: 1.625rem;
+    font-weight: 500;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+  }
+  .mock-card p {
+    font-size: 0.875rem;
+    color: var(--ink-dim);
+    line-height: 1.55;
+  }
+  .mock-card .metric {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--royal-11);
+  }
+  .mock-card .tags {
+    display: flex;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+  }
+  .mock-card .tag {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--royal-8);
+    color: var(--royal-11);
+    background: rgba(59, 91, 219, 0.08);
+  }
+  .mock-card .arrow {
+    color: var(--royal-10);
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-top: var(--space-2);
+  }
+
+  /* ==== Build log ticker mock ==== */
+  .mock-ticker {
+    background: var(--royal-3);
+    border: 1px solid var(--royal-7);
+    border-radius: var(--radius);
+    padding: var(--space-5);
+  }
+  .mock-ticker .ticker-head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+  }
+  .mock-ticker .live-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--royal-10);
+  }
+  .mock-ticker .ticker-title {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--ink-dim);
+  }
+  .mock-ticker .entry {
+    display: grid;
+    grid-template-columns: 96px 1fr;
+    gap: var(--space-3);
+    padding: var(--space-2) 0;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    border-top: 1px solid var(--royal-7);
+  }
+  .mock-ticker .entry:first-of-type { border-top: none; }
+  .mock-ticker .entry .date { color: var(--ink-faint); }
+  .mock-ticker .entry .action { color: var(--ink-dim); }
+  .mock-ticker .entry .project { color: var(--royal-11); }
+
+  /* ==== Diagram mock ==== */
+  .mock-diagram {
+    background: var(--royal-3);
+    border: 1px solid var(--royal-7);
+    border-radius: var(--radius);
+    padding: var(--space-5);
+  }
+  .mock-diagram .diag-title {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--ink-dim);
+    margin-bottom: var(--space-4);
+  }
+  .mock-diagram svg { width: 100%; height: auto; }
+
+  /* ==== Usage notes ==== */
+  .usage {
+    background: var(--royal-1);
+    border: 1px solid var(--royal-7);
+    border-radius: var(--radius);
+    padding: var(--space-5);
+    margin-top: var(--space-4);
+  }
+  .usage h4 {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--ink-dim);
+    margin-bottom: var(--space-3);
+    font-weight: 500;
+  }
+  .usage ul { list-style: none; display: flex; flex-direction: column; gap: var(--space-2); }
+  .usage li {
+    font-size: 0.875rem;
+    color: var(--ink-dim);
+    padding-left: var(--space-4);
+    position: relative;
+  }
+  .usage li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--royal-11);
+    font-family: var(--font-mono);
+  }
+  .usage li.dont::before { content: '×'; color: var(--ink-faint); }
+  .usage li strong { color: var(--ink); font-weight: 500; }
+
+  /* ==== Recommendation footer ==== */
+  .rec {
+    margin-top: var(--space-8);
+    padding: var(--space-6);
+    background: var(--royal-1);
+    border: 1px solid var(--royal-8);
+    border-radius: var(--radius-lg);
+  }
+  .rec h2 {
+    font-family: var(--font-serif);
+    font-size: 1.75rem;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: var(--space-4);
+  }
+  .rec p { color: var(--ink-dim); max-width: 68ch; }
+  .rec p + p { margin-top: var(--space-3); }
+  .rec strong { color: var(--ink); font-weight: 500; }
+
+  /* ==== Accent span (used per scheme) ==== */
+  .accent { color: var(--accent, var(--royal-10)); }
+  .accent-bg { background: var(--accent, var(--royal-10)); color: var(--royal-1); }
+  .accent-border { border-color: var(--accent, var(--royal-10)) !important; }
+  .accent-underline {
+    background-image: linear-gradient(var(--accent, var(--royal-10)), var(--accent, var(--royal-10)));
+    background-repeat: no-repeat;
+    background-position: 0 88%;
+    background-size: 100% 3px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="doc-kicker">Portfolio · design exploration · 2026-04-12</div>
+    <h1 class="doc-title">Accent palette<br>explorer — v1</h1>
+    <p class="doc-intro">
+      Royal Tonal gives cohesion but no way for hero moments, data-viz, or diagram highlights to spike above the tonal register. This doc compares two candidate directions — <strong style="color:var(--ink)">Approach 2</strong> (monochromatic + functional accent) and <strong style="color:var(--ink)">Approach 4</strong> (analogous family) — against the locked Royal Tonal baseline.
+    </p>
+    <p class="doc-intro">
+      Each scheme is shown on four surfaces: hero, case study card, build log ticker, and a diagram spot. Usage rules per scheme sit in the dark box underneath.
+    </p>
+  </header>
+
+  <!-- ============================================ -->
+  <!-- BASELINE -->
+  <!-- ============================================ -->
+  <section class="section">
+    <div class="section-label">00 · baseline</div>
+    <h2 class="section-title">Royal Tonal as it stands today</h2>
+    <p class="section-blurb">Single-hue 12-step scale. Everything derives from <code style="font-family:var(--font-mono);color:var(--royal-11)">#3B5BDB</code>. This is the control.</p>
+
+    <div class="swatches">
+      <div class="swatch"><div class="swatch-chip" style="background:#3B5BDB"></div><div class="swatch-label">#3B5BDB</div><div class="swatch-role">royal-8 · brand</div></div>
+      <div class="swatch"><div class="swatch-chip" style="background:#6C85FF"></div><div class="swatch-label">#6C85FF</div><div class="swatch-role">royal-10 · link</div></div>
+      <div class="swatch"><div class="swatch-chip" style="background:#A5B4FF"></div><div class="swatch-label">#A5B4FF</div><div class="swatch-role">royal-11 · kicker</div></div>
+      <div class="swatch"><div class="swatch-chip" style="background:#D5DCFA"></div><div class="swatch-label">#D5DCFA</div><div class="swatch-role">royal-12 · on-brand</div></div>
+    </div>
+
+    <div class="surfaces">
+      <div class="mock-hero">
+        <div class="kicker">— Product thinker · shipping with AI</div>
+        <h2>I design product decisions, then ship them with Claude Code.</h2>
+        <div class="hero-meta">SYDNEY · AVAILABLE FOR WORK · Q2 2026</div>
+        <a class="cta" href="#">Get in touch →</a>
+      </div>
+      <div class="mock-card">
+        <div class="kicker">Selected work · 01</div>
+        <h3>Planner App</h3>
+        <p>GTD planner with persistent SMS reminders. Migrated from Python/Railway to TypeScript/Cloudflare with single-choke-point spend protection.</p>
+        <div class="metric">+4 architecture principles extracted → workspace</div>
+        <div class="tags">
+          <span class="tag">CLOUDFLARE</span>
+          <span class="tag">TYPESCRIPT</span>
+          <span class="tag">D1</span>
+        </div>
+        <div class="arrow">Read case study →</div>
+      </div>
+    </div>
+
+    <div class="surfaces-row">
+      <div class="mock-ticker">
+        <div class="ticker-head">
+          <div class="live-dot"></div>
+          <div class="ticker-title">Build log · live</div>
+        </div>
+        <div class="entry"><span class="date">2026-04-12</span><span class="action"><span class="project">portfolio</span> — chunk 4a.3 imagery standards committed</span></div>
+        <div class="entry"><span class="date">2026-04-11</span><span class="action"><span class="project">design-system</span> — chunk 3 emitter shipped</span></div>
+        <div class="entry"><span class="date">2026-04-10</span><span class="action"><span class="project">planner-app</span> — phase F scheduler, 111 tests</span></div>
+      </div>
+
+      <div class="mock-diagram">
+        <div class="diag-title">Diagram · causal loop (baseline)</div>
+        <svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="arr-base" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M0,0 L10,5 L0,10 z" fill="#6C85FF"/>
+            </marker>
+          </defs>
+          <circle cx="70" cy="90" r="34" fill="#1E2346" stroke="#3B5BDB" stroke-width="1.5"/>
+          <text x="70" y="94" text-anchor="middle" fill="#A5B4FF" font-family="Geist Mono" font-size="11">signal</text>
+          <circle cx="200" cy="90" r="34" fill="#1E2346" stroke="#3B5BDB" stroke-width="1.5"/>
+          <text x="200" y="94" text-anchor="middle" fill="#A5B4FF" font-family="Geist Mono" font-size="11">capture</text>
+          <circle cx="330" cy="90" r="34" fill="#1E2346" stroke="#3B5BDB" stroke-width="1.5"/>
+          <text x="330" y="94" text-anchor="middle" fill="#A5B4FF" font-family="Geist Mono" font-size="11">artefact</text>
+          <path d="M 108 90 L 162 90" stroke="#6C85FF" stroke-width="1.5" fill="none" marker-end="url(#arr-base)"/>
+          <path d="M 238 90 L 292 90" stroke="#6C85FF" stroke-width="1.5" fill="none" marker-end="url(#arr-base)"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="usage">
+      <h4>Baseline observation</h4>
+      <ul>
+        <li>Every surface reads at the same volume — nothing cues the eye where to look first.</li>
+        <li>Case card metric, live ticker dot, and diagram critical-path all blend into the royal register.</li>
+        <li>This is the problem each option below is trying to solve.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- APPROACH 2 -->
+  <!-- ============================================ -->
+  <section class="section">
+    <div class="section-label">02 · approach · monochromatic + functional accent</div>
+    <h2 class="section-title">One hue for identity, one hue for attention</h2>
+    <p class="section-blurb">Royal Tonal stays at ~90% of every surface. A single accent hue takes ~10%, scoped to exactly one job. The accent earns attention because it's rare.</p>
+
+    <!-- 2A · AMBER -->
+    <div class="scheme" style="--accent: #F5B942">
+      <div class="scheme-head">
+        <div class="scheme-num">2A</div>
+        <div>
+          <div class="scheme-name">Royal + Amber</div>
+          <div class="scheme-meta"><code style="font-family:var(--font-mono)">#F5B942</code> — complementary (blue+gold, editorial classic)</div>
+        </div>
+      </div>
+      <p class="scheme-desc">The classic editorial pairing. Blue + gold reads as assured and considered — think Vanity Fair, Monocle, The Economist. Warm complementary creates the strongest possible contrast without feeling electric. Risk: leans traditional, can skew "finance" or "law firm" if overused.</p>
+
+      <div class="swatches">
+        <div class="swatch"><div class="swatch-chip" style="background:#3B5BDB"></div><div class="swatch-label">#3B5BDB</div><div class="swatch-role">royal-8 · identity</div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:#F5B942"></div><div class="swatch-label">#F5B942</div><div class="swatch-role">amber · accent</div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:#FFD47A"></div><div class="swatch-label">#FFD47A</div><div class="swatch-role">amber hover</div></div>
+      </div>
+
+      <div class="surfaces">
+        <div class="mock-hero">
+          <div class="kicker">— Product thinker · shipping with AI</div>
+          <h2>I design product decisions, then <span class="accent-underline">ship them</span> with Claude Code.</h2>
+          <div class="hero-meta">SYDNEY · AVAILABLE FOR WORK · Q2 2026</div>
+          <a class="cta" href="#">Get in touch →</a>
+        </div>
+        <div class="mock-card">
+          <div class="kicker">Selected work · 01</div>
+          <h3>Planner App</h3>
+          <p>GTD planner with persistent SMS reminders. Migrated from Python/Railway to TypeScript/Cloudflare with single-choke-point spend protection.</p>
+          <div class="metric accent" style="color:#F5B942">+4 architecture principles extracted → workspace</div>
+          <div class="tags">
+            <span class="tag">CLOUDFLARE</span>
+            <span class="tag">TYPESCRIPT</span>
+            <span class="tag">D1</span>
+          </div>
+          <div class="arrow">Read case study →</div>
+        </div>
+      </div>
+
+      <div class="surfaces-row">
+        <div class="mock-ticker">
+          <div class="ticker-head">
+            <div class="live-dot" style="background:#F5B942;box-shadow:0 0 0 3px rgba(245,185,66,0.2)"></div>
+            <div class="ticker-title">Build log · live</div>
+          </div>
+          <div class="entry"><span class="date">2026-04-12</span><span class="action"><span class="project">portfolio</span> — chunk 4a.3 imagery standards committed</span></div>
+          <div class="entry"><span class="date">2026-04-11</span><span class="action"><span class="project">design-system</span> — chunk 3 emitter shipped</span></div>
+          <div class="entry"><span class="date">2026-04-10</span><span class="action"><span class="project">planner-app</span> — phase F scheduler, 111 tests</span></div>
+        </div>
+
+        <div class="mock-diagram">
+          <div class="diag-title">Diagram · critical path highlighted</div>
+          <svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <marker id="arr-2a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M0,0 L10,5 L0,10 z" fill="#F5B942"/>
+              </marker>
+              <marker id="arr-2a-base" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M0,0 L10,5 L0,10 z" fill="#6C85FF"/>
+              </marker>
+            </defs>
+            <circle cx="70" cy="90" r="34" fill="#1E2346" stroke="#3B5BDB" stroke-width="1.5"/>
+            <text x="70" y="94" text-anchor="middle" fill="#A5B4FF" font-family="Geist Mono" font-size="11">signal</text>
+            <circle cx="200" cy="90" r="34" fill="#1E2346" stroke="#F5B942" stroke-width="2"/>
+            <text x="200" y="94" text-anchor="middle" fill="#F5B942" font-family="Geist Mono" font-size="11">capture</text>
+            <circle cx="330" cy="90" r="34" fill="#1E2346" stroke="#3B5BDB" stroke-width="1.5"/>
+            <text x="330" y="94" text-anchor="middle" fill="#A5B4FF" font-family="Geist Mono" font-size="11">artefact</text>
+            <path d="M 108 90 L 162 90" stroke="#F5B942" stroke-width="2" fill="none" marker-end="url(#arr-2a)"/>
+            <path d="M 238 90 L 292 90" stroke="#6C85FF" stroke-width="1.5" fill="none" marker-end="url(#arr-2a-base)"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="usage">
+        <h4>Amber usage rules</h4>
+        <ul>
+          <li><strong>One job:</strong> outcome metrics + diagram critical path + live-data dot. That's it.</li>
+          <li>Hero one-word highlight only as rare "signature" move (case study openers, about page).</li>
+          <li class="dont">Never on buttons, links, or body UI — those stay royal. Breaks the identity.</li>
+          <li class="dont">Never as a background fill larger than a tag. Amber flood = warning aesthetic.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 2B · CHARTREUSE -->
+    <div class="scheme" style="--accent: #D4F25C">
+      <div class="scheme-head">
+        <div class="scheme-num">2B</div>
+        <div>
+          <div class="scheme-name">Royal + Chartreuse</div>
+          <div class="scheme-meta"><code style="font-family:var(--font-mono)">#D4F25C</code> — near-complementary, electric/modern</div>
+        </div>
+      </div>
+      <p class="scheme-desc">Tech-editorial, confident, awake. Chartreuse reads as "developer tools that know what they're doing" — Linear, Vercel, early GitHub. Sharper and more contemporary than amber. Risk: strongly signals "tech" — less versatile if you ever want the portfolio to read as strategic/product rather than engineering.</p>
+
+      <div class="swatches">
+        <div class="swatch"><div class="swatch-chip" style="background:#3B5BDB"></div><div class="swatch-label">#3B5BDB</div><div class="swatch-role">royal-8 · identity</div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:#D4F25C"></div><div class="swatch-label">#D4F25C</div><div class="swatch-role">chartreuse · accent</div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:#E6FF8A"></div><div class="swatch-label">#E6FF8A</div><div class="swatch-role">chartreuse hover</div></div>
+      </div>
+
+      <div class="surfaces">
+        <div class="mock-hero">
+          <div class="kicker">— Product thinker · shipping with AI</div>
+          <h2>I design product decisions, then <span class="accent-underline">ship them</span> with Claude Code.</h2>
+          <div class="hero-meta">SYDNEY · AVAILABLE FOR WORK · Q2 2026</div>
+          <a class="cta" href="#">Get in touch →</a>
+        </div>
+        <div class="mock-card">
+          <div class="kicker">Selected work · 01</div>
+          <h3>Planner App</h3>
+          <p>GTD planner with persistent SMS reminders. Migrated from Python/Railway to TypeScript/Cloudflare with single-choke-point spend protection.</p>
+          <div class="metric" style="color:#D4F25C">+4 architecture principles extracted → workspace</div>
+          <div class="tags">
+            <span class="tag">CLOUDFLARE</span>
+            <span class="tag">TYPESCRIPT</span>
+            <span class="tag">D1</span>
+          </div>
+          <div class="arrow">Read case study →</div>
+        </div>
+      </div>
+
+      <div class="surfaces-row">
+        <div class="mock-ticker">
+          <div class="ticker-head">
+            <div class="live-dot" style="background:#D4F25C;box-shadow:0 0 0 3px rgba(212,242,92,0.25)"></div>
+            <div class="ticker-title">Build log · live</div>
+          </div>
+          <div class="entry"><span class="date">2026-04-12</span><span class="action"><span class="project">portfolio</span> — chunk 4a.3 imagery standards committed</span></div>
+          <div class="entry"><span class="date">2026-04-11</span><span class="action"><span class="project">design-system</span> — chunk 3 emitter shipped</span></div>
+          <div class="entry"><span class="date">2026-04-10</span><span class="action"><span class="project">planner-app</span> — phase F scheduler, 111 tests</span></div>
+        </div>
+
+        <div class="mock-diagram">
+          <div class="diag-title">Diagram · critical path highlighted</div>
+          <svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <marker id="arr-2b" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M0,0 L10,5 L0,10 z" fill="#D4F25C"/>
+              </marker>
+              <marker id="arr-2b-base" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M0,0 L10,5 L0,10 z" fill="#6C85FF"/>
+              </marker>
+            </defs>
+            <circle cx="70" cy="90" r="34" fill="#1E2346" stroke="#3B5BDB" stroke-width="1.5"/>
+            <text x="70" y="94" text-anchor="middle" fill="#A5B4FF" font-family="Geist Mono" font-size="11">signal</text>
+            <circle cx="200" cy="90" r="34" fill="#1E2346" stroke="#D4F25C" stroke-width="2"/>
+            <text x="200" y="94" text-anchor="middle" fill="#D4F25C" font-family="Geist Mono" font-size="11">capture</text>
+            <circle cx="330" cy="90" r="34" fill="#1E2346" stroke="#3B5BDB" stroke-width="1.5"/>
+            <text x="330" y="94" text-anchor="middle" fill="#A5B4FF" font-family="Geist Mono" font-size="11">artefact</text>
+            <path d="M 108 90 L 162 90" stroke="#D4F25C" stroke-width="2" fill="none" marker-end="url(#arr-2b)"/>
+            <path d="M 238 90 L 292 90" stroke="#6C85FF" stroke-width="1.5" fill="none" marker-end="url(#arr-2b-base)"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="usage">
+        <h4>Chartreuse usage rules</h4>
+        <ul>
+          <li><strong>One job:</strong> outcome metrics + diagram critical path + live-data dot.</li>
+          <li>Works well for code highlighting (inline code spans in case study body — rare use).</li>
+          <li class="dont">Never on buttons, links, or body UI.</li>
+          <li class="dont">Avoid pairing with warm tones in the same frame — chartreuse + amber reads as "Lime Cordial".</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 2C · CORAL -->
+    <div class="scheme" style="--accent: #FF7E5F">
+      <div class="scheme-head">
+        <div class="scheme-num">2C</div>
+        <div>
+          <div class="scheme-name">Royal + Coral</div>
+          <div class="scheme-meta"><code style="font-family:var(--font-mono)">#FF7E5F</code> — warm split-complement, human/friendly</div>
+        </div>
+      </div>
+      <p class="scheme-desc">Softer than amber, warmer than chartreuse. Coral reads as personable and approachable — more "product thinker with a human voice" than "serious engineer". Split-complementary (not pure opposite) which is why it feels easier on the eye. Risk: less distinct from designer portfolios — coral-on-dark is common.</p>
+
+      <div class="swatches">
+        <div class="swatch"><div class="swatch-chip" style="background:#3B5BDB"></div><div class="swatch-label">#3B5BDB</div><div class="swatch-role">royal-8 · identity</div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:#FF7E5F"></div><div class="swatch-label">#FF7E5F</div><div class="swatch-role">coral · accent</div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:#FFA488"></div><div class="swatch-label">#FFA488</div><div class="swatch-role">coral hover</div></div>
+      </div>
+
+      <div class="surfaces">
+        <div class="mock-hero">
+          <div class="kicker">— Product thinker · shipping with AI</div>
+          <h2>I design product decisions, then <span class="accent-underline">ship them</span> with Claude Code.</h2>
+          <div class="hero-meta">SYDNEY · AVAILABLE FOR WORK · Q2 2026</div>
+          <a class="cta" href="#">Get in touch →</a>
+        </div>
+        <div class="mock-card">
+          <div class="kicker">Selected work · 01</div>
+          <h3>Planner App</h3>
+          <p>GTD planner with persistent SMS reminders. Migrated from Python/Railway to TypeScript/Cloudflare with single-choke-point spend protection.</p>
+          <div class="metric" style="color:#FF7E5F">+4 architecture principles extracted → workspace</div>
+          <div class="tags">
+            <span class="tag">CLOUDFLARE</span>
+            <span class="tag">TYPESCRIPT</span>
+            <span class="tag">D1</span>
+          </div>
+          <div class="arrow">Read case study →</div>
+        </div>
+      </div>
+
+      <div class="surfaces-row">
+        <div class="mock-ticker">
+          <div class="ticker-head">
+            <div class="live-dot" style="background:#FF7E5F;box-shadow:0 0 0 3px rgba(255,126,95,0.22)"></div>
+            <div class="ticker-title">Build log · live</div>
+          </div>
+          <div class="entry"><span class="date">2026-04-12</span><span class="action"><span class="project">portfolio</span> — chunk 4a.3 imagery standards committed</span></div>
+          <div class="entry"><span class="date">2026-04-11</span><span class="action"><span class="project">design-system</span> — chunk 3 emitter shipped</span></div>
+          <div class="entry"><span class="date">2026-04-10</span><span class="action"><span class="project">planner-app</span> — phase F scheduler, 111 tests</span></div>
+        </div>
+
+        <div class="mock-diagram">
+          <div class="diag-title">Diagram · critical path highlighted</div>
+          <svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <marker id="arr-2c" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M0,0 L10,5 L0,10 z" fill="#FF7E5F"/>
+              </marker>
+              <marker id="arr-2c-base" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M0,0 L10,5 L0,10 z" fill="#6C85FF"/>
+              </marker>
+            </defs>
+            <circle cx="70" cy="90" r="34" fill="#1E2346" stroke="#3B5BDB" stroke-width="1.5"/>
+            <text x="70" y="94" text-anchor="middle" fill="#A5B4FF" font-family="Geist Mono" font-size="11">signal</text>
+            <circle cx="200" cy="90" r="34" fill="#1E2346" stroke="#FF7E5F" stroke-width="2"/>
+            <text x="200" y="94" text-anchor="middle" fill="#FF7E5F" font-family="Geist Mono" font-size="11">capture</text>
+            <circle cx="330" cy="90" r="34" fill="#1E2346" stroke="#3B5BDB" stroke-width="1.5"/>
+            <text x="330" y="94" text-anchor="middle" fill="#A5B4FF" font-family="Geist Mono" font-size="11">artefact</text>
+            <path d="M 108 90 L 162 90" stroke="#FF7E5F" stroke-width="2" fill="none" marker-end="url(#arr-2c)"/>
+            <path d="M 238 90 L 292 90" stroke="#6C85FF" stroke-width="1.5" fill="none" marker-end="url(#arr-2c-base)"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="usage">
+        <h4>Coral usage rules</h4>
+        <ul>
+          <li><strong>One job:</strong> outcome metrics + diagram critical path + live-data dot.</li>
+          <li>Warmer temperature makes it good for "human voice" callouts — quotes, transcript highlights.</li>
+          <li class="dont">Never on buttons, links, or body UI.</li>
+          <li class="dont">Coral flood on large surfaces reads as "error state" — keep it to small accents only.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- APPROACH 4 -->
+  <!-- ============================================ -->
+  <section class="section">
+    <div class="section-label">04 · approach · analogous family</div>
+    <h2 class="section-title">A family of adjacent hues, all part of identity</h2>
+    <p class="section-blurb">Not "base + accent" but "base + siblings". Adjacent hues on the wheel share royal blue's assurance while giving illustrations, data viz, and category differentiation more range. Each hue earns a functional role — not just "pop".</p>
+
+    <!-- 4A · ROYAL + CYAN -->
+    <div class="scheme" style="--accent: #3BC3DB">
+      <div class="scheme-head">
+        <div class="scheme-num">4A</div>
+        <div>
+          <div class="scheme-name">Royal + Cyan</div>
+          <div class="scheme-meta"><code style="font-family:var(--font-mono)">#3B5BDB</code> + <code style="font-family:var(--font-mono)">#3BC3DB</code> — cool-shift, data-editorial</div>
+        </div>
+      </div>
+      <p class="scheme-desc">Shift one step along the wheel toward cyan. Same saturation band, same value range — they read as a family. Cyan gives diagrams a second stroke colour and data-viz a second series colour, without introducing temperature conflict. Editorial and modern, slightly "Stripe/Bloomberg" in feel.</p>
+
+      <div class="swatches">
+        <div class="swatch"><div class="swatch-chip" style="background:#3B5BDB"></div><div class="swatch-label">#3B5BDB</div><div class="swatch-role">royal · base</div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:#3BC3DB"></div><div class="swatch-label">#3BC3DB</div><div class="swatch-role">cyan · sibling</div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:#A5B4FF"></div><div class="swatch-label">#A5B4FF</div><div class="swatch-role">royal-11 · tint</div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:#86E4F0"></div><div class="swatch-label">#86E4F0</div><div class="swatch-role">cyan · tint</div></div>
+      </div>
+
+      <div class="surfaces">
+        <div class="mock-hero">
+          <div class="kicker" style="color:#86E4F0">— Product thinker · shipping with AI</div>
+          <h2>I design product decisions, then ship them with Claude Code.</h2>
+          <div class="hero-meta">SYDNEY · AVAILABLE FOR WORK · Q2 2026</div>
+          <a class="cta" href="#" style="background:linear-gradient(135deg,#3B5BDB 0%,#3BC3DB 100%);border-color:#3BC3DB">Get in touch →</a>
+        </div>
+        <div class="mock-card" style="border-left:3px solid #3BC3DB">
+          <div class="kicker" style="color:#86E4F0">Selected work · 01</div>
+          <h3>Planner App</h3>
+          <p>GTD planner with persistent SMS reminders. Migrated from Python/Railway to TypeScript/Cloudflare with single-choke-point spend protection.</p>
+          <div class="metric" style="color:#86E4F0">+4 architecture principles extracted → workspace</div>
+          <div class="tags">
+            <span class="tag" style="border-color:#3BC3DB;color:#86E4F0;background:rgba(59,195,219,0.08)">CLOUDFLARE</span>
+            <span class="tag">TYPESCRIPT</span>
+            <span class="tag">D1</span>
+          </div>
+          <div class="arrow" style="color:#86E4F0">Read case study →</div>
+        </div>
+      </div>
+
+      <div class="surfaces-row">
+        <div class="mock-ticker">
+          <div class="ticker-head">
+            <div class="live-dot" style="background:#3BC3DB;box-shadow:0 0 0 3px rgba(59,195,219,0.22)"></div>
+            <div class="ticker-title">Build log · live</div>
+          </div>
+          <div class="entry"><span class="date">2026-04-12</span><span class="action"><span class="project" style="color:#86E4F0">portfolio</span> — chunk 4a.3 imagery standards committed</span></div>
+          <div class="entry"><span class="date">2026-04-11</span><span class="action"><span class="project">design-system</span> — chunk 3 emitter shipped</span></div>
+          <div class="entry"><span class="date">2026-04-10</span><span class="action"><span class="project" style="color:#86E4F0">planner-app</span> — phase F scheduler, 111 tests</span></div>
+        </div>
+
+        <div class="mock-diagram">
+          <div class="diag-title">Diagram · two-series flow</div>
+          <svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <marker id="arr-4a-r" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M0,0 L10,5 L0,10 z" fill="#6C85FF"/>
+              </marker>
+              <marker id="arr-4a-c" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M0,0 L10,5 L0,10 z" fill="#86E4F0"/>
+              </marker>
+            </defs>
+            <circle cx="70" cy="60" r="28" fill="#1E2346" stroke="#3B5BDB" stroke-width="1.5"/>
+            <text x="70" y="64" text-anchor="middle" fill="#A5B4FF" font-family="Geist Mono" font-size="10">input</text>
+            <circle cx="200" cy="90" r="32" fill="#1E2346" stroke="#3BC3DB" stroke-width="1.5"/>
+            <text x="200" y="94" text-anchor="middle" fill="#86E4F0" font-family="Geist Mono" font-size="10">process</text>
+            <circle cx="330" cy="60" r="28" fill="#1E2346" stroke="#3B5BDB" stroke-width="1.5"/>
+            <text x="330" y="64" text-anchor="middle" fill="#A5B4FF" font-family="Geist Mono" font-size="10">output</text>
+            <circle cx="70" cy="140" r="28" fill="#1E2346" stroke="#3B5BDB" stroke-width="1.5"/>
+            <text x="70" y="144" text-anchor="middle" fill="#A5B4FF" font-family="Geist Mono" font-size="10">cache</text>
+            <path d="M 98 68 L 170 82" stroke="#6C85FF" stroke-width="1.5" fill="none" marker-end="url(#arr-4a-r)"/>
+            <path d="M 98 132 L 170 100" stroke="#86E4F0" stroke-width="1.5" fill="none" marker-end="url(#arr-4a-c)"/>
+            <path d="M 232 82 L 302 68" stroke="#6C85FF" stroke-width="1.5" fill="none" marker-end="url(#arr-4a-r)"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="usage">
+        <h4>Cyan sibling rules</h4>
+        <ul>
+          <li><strong>Role split:</strong> royal = primary/UI. Cyan = secondary series + category 2 tags + "live" indicators.</li>
+          <li>Enables two-series data viz and dual-category diagrams without borrowing a hot accent.</li>
+          <li>Cyan kicker works as the "live/now" register, royal kicker as the "brand" register.</li>
+          <li class="dont">Don't use cyan for CTAs — royal is the primary action colour. Cyan is always the second voice.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 4B · ROYAL + VIOLET -->
+    <div class="scheme" style="--accent: #8C3BDB">
+      <div class="scheme-head">
+        <div class="scheme-num">4B</div>
+        <div>
+          <div class="scheme-name">Royal + Violet</div>
+          <div class="scheme-meta"><code style="font-family:var(--font-mono)">#3B5BDB</code> + <code style="font-family:var(--font-mono)">#8C3BDB</code> — warm-shift, luxury-editorial</div>
+        </div>
+      </div>
+      <p class="scheme-desc">Shift one step the other way — toward violet. Reads richer and more "premium" than the cyan version. Closer to fashion/luxury magazine colour language. Works particularly well because the existing periwinkle (`royal-11` #A5B4FF) already bridges the two hues, making the family feel natural. Risk: edges toward "designer" aesthetic; slightly less tech-forward.</p>
+
+      <div class="swatches">
+        <div class="swatch"><div class="swatch-chip" style="background:#3B5BDB"></div><div class="swatch-label">#3B5BDB</div><div class="swatch-role">royal · base</div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:#8C3BDB"></div><div class="swatch-label">#8C3BDB</div><div class="swatch-role">violet · sibling</div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:#A5B4FF"></div><div class="swatch-label">#A5B4FF</div><div class="swatch-role">periwinkle · bridge</div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:#C89BFF"></div><div class="swatch-label">#C89BFF</div><div class="swatch-role">violet · tint</div></div>
+      </div>
+
+      <div class="surfaces">
+        <div class="mock-hero">
+          <div class="kicker" style="color:#C89BFF">— Product thinker · shipping with AI</div>
+          <h2>I design product decisions, then ship them with Claude Code.</h2>
+          <div class="hero-meta">SYDNEY · AVAILABLE FOR WORK · Q2 2026</div>
+          <a class="cta" href="#" style="background:linear-gradient(135deg,#3B5BDB 0%,#8C3BDB 100%);border-color:#8C3BDB">Get in touch →</a>
+        </div>
+        <div class="mock-card" style="border-left:3px solid #8C3BDB">
+          <div class="kicker" style="color:#C89BFF">Selected work · 01</div>
+          <h3>Planner App</h3>
+          <p>GTD planner with persistent SMS reminders. Migrated from Python/Railway to TypeScript/Cloudflare with single-choke-point spend protection.</p>
+          <div class="metric" style="color:#C89BFF">+4 architecture principles extracted → workspace</div>
+          <div class="tags">
+            <span class="tag" style="border-color:#8C3BDB;color:#C89BFF;background:rgba(140,59,219,0.1)">CLOUDFLARE</span>
+            <span class="tag">TYPESCRIPT</span>
+            <span class="tag">D1</span>
+          </div>
+          <div class="arrow" style="color:#C89BFF">Read case study →</div>
+        </div>
+      </div>
+
+      <div class="surfaces-row">
+        <div class="mock-ticker">
+          <div class="ticker-head">
+            <div class="live-dot" style="background:#C89BFF;box-shadow:0 0 0 3px rgba(200,155,255,0.25)"></div>
+            <div class="ticker-title">Build log · live</div>
+          </div>
+          <div class="entry"><span class="date">2026-04-12</span><span class="action"><span class="project" style="color:#C89BFF">portfolio</span> — chunk 4a.3 imagery standards committed</span></div>
+          <div class="entry"><span class="date">2026-04-11</span><span class="action"><span class="project">design-system</span> — chunk 3 emitter shipped</span></div>
+          <div class="entry"><span class="date">2026-04-10</span><span class="action"><span class="project" style="color:#C89BFF">planner-app</span> — phase F scheduler, 111 tests</span></div>
+        </div>
+
+        <div class="mock-diagram">
+          <div class="diag-title">Diagram · two-series flow</div>
+          <svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <marker id="arr-4b-r" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M0,0 L10,5 L0,10 z" fill="#6C85FF"/>
+              </marker>
+              <marker id="arr-4b-v" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M0,0 L10,5 L0,10 z" fill="#C89BFF"/>
+              </marker>
+            </defs>
+            <circle cx="70" cy="60" r="28" fill="#1E2346" stroke="#3B5BDB" stroke-width="1.5"/>
+            <text x="70" y="64" text-anchor="middle" fill="#A5B4FF" font-family="Geist Mono" font-size="10">input</text>
+            <circle cx="200" cy="90" r="32" fill="#1E2346" stroke="#8C3BDB" stroke-width="1.5"/>
+            <text x="200" y="94" text-anchor="middle" fill="#C89BFF" font-family="Geist Mono" font-size="10">process</text>
+            <circle cx="330" cy="60" r="28" fill="#1E2346" stroke="#3B5BDB" stroke-width="1.5"/>
+            <text x="330" y="64" text-anchor="middle" fill="#A5B4FF" font-family="Geist Mono" font-size="10">output</text>
+            <circle cx="70" cy="140" r="28" fill="#1E2346" stroke="#3B5BDB" stroke-width="1.5"/>
+            <text x="70" y="144" text-anchor="middle" fill="#A5B4FF" font-family="Geist Mono" font-size="10">cache</text>
+            <path d="M 98 68 L 170 82" stroke="#6C85FF" stroke-width="1.5" fill="none" marker-end="url(#arr-4b-r)"/>
+            <path d="M 98 132 L 170 100" stroke="#C89BFF" stroke-width="1.5" fill="none" marker-end="url(#arr-4b-v)"/>
+            <path d="M 232 82 L 302 68" stroke="#6C85FF" stroke-width="1.5" fill="none" marker-end="url(#arr-4b-r)"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="usage">
+        <h4>Violet sibling rules</h4>
+        <ul>
+          <li><strong>Role split:</strong> royal = work/craft. Violet = thinking/writing (could split the portfolio's two modes — build log = royal, writing posts = violet).</li>
+          <li>Periwinkle `royal-11` already bridges royal and violet — the family feels cohesive, not grafted.</li>
+          <li>Good for category differentiation: project case studies (royal) vs essays (violet) vs transcripts (a shared tint).</li>
+          <li class="dont">Don't use violet for CTAs or primary navigation — royal stays primary.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 4C · TRIADIC ANALOGOUS -->
+    <div class="scheme" style="--accent: #8C3BDB">
+      <div class="scheme-head">
+        <div class="scheme-num">4C</div>
+        <div>
+          <div class="scheme-name">Violet + Royal + Cyan (triadic-analogous)</div>
+          <div class="scheme-meta"><code style="font-family:var(--font-mono)">#8C3BDB</code> · <code style="font-family:var(--font-mono)">#3B5BDB</code> · <code style="font-family:var(--font-mono)">#3BC3DB</code> — full family</div>
+        </div>
+      </div>
+      <p class="scheme-desc">The most ambitious option. Three hues spanning violet → royal → cyan give diagrams and data-viz a real colour vocabulary — enough to differentiate 3+ series without borrowing a fourth colour. Highest ceiling for illustration, lowest margin for error: if the three aren't used with discipline, the page can read as "3 brands fighting". Best if case studies lean heavily on diagrams and flow illustrations.</p>
+
+      <div class="swatches">
+        <div class="swatch"><div class="swatch-chip" style="background:#8C3BDB"></div><div class="swatch-label">#8C3BDB</div><div class="swatch-role">violet · writing</div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:#3B5BDB"></div><div class="swatch-label">#3B5BDB</div><div class="swatch-role">royal · primary</div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:#3BC3DB"></div><div class="swatch-label">#3BC3DB</div><div class="swatch-role">cyan · live/data</div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:#C89BFF"></div><div class="swatch-label">#C89BFF</div><div class="swatch-role">violet tint</div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:#86E4F0"></div><div class="swatch-label">#86E4F0</div><div class="swatch-role">cyan tint</div></div>
+      </div>
+
+      <div class="surfaces">
+        <div class="mock-hero">
+          <div class="kicker" style="background:linear-gradient(90deg,#C89BFF 0%,#A5B4FF 50%,#86E4F0 100%);-webkit-background-clip:text;background-clip:text;color:transparent">— Product thinker · shipping with AI</div>
+          <h2>I design product decisions, then ship them with Claude Code.</h2>
+          <div class="hero-meta">SYDNEY · AVAILABLE FOR WORK · Q2 2026</div>
+          <a class="cta" href="#" style="background:linear-gradient(135deg,#8C3BDB 0%,#3B5BDB 50%,#3BC3DB 100%);border-color:#3B5BDB">Get in touch →</a>
+        </div>
+        <div class="mock-card" style="border-left:3px solid transparent;border-image:linear-gradient(180deg,#8C3BDB 0%,#3B5BDB 50%,#3BC3DB 100%) 1">
+          <div class="kicker" style="color:#C89BFF">Selected work · 01</div>
+          <h3>Planner App</h3>
+          <p>GTD planner with persistent SMS reminders. Migrated from Python/Railway to TypeScript/Cloudflare with single-choke-point spend protection.</p>
+          <div class="metric" style="color:#86E4F0">+4 architecture principles extracted → workspace</div>
+          <div class="tags">
+            <span class="tag" style="border-color:#8C3BDB;color:#C89BFF;background:rgba(140,59,219,0.1)">WRITING</span>
+            <span class="tag">TYPESCRIPT</span>
+            <span class="tag" style="border-color:#3BC3DB;color:#86E4F0;background:rgba(59,195,219,0.08)">LIVE</span>
+          </div>
+          <div class="arrow" style="color:#86E4F0">Read case study →</div>
+        </div>
+      </div>
+
+      <div class="surfaces-row">
+        <div class="mock-ticker">
+          <div class="ticker-head">
+            <div class="live-dot" style="background:#3BC3DB;box-shadow:0 0 0 3px rgba(59,195,219,0.22)"></div>
+            <div class="ticker-title">Build log · live</div>
+          </div>
+          <div class="entry"><span class="date">2026-04-12</span><span class="action"><span class="project" style="color:#C89BFF">writing</span> — essay on transcripts-as-artefacts drafted</span></div>
+          <div class="entry"><span class="date">2026-04-11</span><span class="action"><span class="project">design-system</span> — chunk 3 emitter shipped</span></div>
+          <div class="entry"><span class="date">2026-04-10</span><span class="action"><span class="project" style="color:#86E4F0">planner-app</span> — phase F scheduler, 111 tests</span></div>
+        </div>
+
+        <div class="mock-diagram">
+          <div class="diag-title">Diagram · three-series flow</div>
+          <svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <marker id="arr-4c-v" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M0,0 L10,5 L0,10 z" fill="#C89BFF"/>
+              </marker>
+              <marker id="arr-4c-r" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M0,0 L10,5 L0,10 z" fill="#6C85FF"/>
+              </marker>
+              <marker id="arr-4c-c" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M0,0 L10,5 L0,10 z" fill="#86E4F0"/>
+              </marker>
+            </defs>
+            <circle cx="70" cy="50" r="26" fill="#1E2346" stroke="#8C3BDB" stroke-width="1.5"/>
+            <text x="70" y="54" text-anchor="middle" fill="#C89BFF" font-family="Geist Mono" font-size="10">thinking</text>
+            <circle cx="70" cy="140" r="26" fill="#1E2346" stroke="#3BC3DB" stroke-width="1.5"/>
+            <text x="70" y="144" text-anchor="middle" fill="#86E4F0" font-family="Geist Mono" font-size="10">data</text>
+            <circle cx="200" cy="95" r="32" fill="#1E2346" stroke="#3B5BDB" stroke-width="1.5"/>
+            <text x="200" y="99" text-anchor="middle" fill="#A5B4FF" font-family="Geist Mono" font-size="10">shipping</text>
+            <circle cx="330" cy="95" r="28" fill="#1E2346" stroke="#3B5BDB" stroke-width="1.5"/>
+            <text x="330" y="99" text-anchor="middle" fill="#A5B4FF" font-family="Geist Mono" font-size="10">artefact</text>
+            <path d="M 96 58 L 170 85" stroke="#C89BFF" stroke-width="1.5" fill="none" marker-end="url(#arr-4c-v)"/>
+            <path d="M 96 132 L 170 105" stroke="#86E4F0" stroke-width="1.5" fill="none" marker-end="url(#arr-4c-c)"/>
+            <path d="M 232 95 L 302 95" stroke="#6C85FF" stroke-width="1.5" fill="none" marker-end="url(#arr-4c-r)"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="usage">
+        <h4>Triadic family rules</h4>
+        <ul>
+          <li><strong>Role-per-hue:</strong> violet = thinking/writing · royal = work/craft/CTAs · cyan = live/data.</li>
+          <li>This gives the portfolio a colour language for its three content types (case studies, writing, build log) without ever feeling decorative.</li>
+          <li>Diagrams and flow illustrations can legitimately use all three — each hue carries a meaning, not just a colour slot.</li>
+          <li class="dont">Don't let the gradient hero move bleed into case study bodies — the gradient is a signature, not a pattern.</li>
+          <li class="dont">Don't introduce a fourth hue later. Three is the whole commitment.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- RECOMMENDATION -->
+  <!-- ============================================ -->
+  <section class="section">
+    <div class="section-label">05 · recommendation</div>
+    <div class="rec">
+      <h2>Leaning towards 4B (Royal + Violet), with 2A (Amber) as the backup</h2>
+      <p><strong>Why 4B:</strong> the portfolio has three distinct content types (case studies, writing posts, build log + transcripts) and the style guide work in chunk 4a is explicitly trying to give them distinct voices. An analogous family lets you <em>assign meaning per hue</em> — royal for work, violet for thinking — in a way that a single accent can't. Periwinkle (royal-11) already sits between royal and violet, so the family will feel native rather than grafted on.</p>
+      <p><strong>Why not 4C (triadic):</strong> three hues is the richest but most disciplined option. Unless diagrams dominate case study bodies (chunk 4d will tell us), the third hue adds complexity without proportional return. Promote 4B to 4C later if chunk 4d illustrations demand it.</p>
+      <p><strong>Why 2A as backup:</strong> if the "two modes" framing doesn't hold up once case studies are written, amber + royal is the safer, more traditional choice — strong contrast, editorial legibility, and zero risk of category confusion. The accent is doing one thing and doing it loudly.</p>
+      <p><strong>Against 2B (chartreuse) and 2C (coral):</strong> chartreuse is too "developer tools" for a product-thinking positioning; coral competes with a lot of designer portfolios and weakens the Royal Tonal identity rather than extending it.</p>
+      <p><strong>Next step:</strong> pick between 4B and 2A, then extend the chosen option into a <em>full</em> token block (add `--violet-*` or `--amber-*` to `design.tokens.ts`) and rebuild the existing design explorer on it before committing to anything in `globals.css`.</p>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

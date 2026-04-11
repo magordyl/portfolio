@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Royal + Violet — v2 (token block, gradient options, transcript component)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* ============================================ */
+    /* Royal Tonal (chrome) — unchanged from v1     */
+    /* ============================================ */
+    --royal-1:  #0E0F1C;
+    --royal-2:  #121428;
+    --royal-3:  #181B36;
+    --royal-4:  #1E2346;
+    --royal-5:  #252C58;
+    --royal-6:  #2D366C;
+    --royal-7:  #364280;
+    --royal-8:  #3B5BDB;
+    --royal-9:  #4D6DE8;
+    --royal-10: #6C85FF;
+    --royal-11: #A5B4FF;
+    --royal-12: #D5DCFA;
+
+    /* ============================================ */
+    /* Violet (signal) — NEW, steps 8 to 12 only    */
+    /* ============================================ */
+    --violet-8:  #8C3BDB;  /* solid brand (thinking/writing) */
+    --violet-9:  #9D4DE8;  /* hovered solid */
+    --violet-10: #B47CFF;  /* text link / bright text on dark */
+    --violet-11: #C89BFF;  /* kicker / metadata */
+    --violet-12: #E6D4FF;  /* high-contrast text on violet-8 */
+
+    /* Ink */
+    --ink:       #E6E2D9;
+    --ink-dim:   #9C968A;
+    --ink-faint: #5E584F;
+
+    /* Fonts */
+    --font-serif: 'Fraunces', Georgia, serif;
+    --font-sans:  'Geist', -apple-system, system-ui, sans-serif;
+    --font-mono:  'Geist Mono', 'SF Mono', Menlo, monospace;
+
+    /* Spacing */
+    --s1: 0.25rem;
+    --s2: 0.5rem;
+    --s3: 0.75rem;
+    --s4: 1rem;
+    --s5: 1.5rem;
+    --s6: 2rem;
+    --s7: 3rem;
+    --s8: 4.5rem;
+
+    /* Radius */
+    --radius-sm: 2px;
+    --radius:    8px;
+    --radius-lg: 12px;
+
+    /* Semantic aliases — v2 */
+    --bg:             var(--royal-2);
+    --bg-subtle:      var(--royal-3);
+    --card:           var(--royal-4);
+    --border:         var(--royal-7);
+    --primary:        var(--royal-8);
+    --primary-hover:  var(--royal-9);
+    --link:           var(--royal-10);
+    --kicker:         var(--royal-11);
+
+    --thinking:       var(--violet-8);
+    --thinking-link:  var(--violet-10);
+    --thinking-kicker: var(--violet-11);
+
+    /* Signature gradient — used sparingly */
+    --grad-rv:        linear-gradient(135deg, var(--royal-8) 0%, var(--violet-8) 100%);
+    --grad-rv-soft:   linear-gradient(135deg, var(--royal-10) 0%, var(--violet-10) 100%);
+    --grad-rv-line:   linear-gradient(180deg, var(--royal-8) 0%, var(--violet-8) 100%);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-optical-sizing: auto; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 1280px; margin: 0 auto; padding: var(--s8) var(--s6); }
+
+  /* ==== Doc headers ==== */
+  .doc-kicker {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--royal-11);
+    margin-bottom: var(--s3);
+  }
+  .doc-title {
+    font-family: var(--font-serif);
+    font-size: 4rem;
+    font-weight: 400;
+    line-height: 0.98;
+    letter-spacing: -0.025em;
+    margin-bottom: var(--s5);
+  }
+  .doc-intro {
+    font-size: 1.0625rem;
+    color: var(--ink-dim);
+    max-width: 62ch;
+    line-height: 1.65;
+  }
+  .doc-intro + .doc-intro { margin-top: var(--s4); }
+  .doc-intro strong { color: var(--ink); font-weight: 500; }
+
+  /* ==== Section structure ==== */
+  .section { margin-top: var(--s8); padding-top: var(--s7); border-top: 1px solid var(--border); }
+  .section:first-of-type { border-top: none; padding-top: 0; }
+
+  .section-label {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--ink-faint);
+    letter-spacing: 0.05em;
+    margin-bottom: var(--s2);
+  }
+  .section-title {
+    font-family: var(--font-serif);
+    font-size: 2rem;
+    font-weight: 400;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    margin-bottom: var(--s3);
+  }
+  .section-blurb {
+    color: var(--ink-dim);
+    max-width: 62ch;
+    margin-bottom: var(--s6);
+  }
+  .section-blurb strong { color: var(--ink); font-weight: 500; }
+
+  /* ==== Token table ==== */
+  .tokens-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--s5);
+    margin-bottom: var(--s6);
+  }
+  @media (max-width: 960px) { .tokens-grid { grid-template-columns: 1fr; } }
+
+  .token-block {
+    background: var(--royal-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: var(--s5);
+  }
+  .token-block.violet { border-color: var(--violet-8); }
+  .token-block h3 {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    margin-bottom: var(--s4);
+    color: var(--ink-dim);
+  }
+  .token-row {
+    display: grid;
+    grid-template-columns: 28px 1fr auto;
+    align-items: center;
+    gap: var(--s3);
+    padding: 8px 0;
+    border-top: 1px solid var(--royal-7);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+  }
+  .token-row:first-of-type { border-top: none; }
+  .token-swatch {
+    width: 28px; height: 28px;
+    border-radius: 4px;
+    border: 1px solid var(--royal-7);
+  }
+  .token-name { color: var(--ink); }
+  .token-hex { color: var(--ink-dim); }
+  .token-role {
+    font-size: 0.6875rem;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: block;
+  }
+
+  /* ==== Role split table ==== */
+  .split-table {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: var(--s6);
+  }
+  .split-row {
+    display: grid;
+    grid-template-columns: 160px 1fr 1fr;
+    border-top: 1px solid var(--border);
+  }
+  .split-row:first-child { border-top: none; background: var(--royal-3); }
+  .split-row > div {
+    padding: var(--s3) var(--s4);
+    font-size: 0.875rem;
+  }
+  .split-row.header > div {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--ink-dim);
+  }
+  .split-role {
+    color: var(--ink);
+    font-weight: 500;
+  }
+  .split-royal { color: var(--royal-11); }
+  .split-violet { color: var(--violet-11); }
+
+  /* ==== Gradient option cards ==== */
+  .grad-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--s5);
+  }
+  @media (max-width: 1024px) { .grad-options { grid-template-columns: 1fr; } }
+  .grad-option {
+    background: var(--royal-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: var(--s5);
+  }
+  .grad-option h3 {
+    font-family: var(--font-serif);
+    font-size: 1.25rem;
+    font-weight: 500;
+    margin-bottom: var(--s2);
+  }
+  .grad-option .option-tag {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    margin-bottom: var(--s2);
+  }
+  .grad-option .option-desc {
+    font-size: 0.875rem;
+    color: var(--ink-dim);
+    margin-bottom: var(--s5);
+  }
+
+  /* ==== Mock hero ==== */
+  .mock-hero {
+    padding: var(--s6) var(--s5);
+    background: var(--royal-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: var(--s4);
+  }
+  .mock-hero .kicker {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--royal-11);
+    margin-bottom: var(--s3);
+  }
+  .mock-hero h2 {
+    font-family: var(--font-serif);
+    font-size: 2.25rem;
+    font-weight: 400;
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+    margin-bottom: var(--s5);
+  }
+  .mock-hero .cta {
+    display: inline-block;
+    padding: var(--s3) var(--s5);
+    background: var(--royal-8);
+    color: var(--royal-12);
+    font-weight: 600;
+    font-size: 0.9375rem;
+    border-radius: var(--radius);
+    text-decoration: none;
+    border: 1px solid var(--royal-8);
+  }
+  .mock-hero .cta.gradient {
+    background: var(--grad-rv);
+    border-color: var(--violet-8);
+  }
+
+  /* Gradient underline on a word */
+  .grad-underline {
+    background-image: var(--grad-rv-soft);
+    background-repeat: no-repeat;
+    background-position: 0 92%;
+    background-size: 100% 3px;
+  }
+
+  /* ==== Mock card ==== */
+  .mock-card {
+    background: var(--royal-4);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: var(--s5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--s3);
+    position: relative;
+  }
+  .mock-card .kicker {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--royal-11);
+  }
+  .mock-card h3 {
+    font-family: var(--font-serif);
+    font-size: 1.375rem;
+    font-weight: 500;
+    line-height: 1.15;
+  }
+  .mock-card p {
+    font-size: 0.875rem;
+    color: var(--ink-dim);
+  }
+  .mock-card .tags { display: flex; gap: var(--s2); flex-wrap: wrap; }
+  .mock-card .tag {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--royal-8);
+    color: var(--royal-11);
+    background: rgba(59, 91, 219, 0.08);
+  }
+  .mock-card .arrow {
+    color: var(--royal-10);
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+  .mock-card.gradient-left {
+    border-left: 3px solid transparent;
+    border-image: var(--grad-rv-line) 1;
+    border-top: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .mock-card.featured {
+    position: relative;
+    background:
+      linear-gradient(var(--royal-4), var(--royal-4)) padding-box,
+      var(--grad-rv) border-box;
+    border: 1px solid transparent;
+  }
+  .mock-card .featured-pin {
+    position: absolute;
+    top: var(--s3);
+    right: var(--s3);
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    color: var(--violet-11);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    padding: 2px 6px;
+    border: 1px solid var(--violet-8);
+    border-radius: var(--radius-sm);
+    background: rgba(140, 59, 219, 0.1);
+  }
+  .mock-card.writing {
+    border-left: 3px solid var(--violet-8);
+  }
+  .mock-card.writing .kicker { color: var(--violet-11); }
+  .mock-card.writing .tag {
+    border-color: var(--violet-8);
+    color: var(--violet-11);
+    background: rgba(140, 59, 219, 0.1);
+  }
+  .mock-card.writing .arrow { color: var(--violet-10); }
+
+  /* ==== Signature divider ==== */
+  .grad-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, var(--royal-8) 25%, var(--violet-8) 75%, transparent 100%);
+    margin: var(--s5) 0;
+  }
+
+  /* ==== Transcript component ==== */
+  .transcript {
+    background: var(--royal-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: var(--s5);
+    margin-bottom: var(--s4);
+  }
+  .transcript .t-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--ink-faint);
+    margin-bottom: var(--s4);
+    padding-bottom: var(--s3);
+    border-bottom: 1px solid var(--royal-7);
+  }
+  .transcript .t-head .t-meta { color: var(--ink-dim); }
+  .turn { padding: var(--s3) 0; }
+  .turn + .turn { border-top: 1px solid var(--royal-7); }
+  .turn .role {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-weight: 500;
+    margin-bottom: var(--s2);
+  }
+  .turn .body {
+    font-size: 0.9375rem;
+    line-height: 1.6;
+  }
+
+  /* --- Transcript Option A: colour only --- */
+  .t-a .turn.dylan .role { color: var(--royal-11); }
+  .t-a .turn.claude .role { color: var(--violet-11); }
+  .t-a .turn .body { color: var(--ink); font-family: var(--font-sans); }
+
+  /* --- Transcript Option B: colour + left border strip --- */
+  .t-b .turn {
+    padding: var(--s3) 0 var(--s3) var(--s4);
+    border-left: 2px solid transparent;
+  }
+  .t-b .turn + .turn { border-top: 1px solid var(--royal-7); }
+  .t-b .turn.dylan {
+    border-left-color: var(--royal-8);
+    margin-left: 0;
+  }
+  .t-b .turn.claude {
+    border-left-color: var(--violet-8);
+  }
+  .t-b .turn.dylan .role { color: var(--royal-11); }
+  .t-b .turn.claude .role { color: var(--violet-11); }
+  .t-b .turn .body { color: var(--ink); font-family: var(--font-sans); }
+
+  /* --- Transcript Option C: colour + typography split --- */
+  .t-c .turn.dylan .role { color: var(--royal-11); }
+  .t-c .turn.claude .role { color: var(--violet-11); }
+  .t-c .turn.dylan .body {
+    font-family: var(--font-sans);
+    color: var(--ink);
+  }
+  .t-c .turn.claude .body {
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    color: var(--ink);
+    line-height: 1.65;
+  }
+
+  /* --- Transcript Option D: full mix (border + colour + typography) --- */
+  .t-d {
+    background:
+      linear-gradient(var(--royal-3), var(--royal-3)) padding-box,
+      var(--grad-rv) border-box;
+    border: 1px solid transparent;
+  }
+  .t-d .turn { padding: var(--s3) 0 var(--s3) var(--s4); border-left: 2px solid transparent; }
+  .t-d .turn.dylan { border-left-color: var(--royal-8); }
+  .t-d .turn.claude { border-left-color: var(--violet-8); }
+  .t-d .turn.dylan .role { color: var(--royal-11); }
+  .t-d .turn.claude .role { color: var(--violet-11); }
+  .t-d .turn.dylan .body {
+    font-family: var(--font-sans);
+    color: var(--ink);
+  }
+  .t-d .turn.claude .body {
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    color: var(--ink);
+    line-height: 1.65;
+  }
+
+  /* Code block inside transcript bodies */
+  .turn .body pre {
+    margin: var(--s3) 0 0;
+    padding: var(--s3);
+    background: var(--royal-1);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--royal-11);
+    overflow-x: auto;
+  }
+
+  /* ==== Usage notes ==== */
+  .usage {
+    background: var(--royal-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: var(--s5);
+    margin-top: var(--s4);
+  }
+  .usage h4 {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--ink-dim);
+    margin-bottom: var(--s3);
+    font-weight: 500;
+  }
+  .usage ul { list-style: none; display: flex; flex-direction: column; gap: var(--s2); }
+  .usage li {
+    font-size: 0.875rem;
+    color: var(--ink-dim);
+    padding-left: var(--s4);
+    position: relative;
+  }
+  .usage li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--royal-11);
+    font-family: var(--font-mono);
+  }
+  .usage li.dont::before { content: '×'; color: var(--ink-faint); }
+  .usage li strong { color: var(--ink); font-weight: 500; }
+
+  /* ==== Recommendation ==== */
+  .rec {
+    margin-top: var(--s8);
+    padding: var(--s6);
+    background:
+      linear-gradient(var(--royal-1), var(--royal-1)) padding-box,
+      var(--grad-rv) border-box;
+    border: 1px solid transparent;
+    border-radius: var(--radius-lg);
+  }
+  .rec h2 {
+    font-family: var(--font-serif);
+    font-size: 1.75rem;
+    font-weight: 500;
+    margin-bottom: var(--s4);
+  }
+  .rec p { color: var(--ink-dim); max-width: 68ch; }
+  .rec p + p { margin-top: var(--s3); }
+  .rec strong { color: var(--ink); font-weight: 500; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="doc-kicker">Portfolio · design exploration · v2 · 2026-04-12</div>
+    <h1 class="doc-title">Royal + Violet<br>token block &amp; component spec</h1>
+    <p class="doc-intro">
+      v1 picked direction: Royal + Violet (option 4B), with the gradient border move from 4C preserved as an option for sparing use. This doc closes three decisions before the tokens land in <code style="font-family:var(--font-mono);color:var(--royal-11)">globals.css</code>.
+    </p>
+    <p class="doc-intro">
+      <strong>Decision 1</strong> — the full token block for violet (does the scale feel right; what semantic aliases does it earn). <strong>Decision 2</strong> — where the royal-to-violet gradient is allowed to appear, since "sparingly" needs a rule. <strong>Decision 3</strong> — how Claude and Dylan get distinct identities inside the chat transcript component.
+    </p>
+  </header>
+
+  <!-- ============================================ -->
+  <!-- SECTION 1 · TOKEN BLOCK -->
+  <!-- ============================================ -->
+  <section class="section">
+    <div class="section-label">01 · token block</div>
+    <h2 class="section-title">Violet only lives in steps 8 to 12</h2>
+    <p class="section-blurb">
+      A full 12-step violet scale would double the palette for little gain. Backgrounds, borders, and chrome are already fully solved by Royal Tonal; violet only needs to show up where it carries <strong>meaning</strong> (brand signal, kickers, links, on-brand text). Five steps, each with a role.
+    </p>
+
+    <div class="tokens-grid">
+      <div class="token-block">
+        <h3>Royal Tonal (chrome) · unchanged</h3>
+        <div class="token-row"><div class="token-swatch" style="background:#0E0F1C"></div><div><div class="token-name">--royal-1</div><span class="token-role">app bg</span></div><div class="token-hex">#0E0F1C</div></div>
+        <div class="token-row"><div class="token-swatch" style="background:#121428"></div><div><div class="token-name">--royal-2</div><span class="token-role">surface</span></div><div class="token-hex">#121428</div></div>
+        <div class="token-row"><div class="token-swatch" style="background:#181B36"></div><div><div class="token-name">--royal-3</div><span class="token-role">subtle bg</span></div><div class="token-hex">#181B36</div></div>
+        <div class="token-row"><div class="token-swatch" style="background:#1E2346"></div><div><div class="token-name">--royal-4</div><span class="token-role">card</span></div><div class="token-hex">#1E2346</div></div>
+        <div class="token-row"><div class="token-swatch" style="background:#252C58"></div><div><div class="token-name">--royal-5</div><span class="token-role">card hover</span></div><div class="token-hex">#252C58</div></div>
+        <div class="token-row"><div class="token-swatch" style="background:#2D366C"></div><div><div class="token-name">--royal-6</div><span class="token-role">active</span></div><div class="token-hex">#2D366C</div></div>
+        <div class="token-row"><div class="token-swatch" style="background:#364280"></div><div><div class="token-name">--royal-7</div><span class="token-role">border</span></div><div class="token-hex">#364280</div></div>
+        <div class="token-row"><div class="token-swatch" style="background:#3B5BDB"></div><div><div class="token-name">--royal-8</div><span class="token-role">brand · CTAs</span></div><div class="token-hex">#3B5BDB</div></div>
+        <div class="token-row"><div class="token-swatch" style="background:#4D6DE8"></div><div><div class="token-name">--royal-9</div><span class="token-role">brand hover</span></div><div class="token-hex">#4D6DE8</div></div>
+        <div class="token-row"><div class="token-swatch" style="background:#6C85FF"></div><div><div class="token-name">--royal-10</div><span class="token-role">link</span></div><div class="token-hex">#6C85FF</div></div>
+        <div class="token-row"><div class="token-swatch" style="background:#A5B4FF"></div><div><div class="token-name">--royal-11</div><span class="token-role">kicker</span></div><div class="token-hex">#A5B4FF</div></div>
+        <div class="token-row"><div class="token-swatch" style="background:#D5DCFA"></div><div><div class="token-name">--royal-12</div><span class="token-role">on-brand text</span></div><div class="token-hex">#D5DCFA</div></div>
+      </div>
+
+      <div class="token-block violet">
+        <h3>Violet (signal) · NEW</h3>
+        <div class="token-row"><div class="token-swatch" style="background:#8C3BDB"></div><div><div class="token-name">--violet-8</div><span class="token-role">brand · thinking</span></div><div class="token-hex">#8C3BDB</div></div>
+        <div class="token-row"><div class="token-swatch" style="background:#9D4DE8"></div><div><div class="token-name">--violet-9</div><span class="token-role">hover</span></div><div class="token-hex">#9D4DE8</div></div>
+        <div class="token-row"><div class="token-swatch" style="background:#B47CFF"></div><div><div class="token-name">--violet-10</div><span class="token-role">link · thinking</span></div><div class="token-hex">#B47CFF</div></div>
+        <div class="token-row"><div class="token-swatch" style="background:#C89BFF"></div><div><div class="token-name">--violet-11</div><span class="token-role">kicker · thinking</span></div><div class="token-hex">#C89BFF</div></div>
+        <div class="token-row"><div class="token-swatch" style="background:#E6D4FF"></div><div><div class="token-name">--violet-12</div><span class="token-role">on-brand text</span></div><div class="token-hex">#E6D4FF</div></div>
+        <div style="height: var(--s5)"></div>
+        <h3 style="margin-top:var(--s3)">Signature gradient · NEW</h3>
+        <div style="margin-top: var(--s3); height: 48px; border-radius: var(--radius); background: linear-gradient(135deg, #3B5BDB 0%, #8C3BDB 100%);"></div>
+        <div style="font-family: var(--font-mono); font-size: 0.6875rem; color: var(--ink-faint); margin-top: var(--s2); text-transform: uppercase; letter-spacing: 0.08em;">--grad-rv · 135deg · royal-8 → violet-8</div>
+      </div>
+    </div>
+
+    <div class="usage">
+      <h4>Why 5 violet steps, not 12</h4>
+      <ul>
+        <li>Chrome (backgrounds, borders, cards) is a <strong>solved problem</strong> with royal. Violet doesn't need its own dark-end scale.</li>
+        <li>Semantic split: violet is <strong>content signal</strong>, not surface. It appears on text, icons, borders, kickers — never as a fill for navigation, cards, or page surfaces.</li>
+        <li>Fewer steps means fewer wrong choices. A developer writing a component has one violet text colour (<code style="font-family:var(--font-mono)">violet-11</code>) and one violet brand colour (<code style="font-family:var(--font-mono)">violet-8</code>), not twelve slightly-different purples to pick between.</li>
+        <li>The 5-step scale can grow later if a legitimate need shows up (e.g. chunk 4d illustrations wanting a violet tint background). Not before.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- SECTION 2 · ROLE SPLIT -->
+  <!-- ============================================ -->
+  <section class="section">
+    <div class="section-label">02 · role split</div>
+    <h2 class="section-title">What royal does, what violet does</h2>
+    <p class="section-blurb">Meaning per hue keeps the family coherent. Without this rule, violet becomes "second accent" (decorative) and the cohesion collapses.</p>
+
+    <div class="split-table">
+      <div class="split-row header">
+        <div>Surface</div>
+        <div>Royal</div>
+        <div>Violet</div>
+      </div>
+      <div class="split-row">
+        <div class="split-role">Page chrome</div>
+        <div class="split-royal">Backgrounds, cards, borders, hover states</div>
+        <div>—</div>
+      </div>
+      <div class="split-row">
+        <div class="split-role">Primary action</div>
+        <div class="split-royal">CTAs, "Get in touch", form submit, main nav</div>
+        <div>—</div>
+      </div>
+      <div class="split-row">
+        <div class="split-role">Content · work</div>
+        <div class="split-royal">Case study cards, project kickers, work log entries</div>
+        <div>—</div>
+      </div>
+      <div class="split-row">
+        <div class="split-role">Content · thinking</div>
+        <div>—</div>
+        <div class="split-violet">Writing posts, essay kickers, transcript "Claude" role, thinking-mode callouts</div>
+      </div>
+      <div class="split-row">
+        <div class="split-role">Signature moments</div>
+        <div colspan="2" style="grid-column: 2 / span 2;" class="split-violet">Royal → Violet gradient (border, divider, hero underline) — see section 3 for placement rules</div>
+      </div>
+      <div class="split-row">
+        <div class="split-role">Body text</div>
+        <div class="split-royal">Always ink (<code style="font-family:var(--font-mono);font-size:0.75rem">#E6E2D9</code>) — neither hue touches body prose</div>
+        <div>—</div>
+      </div>
+    </div>
+
+    <div class="usage">
+      <h4>Tension to watch</h4>
+      <ul>
+        <li>Royal must stay <strong>dominant</strong>. Target split is ~85% royal / 15% violet across a given page. Violet present but not competing.</li>
+        <li>A case study about a writing post can use violet accents; a writing post about a case study stays neutral. The hue follows the <em>subject</em>, not the container.</li>
+        <li class="dont">Don't use violet for status (success / error / warning). That pattern is off-limits for the portfolio; it reads as category.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- SECTION 3 · GRADIENT OPTIONS -->
+  <!-- ============================================ -->
+  <section class="section">
+    <div class="section-label">03 · gradient placement · pick one (or a combination)</div>
+    <h2 class="section-title">Where the Royal → Violet gradient is allowed to appear</h2>
+    <p class="section-blurb">
+      You liked the gradient border move from v1's 4C but asked for sparing use. "Sparing" needs a concrete rule or it drifts. Four options below, ordered from most reserved to least. They're not mutually exclusive — A could pair with C, for example — but the more surfaces that carry the gradient, the less signature it becomes.
+    </p>
+
+    <div class="grad-options">
+
+      <!-- Option A · signature hero only -->
+      <div class="grad-option">
+        <div class="option-tag">Option A · most reserved</div>
+        <h3>Hero signature only</h3>
+        <p class="option-desc">Gradient appears exactly once per page: as the hero CTA background and/or a 3px underline on a single hero keyword. Everywhere else, royal and violet stay separated. The gradient becomes a literal signature: "this is where the page begins".</p>
+
+        <div class="mock-hero">
+          <div class="kicker">— Product thinker · shipping with AI</div>
+          <h2>I design product decisions, then <span class="grad-underline">ship them</span> with Claude Code.</h2>
+          <a class="cta gradient" href="#">Get in touch →</a>
+        </div>
+
+        <div class="usage">
+          <h4>Rule</h4>
+          <ul>
+            <li>Gradient = hero CTA + hero keyword underline. <strong>Nothing else.</strong></li>
+            <li>Cards, dividers, transcripts all use solid royal or solid violet — never mixed.</li>
+            <li>Easiest to maintain, lowest design risk, lowest visual variety.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Option B · featured card only -->
+      <div class="grad-option">
+        <div class="option-tag">Option B · targeted emphasis</div>
+        <h3>Featured case study card</h3>
+        <p class="option-desc">The hero signature (option A), plus: exactly one case study card per landing page gets a gradient border. Used to draw the eye to the strongest or newest case study. All other cards stay royal-bordered.</p>
+
+        <div class="mock-card featured">
+          <span class="featured-pin">FEATURED</span>
+          <div class="kicker">Selected work · 01</div>
+          <h3>Planner App</h3>
+          <p>GTD planner with persistent SMS reminders. Migrated Python/Railway to TypeScript/Cloudflare with single-choke-point spend protection.</p>
+          <div class="tags">
+            <span class="tag">CLOUDFLARE</span>
+            <span class="tag">TYPESCRIPT</span>
+            <span class="tag">D1</span>
+          </div>
+          <div class="arrow">Read case study →</div>
+        </div>
+
+        <div class="usage">
+          <h4>Rule</h4>
+          <ul>
+            <li>At most <strong>one</strong> featured card per page. The pin label "FEATURED" earns the treatment; otherwise the emphasis looks arbitrary.</li>
+            <li>Rotate which case study is featured as priorities change — the treatment is navigational, not permanent.</li>
+            <li>Hover state on non-featured cards stays royal only.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Option C · section dividers -->
+      <div class="grad-option">
+        <div class="option-tag">Option C · structural</div>
+        <h3>Section dividers between modes</h3>
+        <p class="option-desc">Gradient appears as a thin horizontal line separating the "work" zone (case studies, royal) from the "thinking" zone (writing, violet). A structural marker rather than a decorative one. Hero signature still applies on top.</p>
+
+        <div style="padding: var(--s4) var(--s5); background: var(--royal-2); border: 1px solid var(--border); border-radius: var(--radius);">
+          <div style="font-family: var(--font-serif); font-size: 1.5rem; margin-bottom: var(--s3);">Selected work</div>
+          <div style="font-size: 0.875rem; color: var(--ink-dim);">Case study cards go here, royal-styled.</div>
+          <div class="grad-divider"></div>
+          <div style="font-family: var(--font-serif); font-size: 1.5rem; margin-bottom: var(--s3); color: var(--violet-11);">Writing</div>
+          <div style="font-size: 0.875rem; color: var(--ink-dim);">Essay cards go here, violet-styled.</div>
+        </div>
+
+        <div class="usage">
+          <h4>Rule</h4>
+          <ul>
+            <li>Gradient divider = mode transition. Never a cosmetic separator.</li>
+            <li>Max one gradient divider per page (landing); writing index and project index stay single-mode so no divider needed.</li>
+            <li>Pairs naturally with option A — the hero is the opening signature, the divider is the midpoint signature.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Option D · all category cards gradient-left -->
+      <div class="grad-option">
+        <div class="option-tag">Option D · routine use</div>
+        <h3>Every cross-mode card</h3>
+        <p class="option-desc">Any card that represents a hybrid artefact (a case study that embeds a writing excerpt; a writing post about a shipped feature) gets a gradient left border. Signals "this belongs to both modes". Used several times per page but always tied to a specific meaning.</p>
+
+        <div class="mock-card gradient-left">
+          <div class="kicker">Essay · about planner app</div>
+          <h3>Three guardrails that saved the spend budget</h3>
+          <p>Shipping a paid-API product without a single "oh god what have I done" moment. A writing post about work.</p>
+          <div class="tags">
+            <span class="tag">ARCHITECTURE</span>
+            <span class="tag">POSTMORTEM</span>
+          </div>
+          <div class="arrow">Read the essay →</div>
+        </div>
+
+        <div class="usage">
+          <h4>Rule</h4>
+          <ul>
+            <li>Gradient = "this artefact lives in both modes". Triggered by content, not decoration.</li>
+            <li>Least signature, most reusable. Risk: if ~30%+ of cards are "hybrid", the treatment stops reading as special.</li>
+            <li>Only viable if cross-mode content is actually rare (less than ~1 in 5 cards per page).</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="usage" style="margin-top: var(--s6)">
+      <h4>Picking between them</h4>
+      <ul>
+        <li><strong>Default recommendation:</strong> A + C (hero signature + structural divider). Two fixed appearance points per landing page, total. Maximally sparing; the gradient is never "decorative", only "punctuation".</li>
+        <li>Add B only if the landing page needs a visual anchor stronger than the hero already provides. Unlikely until chunk 4c page layout is final.</li>
+        <li>Avoid D unless hybrid content becomes a recurring pattern in chunk 4d writing posts. Too broad to start.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- SECTION 4 · TRANSCRIPT COMPONENT -->
+  <!-- ============================================ -->
+  <section class="section">
+    <div class="section-label">04 · chat transcript component · pick one identity treatment</div>
+    <h2 class="section-title">Giving Claude and Dylan distinct voices in transcripts</h2>
+    <p class="section-blurb">
+      Transcripts are verbatim (no edits), 2 to 8 turns, embedded in case studies under Process and Lessons. The role of the design is to make who's speaking <strong>scannable at a glance</strong>, without introducing chat-UI patterns that fight the surrounding prose. Four treatments below, from colour-only to full mix.
+    </p>
+    <p class="section-blurb">
+      <strong>Colour assignment is fixed across all four:</strong> Dylan = royal (work/craft, dominant brand), Claude = violet (thinking, sibling brand). This matches the section 2 role split. What varies is how loudly the identity is drawn.
+    </p>
+
+    <!-- Option A · colour only -->
+    <h3 style="font-family: var(--font-serif); font-size: 1.375rem; margin-bottom: var(--s3);">Option A · colour only on role label</h3>
+    <p class="section-blurb" style="margin-bottom: var(--s4); font-size: 0.9375rem;">
+      Simplest. Role label is coloured; bodies are identical in font and weight. Quietest treatment, best when the transcript sits near other coloured callouts.
+    </p>
+    <div class="transcript t-a">
+      <div class="t-head">
+        <span>Transcript · architecture planning</span>
+        <span class="t-meta">2026-04-10 · 4 turns</span>
+      </div>
+      <div class="turn dylan">
+        <div class="role">Dylan</div>
+        <div class="body">The spend module needs idempotency or the whole thing is a liability. How do I make "send twice" structurally impossible rather than probabilistically unlikely?</div>
+      </div>
+      <div class="turn claude">
+        <div class="role">Claude</div>
+        <div class="body">Insert the row before calling Twilio. Put a UNIQUE constraint on <code style="font-family:var(--font-mono);color:var(--violet-11)">(recipient, occurrence_id, date)</code> and let the database reject the second write. On vendor failure after the insert, delete the row or mark it failed — never leave it in limbo.</div>
+      </div>
+      <div class="turn dylan">
+        <div class="role">Dylan</div>
+        <div class="body">Does this need to be in a transaction?</div>
+      </div>
+      <div class="turn claude">
+        <div class="role">Claude</div>
+        <div class="body">No. The constraint does the work. A transaction would actually hurt — it holds the row lock across the Twilio call, which might take hundreds of milliseconds.</div>
+      </div>
+    </div>
+
+    <!-- Option B · colour + left border -->
+    <h3 style="font-family: var(--font-serif); font-size: 1.375rem; margin-top: var(--s6); margin-bottom: var(--s3);">Option B · colour + left border strip</h3>
+    <p class="section-blurb" style="margin-bottom: var(--s4); font-size: 0.9375rem;">
+      Adds a 2px coloured bar down the left of each turn. More scannable; you can tell who's speaking from the corner of your eye. Slightly more "chat UI" in feel.
+    </p>
+    <div class="transcript t-b">
+      <div class="t-head">
+        <span>Transcript · architecture planning</span>
+        <span class="t-meta">2026-04-10 · 4 turns</span>
+      </div>
+      <div class="turn dylan">
+        <div class="role">Dylan</div>
+        <div class="body">The spend module needs idempotency or the whole thing is a liability. How do I make "send twice" structurally impossible rather than probabilistically unlikely?</div>
+      </div>
+      <div class="turn claude">
+        <div class="role">Claude</div>
+        <div class="body">Insert the row before calling Twilio. Put a UNIQUE constraint on <code style="font-family:var(--font-mono);color:var(--violet-11)">(recipient, occurrence_id, date)</code> and let the database reject the second write. On vendor failure after the insert, delete the row or mark it failed — never leave it in limbo.</div>
+      </div>
+      <div class="turn dylan">
+        <div class="role">Dylan</div>
+        <div class="body">Does this need to be in a transaction?</div>
+      </div>
+      <div class="turn claude">
+        <div class="role">Claude</div>
+        <div class="body">No. The constraint does the work. A transaction would actually hurt — it holds the row lock across the Twilio call, which might take hundreds of milliseconds.</div>
+      </div>
+    </div>
+
+    <!-- Option C · colour + typography -->
+    <h3 style="font-family: var(--font-serif); font-size: 1.375rem; margin-top: var(--s6); margin-bottom: var(--s3);">Option C · colour + typography split</h3>
+    <p class="section-blurb" style="margin-bottom: var(--s4); font-size: 0.9375rem;">
+      Dylan = Geist sans (human voice); Claude = Geist Mono (AI voice). Typography alone does most of the identity work, colour reinforces it. Reads as "natural language in, structured output out" — which is what Claude's replies often look like anyway. <strong>This is the most distinctive and the most "opinionated".</strong>
+    </p>
+    <div class="transcript t-c">
+      <div class="t-head">
+        <span>Transcript · architecture planning</span>
+        <span class="t-meta">2026-04-10 · 4 turns</span>
+      </div>
+      <div class="turn dylan">
+        <div class="role">Dylan</div>
+        <div class="body">The spend module needs idempotency or the whole thing is a liability. How do I make "send twice" structurally impossible rather than probabilistically unlikely?</div>
+      </div>
+      <div class="turn claude">
+        <div class="role">Claude</div>
+        <div class="body">Insert the row before calling Twilio. Put a UNIQUE constraint on (recipient, occurrence_id, date) and let the database reject the second write. On vendor failure after the insert, delete the row or mark it failed — never leave it in limbo.</div>
+      </div>
+      <div class="turn dylan">
+        <div class="role">Dylan</div>
+        <div class="body">Does this need to be in a transaction?</div>
+      </div>
+      <div class="turn claude">
+        <div class="role">Claude</div>
+        <div class="body">No. The constraint does the work. A transaction would actually hurt — it holds the row lock across the Twilio call, which might take hundreds of milliseconds.</div>
+      </div>
+    </div>
+
+    <!-- Option D · full mix -->
+    <h3 style="font-family: var(--font-serif); font-size: 1.375rem; margin-top: var(--s6); margin-bottom: var(--s3);">Option D · full mix (gradient container + border + typography)</h3>
+    <p class="section-blurb" style="margin-bottom: var(--s4); font-size: 0.9375rem;">
+      The container itself gets a royal-to-violet gradient border, signalling "this is a conversation between the two brands". Inside, each turn uses the colour + typography split from option C. Heaviest treatment; best if transcripts are rare and signature rather than frequent.
+    </p>
+    <div class="transcript t-d">
+      <div class="t-head">
+        <span>Transcript · architecture planning</span>
+        <span class="t-meta">2026-04-10 · 4 turns</span>
+      </div>
+      <div class="turn dylan">
+        <div class="role">Dylan</div>
+        <div class="body">The spend module needs idempotency or the whole thing is a liability. How do I make "send twice" structurally impossible rather than probabilistically unlikely?</div>
+      </div>
+      <div class="turn claude">
+        <div class="role">Claude</div>
+        <div class="body">Insert the row before calling Twilio. Put a UNIQUE constraint on (recipient, occurrence_id, date) and let the database reject the second write. On vendor failure after the insert, delete the row or mark it failed — never leave it in limbo.</div>
+      </div>
+      <div class="turn dylan">
+        <div class="role">Dylan</div>
+        <div class="body">Does this need to be in a transaction?</div>
+      </div>
+      <div class="turn claude">
+        <div class="role">Claude</div>
+        <div class="body">No. The constraint does the work. A transaction would actually hurt — it holds the row lock across the Twilio call, which might take hundreds of milliseconds.</div>
+      </div>
+    </div>
+
+    <div class="usage" style="margin-top: var(--s6)">
+      <h4>Picking between them</h4>
+      <ul>
+        <li><strong>Leaning recommendation: Option C</strong> (colour + typography split). The mono/sans split does double duty — it carries identity AND it correctly anticipates the visual character of Claude's output (which is often structured / code-containing / list-based). The difference reads instantly without needing border treatments that would echo the gradient card rules.</li>
+        <li>Option D is the "signature" version; use only if transcripts are genuinely rare (one per case study or fewer). If transcripts show up two or three times in a single case study, D will overwhelm the page.</li>
+        <li>Option A is the "quiet" version. Preferable only if the surrounding prose already has too many coloured callouts (which isn't currently the case).</li>
+        <li class="dont">Don't pick B. It's a middle ground that does nothing C doesn't do more distinctively.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- RECOMMENDATIONS -->
+  <!-- ============================================ -->
+  <section class="section">
+    <div class="section-label">05 · summary of decisions needed</div>
+    <div class="rec">
+      <h2>What to lock before tokens land in <code style="font-family:var(--font-mono);font-size:1rem">globals.css</code></h2>
+      <p><strong>Decision 1 (tokens):</strong> confirm the 5-step violet scale (<code style="font-family:var(--font-mono)">violet-8</code> to <code style="font-family:var(--font-mono)">violet-12</code>) plus the <code style="font-family:var(--font-mono)">--grad-rv</code> signature. Default to yes unless the hex values look wrong in this preview. These become <code style="font-family:var(--font-mono)">:root</code> variables in <code style="font-family:var(--font-mono)">globals.css</code> and semantic aliases (<code style="font-family:var(--font-mono)">--thinking</code>, <code style="font-family:var(--font-mono)">--thinking-kicker</code>, etc.) get added alongside.</p>
+      <p><strong>Decision 2 (gradient placement):</strong> recommendation is A + C — hero signature (CTA + keyword underline) plus structural divider between work and thinking zones. Two appearance points per landing page, total. Defer B and D until later chunks prove a need.</p>
+      <p><strong>Decision 3 (transcript identity):</strong> recommendation is Option C — colour + typography split. Dylan in Geist sans, Claude in Geist Mono, role labels coloured. Reads instantly, anticipates the shape of Claude's output, and doesn't require extra container chrome.</p>
+      <p><strong>If all three defaults are accepted:</strong> next action is to extend <code style="font-family:var(--font-mono)">design.tokens.ts</code> (workspace design system) with the violet scale, regenerate the CSS variable block, drop it into <code style="font-family:var(--font-mono)">portfolio/src/styles/globals.css</code>, and update the existing Royal Tonal design-explorer to v2 so future palette decisions have the full family to compare against. The transcript component (<code style="font-family:var(--font-mono)">&lt;ChatTranscript&gt;</code>) is still gated on chunk 4c.1 per the plan — this spec feeds it, doesn't build it.</p>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

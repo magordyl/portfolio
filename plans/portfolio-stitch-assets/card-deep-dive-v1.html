@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Card component — deep-dive v1 (layout options)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* Royal Tonal */
+    --royal-1:  #0E0F1C; --royal-2:  #121428; --royal-3:  #181B36; --royal-4:  #1E2346;
+    --royal-5:  #252C58; --royal-6:  #2D366C; --royal-7:  #364280; --royal-8:  #3B5BDB;
+    --royal-9:  #4D6DE8; --royal-10: #6C85FF; --royal-11: #A5B4FF; --royal-12: #D5DCFA;
+    /* Violet Signal */
+    --violet-8:  #8C3BDB; --violet-9:  #9D4DE8; --violet-10: #B47CFF; --violet-11: #C89BFF; --violet-12: #E6D4FF;
+    /* Gradient */
+    --grad-rv: linear-gradient(135deg, var(--royal-8) 0%, var(--violet-8) 100%);
+    --grad-rv-soft: linear-gradient(135deg, var(--royal-10) 0%, var(--violet-10) 100%);
+    /* Ink */
+    --ink: #E6E2D9; --ink-dim: #9C968A;
+    /* Semantic */
+    --bg: var(--royal-2); --bg-subtle: var(--royal-3);
+    --card: var(--royal-4); --card-hover: var(--royal-5); --border: var(--royal-7);
+    /* Fonts */
+    --font-serif: 'Fraunces', Georgia, serif;
+    --font-sans: 'Geist', -apple-system, system-ui, sans-serif;
+    --font-mono: 'Geist Mono', 'SF Mono', Menlo, monospace;
+    /* Spacing */
+    --s1: 0.25rem; --s2: 0.5rem; --s3: 0.75rem; --s4: 1rem;
+    --s5: 1.5rem; --s6: 2rem; --s7: 3rem; --s8: 4.5rem; --s9: 6rem;
+    /* Radius */
+    --radius-sm: 2px; --radius: 8px; --radius-lg: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-optical-sizing: auto; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1280px; margin: 0 auto; padding: var(--s8) var(--s6); }
+
+  /* ============================================ */
+  /* Doc header                                    */
+  /* ============================================ */
+  .doc-kicker {
+    font-family: var(--font-mono);
+    font-size: 11px; font-weight: 500;
+    line-height: 1;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--royal-11);
+    margin-bottom: var(--s3);
+  }
+  .doc-title {
+    font-family: var(--font-serif);
+    font-size: 4rem; font-weight: 400;
+    line-height: 0.98; letter-spacing: -0.025em;
+    margin-bottom: var(--s5);
+  }
+  .doc-intro {
+    font-size: 1.0625rem; color: var(--ink-dim);
+    max-width: 62ch; line-height: 1.7;
+  }
+  .doc-intro + .doc-intro { margin-top: var(--s4); }
+  .doc-intro strong { color: var(--ink); font-weight: 500; }
+  .doc-intro em { font-style: italic; color: var(--ink); }
+
+  /* ============================================ */
+  /* Section structure                             */
+  /* ============================================ */
+  .section { margin-top: var(--s9); padding-top: var(--s7); border-top: 1px solid var(--border); }
+  .section-label {
+    font-family: var(--font-mono);
+    font-size: 0.75rem; color: var(--ink-dim);
+    letter-spacing: 0.08em; text-transform: uppercase;
+    margin-bottom: var(--s2);
+  }
+  .section-title {
+    font-family: var(--font-serif);
+    font-size: 2.25rem; font-weight: 400;
+    line-height: 1.1; letter-spacing: -0.015em;
+    margin-bottom: var(--s3);
+  }
+  .section-blurb {
+    color: var(--ink-dim);
+    max-width: 62ch;
+    margin-bottom: var(--s6);
+    font-size: 0.9375rem;
+    line-height: 1.7;
+  }
+  .section-blurb strong { color: var(--ink); font-weight: 500; }
+  .section-blurb code {
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    color: var(--royal-11);
+    background: var(--royal-1);
+    padding: 1px 6px;
+    border-radius: 2px;
+  }
+
+  /* ============================================ */
+  /* API block                                     */
+  /* ============================================ */
+  .api-block {
+    background: var(--royal-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: var(--s5) var(--s6);
+    margin-top: var(--s5);
+    margin-bottom: var(--s5);
+  }
+  .api-block h3 {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--royal-11);
+    margin-bottom: var(--s3);
+    font-weight: 500;
+  }
+  .api-block pre {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    line-height: 1.75;
+    color: var(--ink);
+    white-space: pre;
+    overflow-x: auto;
+  }
+  .c-kw { color: var(--royal-10); }
+  .c-str { color: var(--royal-11); }
+  .c-com { color: var(--ink-dim); }
+  .c-type { color: var(--violet-11); }
+
+  /* ============================================ */
+  /* Option section                                */
+  /* ============================================ */
+  .option {
+    margin-top: var(--s7);
+    padding-top: var(--s6);
+    border-top: 1px solid var(--royal-7);
+  }
+  .option:first-of-type { border-top: none; padding-top: 0; margin-top: var(--s5); }
+  .option-header {
+    display: flex;
+    align-items: baseline;
+    gap: var(--s5);
+    margin-bottom: var(--s3);
+  }
+  .option-letter {
+    font-family: var(--font-serif);
+    font-size: 3.5rem;
+    font-weight: 300;
+    line-height: 0.9;
+    background: var(--grad-rv);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    letter-spacing: -0.03em;
+  }
+  .option-name {
+    font-family: var(--font-serif);
+    font-size: 1.75rem;
+    font-weight: 500;
+    line-height: 1.1;
+    color: var(--ink);
+    margin-bottom: var(--s1);
+  }
+  .option-subtitle {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    color: var(--ink-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .option-desc {
+    font-size: 0.9375rem;
+    color: var(--ink-dim);
+    max-width: 62ch;
+    line-height: 1.7;
+    margin-bottom: var(--s5);
+  }
+  .option-desc strong { color: var(--ink); font-weight: 500; }
+  .option-desc em { font-style: italic; color: var(--ink); }
+  .option-demo {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--s5);
+    background: var(--royal-1);
+    border: 1px dashed var(--royal-7);
+    border-radius: var(--radius);
+    padding: var(--s6);
+  }
+  @media (max-width: 900px) { .option-demo { grid-template-columns: 1fr; } }
+  .option-notes {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: var(--s5);
+    margin-top: var(--s4);
+    padding-top: var(--s4);
+    border-top: 1px solid var(--royal-7);
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    color: var(--ink-dim);
+    line-height: 1.7;
+  }
+  @media (max-width: 900px) { .option-notes { grid-template-columns: 1fr; } }
+  .option-notes .note-label {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--royal-11);
+    margin-bottom: var(--s1);
+    display: block;
+    font-weight: 500;
+  }
+  .option-notes strong { color: var(--ink); font-weight: 500; font-family: var(--font-sans); font-size: 0.8125rem; }
+
+  /* ============================================ */
+  /* CARD BASE (shared across all layouts)         */
+  /* ============================================ */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    position: relative;
+    transition: background 140ms ease, box-shadow 140ms ease, border-color 140ms ease;
+  }
+  .card:hover {
+    background: var(--card-hover);
+    border-color: var(--royal-8);
+    box-shadow: inset 0 1px 0 rgba(165, 180, 255, 0.18);
+  }
+  .card .content {
+    padding: var(--s5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--s3);
+  }
+  .card .kicker {
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--royal-11);
+  }
+  .card h3 {
+    font-family: var(--font-serif);
+    font-size: 1.375rem;
+    font-weight: 500;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    margin-top: var(--s1);
+  }
+  .card h3 a.card-link {
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .card h3 a.card-link .arrow-inline {
+    color: var(--royal-10);
+    font-size: 1.125rem;
+    margin-left: var(--s2);
+    display: inline-block;
+    transition: transform 140ms ease;
+  }
+  .card:hover h3 a.card-link .arrow-inline { transform: translateX(3px); }
+  .card.writing h3 a.card-link .arrow-inline { color: var(--violet-10); }
+  .card p {
+    font-size: 0.9375rem;
+    color: var(--ink-dim);
+    line-height: 1.55;
+  }
+  .card .tags {
+    display: flex;
+    gap: var(--s2);
+    flex-wrap: wrap;
+    margin-top: var(--s3);
+  }
+  .tag {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    padding: 3px 8px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--royal-8);
+    color: var(--royal-11);
+    background: rgba(59, 91, 219, 0.08);
+  }
+  .tag.thinking {
+    border-color: var(--violet-8);
+    color: var(--violet-11);
+    background: rgba(140, 59, 219, 0.10);
+  }
+  .card.writing {
+    border-left: 3px solid var(--violet-8);
+  }
+  .card.writing .kicker { color: var(--violet-11); }
+
+  /* ============================================ */
+  /* IMAGERY MOCKS                                 */
+  /* Fake visuals so the layouts are readable      */
+  /* without pulling in real assets                */
+  /* ============================================ */
+
+  /* Screenshot mock — styled to look like an app UI */
+  .img-screenshot {
+    background: linear-gradient(145deg, #1A1D3A 0%, #141730 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  .img-screenshot::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      repeating-linear-gradient(0deg, transparent, transparent 17px, rgba(165, 180, 255, 0.05) 17px, rgba(165, 180, 255, 0.05) 18px),
+      repeating-linear-gradient(90deg, transparent, transparent 29px, rgba(165, 180, 255, 0.04) 29px, rgba(165, 180, 255, 0.04) 30px);
+  }
+  .img-screenshot::after {
+    content: '';
+    position: absolute;
+    top: 14px; left: 14px;
+    width: 36%;
+    height: 6px;
+    background: var(--royal-8);
+    border-radius: 2px;
+    box-shadow:
+      0 14px 0 rgba(165, 180, 255, 0.35),
+      0 24px 0 rgba(165, 180, 255, 0.22),
+      0 34px 0 rgba(165, 180, 255, 0.14);
+  }
+
+  /* Diagram fragment mock — uses SVG inline for a node + arrow */
+  .img-diagram {
+    background: var(--bg-subtle);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Numeral mock — big serif digit with gradient fill */
+  .img-numeral {
+    background: var(--bg-subtle);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-serif);
+    font-weight: 300;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    position: relative;
+    overflow: hidden;
+  }
+  .img-numeral span {
+    background: var(--grad-rv);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    font-size: clamp(3rem, 10vw, 7rem);
+  }
+
+  /* Gradient mark mock — radial gradients + ruled overlay */
+  .img-gradient-mark {
+    background:
+      radial-gradient(circle at 28% 32%, rgba(140, 59, 219, 0.55) 0%, transparent 55%),
+      radial-gradient(circle at 72% 68%, rgba(59, 91, 219, 0.55) 0%, transparent 55%),
+      var(--royal-2);
+    position: relative;
+    overflow: hidden;
+  }
+  .img-gradient-mark::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(90deg, transparent 0, transparent 23px, rgba(200, 155, 255, 0.09) 23px, rgba(200, 155, 255, 0.09) 24px);
+  }
+
+  /* ============================================ */
+  /* LAYOUT A — Top third                          */
+  /* ============================================ */
+  .layout-top { overflow: hidden; }
+  .layout-top .media {
+    height: 160px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ============================================ */
+  /* LAYOUT B — Left half                          */
+  /* ============================================ */
+  .layout-left {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    overflow: hidden;
+  }
+  .layout-left .media {
+    border-right: 1px solid var(--border);
+  }
+  .layout-left .content { padding: var(--s4) var(--s5); }
+
+  /* ============================================ */
+  /* LAYOUT C — Background                         */
+  /* ============================================ */
+  .layout-bg {
+    overflow: hidden;
+    min-height: 320px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+  .layout-bg .media {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+  .layout-bg .scrim {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(14, 15, 28, 0) 0%, rgba(14, 15, 28, 0.35) 45%, rgba(14, 15, 28, 0.93) 92%);
+    z-index: 1;
+  }
+  .layout-bg .content {
+    position: relative;
+    z-index: 2;
+  }
+
+  /* ============================================ */
+  /* LAYOUT D — Corner accent                      */
+  /* ============================================ */
+  .layout-corner .content { padding-right: calc(var(--s5) + 80px); }
+  .layout-corner .media-corner {
+    position: absolute;
+    top: var(--s4);
+    right: var(--s4);
+    width: 64px;
+    height: 64px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .layout-corner .media-corner.img-numeral span { font-size: 2.25rem; }
+
+  /* ============================================ */
+  /* LAYOUT E — Asymmetric half                    */
+  /* ============================================ */
+  .layout-asym {
+    display: grid;
+    grid-template-columns: 58% 42%;
+    min-height: 220px;
+    overflow: hidden;
+  }
+  .layout-asym .content { padding: var(--s5); }
+  .layout-asym .media { border-left: 1px solid var(--border); }
+  .layout-asym .media.img-numeral span { font-size: 5rem; }
+
+  /* ============================================ */
+  /* LAYOUT F — Full-bleed overlap                 */
+  /* ============================================ */
+  .layout-overlap .media {
+    height: 140px;
+    border-radius: var(--radius) var(--radius) 0 0;
+  }
+  .layout-overlap .content {
+    position: relative;
+    margin-top: -28px;
+    background: var(--card);
+    border-radius: var(--radius);
+    padding-top: var(--s5);
+    margin-left: var(--s4);
+    margin-right: var(--s4);
+    margin-bottom: var(--s3);
+    border: 1px solid var(--border);
+    transition: background 140ms ease;
+  }
+  .layout-overlap:hover .content {
+    background: var(--card-hover);
+  }
+  .layout-overlap { background: transparent; border: none; }
+  .layout-overlap:hover { background: transparent; box-shadow: none; border: none; }
+
+  /* ============================================ */
+  /* SUMMARY TABLE                                 */
+  /* ============================================ */
+  .summary-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: var(--s5);
+    font-size: 0.875rem;
+  }
+  .summary-table th, .summary-table td {
+    padding: var(--s3) var(--s4);
+    text-align: left;
+    border-bottom: 1px solid var(--royal-7);
+    vertical-align: top;
+  }
+  .summary-table th {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--royal-11);
+    font-weight: 500;
+    border-bottom: 1px solid var(--border);
+  }
+  .summary-table td.letter {
+    font-family: var(--font-serif);
+    font-size: 1.5rem;
+    color: var(--royal-11);
+    width: 36px;
+    line-height: 1;
+  }
+  .summary-table td.name {
+    color: var(--ink);
+    font-weight: 500;
+    width: 180px;
+  }
+  .summary-table td.verdict {
+    color: var(--ink-dim);
+    font-size: 0.8125rem;
+  }
+  .summary-table .pass  { color: #7BD88F; font-weight: 500; }
+  .summary-table .partial { color: var(--royal-11); }
+  .summary-table .fail  { color: var(--violet-11); }
+  .summary-table tr.recommended {
+    background: rgba(140, 59, 219, 0.06);
+  }
+  .summary-table tr.recommended td.letter { color: var(--violet-11); }
+
+  /* ============================================ */
+  /* RECOMMEND BOX                                 */
+  /* ============================================ */
+  .recommend-box {
+    margin-top: var(--s7);
+    padding: var(--s6);
+    background:
+      linear-gradient(var(--royal-1), var(--royal-1)) padding-box,
+      var(--grad-rv) border-box;
+    border: 1px solid transparent;
+    border-radius: var(--radius-lg);
+  }
+  .recommend-box h2 {
+    font-family: var(--font-serif);
+    font-size: 1.75rem;
+    font-weight: 500;
+    margin-bottom: var(--s3);
+  }
+  .recommend-box p {
+    color: var(--ink-dim);
+    font-size: 0.9375rem;
+    line-height: 1.7;
+    max-width: 64ch;
+  }
+  .recommend-box p + p { margin-top: var(--s3); }
+  .recommend-box strong { color: var(--ink); font-weight: 500; }
+  .recommend-box em { font-style: italic; color: var(--ink); }
+  .recommend-box code {
+    font-family: var(--font-mono);
+    background: rgba(165, 180, 255, 0.10);
+    padding: 1px 6px;
+    border-radius: 2px;
+    color: var(--royal-11);
+    font-size: 0.875rem;
+  }
+
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HEADER -->
+  <header>
+    <div class="doc-kicker">Portfolio · card deep-dive · v1 · 2026-04-12</div>
+    <h1 class="doc-title">Card component<br>layout options</h1>
+    <p class="doc-intro">
+      Deferred from <strong>v5 item 4</strong>. This doc answers the card-level questions that v5 couldn't cover without derailing the accessibility + critique pass: <strong>variant structure</strong> (one component or many) and <strong>imagery placement</strong>. Scope is the card component <em>as a whole</em>, across every surface it ships on — not just the writing variant.
+    </p>
+    <p class="doc-intro">
+      Usage surfaces in scope: landing 2×2 case study grid, landing Writing zone, /writing index, /work index, and the related-work footer inside case study bodies. Density is locked to v5's moderate baseline (three proximity groups). Imagery is <strong>optional</strong> per Q2 — work cards use screenshots or diagram fragments, writing cards use big numerals or gradient washes.
+    </p>
+  </header>
+
+  <!-- ============================================ -->
+  <!-- Q5 · VARIANT STRUCTURE                         -->
+  <!-- ============================================ -->
+  <section class="section">
+    <div class="section-label">Q5 · variant structure</div>
+    <h2 class="section-title">One component, variants via props</h2>
+    <p class="section-blurb">
+      Despite the work/writing register split and five usage surfaces, there's enough structural overlap to justify a single <code>&lt;Card&gt;</code> Astro component with a props API. The alternatives duplicate ~70% of the markup and CSS for differences that are mostly presentational. A prop-driven component lets register and imagery flex independently while keeping the valid combinations explicit. <strong>Featured becomes a boolean flag</strong>, not a third type.
+    </p>
+
+    <div class="api-block">
+      <h3>Proposed API — src/components/Card.astro</h3>
+<pre><span class="c-com">// Single component; register + imagery + featured are orthogonal props</span>
+<span class="c-kw">interface</span> <span class="c-type">Props</span> {
+  <span class="c-com">/** Register — drives kicker colour, left rail, arrow colour, tag styling */</span>
+  register: <span class="c-str">"work"</span> | <span class="c-str">"writing"</span>;
+
+  <span class="c-com">/** Featured — adds gradient border + "FEATURED" pin. At most one per page. */</span>
+  featured?: <span class="c-kw">boolean</span>;
+
+  <span class="c-com">/** Content — always required */</span>
+  kicker: <span class="c-kw">string</span>;                      <span class="c-com">// "Selected work · 01"</span>
+  title: <span class="c-kw">string</span>;
+  description: <span class="c-kw">string</span>;
+  tags: <span class="c-kw">string</span>[];
+  href: <span class="c-kw">string</span>;
+
+  <span class="c-com">/** Optional imagery — if omitted, card is typography-only */</span>
+  image?:
+    | { kind: <span class="c-str">"screenshot"</span>;    src: <span class="c-kw">string</span>; alt: <span class="c-kw">string</span> }  <span class="c-com">// work</span>
+    | { kind: <span class="c-str">"diagram"</span>;       src: <span class="c-kw">string</span>; alt: <span class="c-kw">string</span> }  <span class="c-com">// work</span>
+    | { kind: <span class="c-str">"numeral"</span>;       content: <span class="c-kw">string</span> }           <span class="c-com">// writing ("01", "02"…)</span>
+    | { kind: <span class="c-str">"gradient-mark"</span>; motif?: <span class="c-str">"rules"</span> | <span class="c-str">"grid"</span> };  <span class="c-com">// writing</span>
+}
+
+<span class="c-com">// Valid combinations (enforced via narrowing, not brute validation):</span>
+<span class="c-com">//   register "work"    + image.kind "screenshot" | "diagram" | undefined</span>
+<span class="c-com">//   register "writing" + image.kind "numeral"    | "gradient-mark" | undefined</span></pre>
+    </div>
+
+    <p class="section-blurb" style="margin-top: var(--s5); margin-bottom: 0">
+      <strong>Why not two components?</strong> The work/writing split lives in three places only: kicker colour, left rail presence, arrow colour. Padding, proximity, title font, tag shape, hover behaviour are identical. Splitting into <code>WorkCard</code>/<code>WritingCard</code> just means two files drifting apart.
+      <strong>Why not modifier classes?</strong> Astro component boundaries are stronger than CSS class discipline. Props make "featured writing card with a numeral" either valid or invalid at the type layer; class-based modifiers make it look possible in CSS even if it's meaningless.
+    </p>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- Q4 · LAYOUT OPTIONS                            -->
+  <!-- ============================================ -->
+  <section class="section">
+    <div class="section-label">Q4 · imagery layout</div>
+    <h2 class="section-title">Six layouts for optional imagery</h2>
+    <p class="section-blurb">
+      Each option shown twice: left card is <strong>work register</strong> with a screenshot mock; right card is <strong>writing register</strong> with a numeral or gradient wash. The mocks are CSS-drawn — no real assets — so the question is layout, not craft. Tradeoffs listed under each. Summary table and recommendation at the bottom.
+    </p>
+
+    <!-- ==================================== OPTION A -->
+    <div class="option">
+      <div class="option-header">
+        <div class="option-letter">A</div>
+        <div>
+          <div class="option-name">Top third — image above, content below</div>
+          <div class="option-subtitle">classic blog tile · familiar · image-dominant</div>
+        </div>
+      </div>
+      <p class="option-desc">
+        The most familiar web pattern. 160px image strip at the top, full content block below. Every card with imagery reads as an editorial tile; cards without imagery read as plain text blocks. <strong>The tradeoff:</strong> mixing image and non-image cards in the same grid creates two visual species that don't sit together cleanly. Works if you commit to imagery grid-wide, fails if you want imagery to be truly optional.
+      </p>
+      <div class="option-demo">
+        <article class="card layout-top">
+          <div class="media img-screenshot"></div>
+          <div class="content">
+            <div class="kicker">Selected work · 02</div>
+            <h3><a class="card-link" href="#">The Weekly App<span class="arrow-inline">→</span></a></h3>
+            <p>Meal-kit POC pulling Coles recipes into a consolidated trolley.</p>
+            <div class="tags">
+              <span class="tag">REACT</span>
+              <span class="tag">VITE</span>
+              <span class="tag">NETLIFY</span>
+            </div>
+          </div>
+        </article>
+        <article class="card writing layout-top">
+          <div class="media img-numeral"><span>01</span></div>
+          <div class="content">
+            <div class="kicker">Essay · architecture</div>
+            <h3><a class="card-link" href="#">Three guardrails that saved the spend budget<span class="arrow-inline">→</span></a></h3>
+            <p>Shipping a paid-API product without a single "oh god" moment.</p>
+            <div class="tags">
+              <span class="tag thinking">ARCHITECTURE</span>
+              <span class="tag thinking">POSTMORTEM</span>
+            </div>
+          </div>
+        </article>
+      </div>
+      <div class="option-notes">
+        <div><span class="note-label">Where it works</span><strong>All surfaces</strong>, but only if every card in a group has imagery</div>
+        <div><span class="note-label">Author cost</span><strong>High</strong> — every case study needs a crafted hero image</div>
+        <div><span class="note-label">Risk</span><strong>Visual species split</strong> when mixing with non-image cards</div>
+      </div>
+    </div>
+
+    <!-- ==================================== OPTION B -->
+    <div class="option">
+      <div class="option-header">
+        <div class="option-letter">B</div>
+        <div>
+          <div class="option-name">Left half — image left, content right</div>
+          <div class="option-subtitle">horizontal list tile · wide-friendly · grid-hostile</div>
+        </div>
+      </div>
+      <p class="option-desc">
+        150px image on the left, content filling the rest. Reads as a list row rather than a grid tile. <strong>Breaks at narrow widths:</strong> in a 2×2 landing grid each card is ~420px wide, and giving 150px to imagery leaves only 270px for content — the title wraps aggressively and tags break onto multiple rows. Works well in list contexts (/writing index, related-work footer) but fails in grid contexts.
+      </p>
+      <div class="option-demo">
+        <article class="card layout-left">
+          <div class="media img-screenshot"></div>
+          <div class="content">
+            <div class="kicker">Selected work · 02</div>
+            <h3><a class="card-link" href="#">The Weekly App<span class="arrow-inline">→</span></a></h3>
+            <p>Meal-kit POC pulling Coles recipes into a consolidated trolley.</p>
+            <div class="tags">
+              <span class="tag">REACT</span>
+              <span class="tag">VITE</span>
+              <span class="tag">NETLIFY</span>
+            </div>
+          </div>
+        </article>
+        <article class="card writing layout-left">
+          <div class="media img-gradient-mark"></div>
+          <div class="content">
+            <div class="kicker">Essay · architecture</div>
+            <h3><a class="card-link" href="#">Three guardrails that saved the spend budget<span class="arrow-inline">→</span></a></h3>
+            <p>Shipping a paid-API product without a single "oh god" moment.</p>
+            <div class="tags">
+              <span class="tag thinking">ARCHITECTURE</span>
+              <span class="tag thinking">POSTMORTEM</span>
+            </div>
+          </div>
+        </article>
+      </div>
+      <div class="option-notes">
+        <div><span class="note-label">Where it works</span><strong>List surfaces only</strong> — /writing index, related-work footer</div>
+        <div><span class="note-label">Author cost</span><strong>Medium</strong> — image present but smaller footprint</div>
+        <div><span class="note-label">Risk</span><strong>Doesn't fit the 2×2 landing grid</strong> at any breakpoint</div>
+      </div>
+    </div>
+
+    <!-- ==================================== OPTION C -->
+    <div class="option">
+      <div class="option-header">
+        <div class="option-letter">C</div>
+        <div>
+          <div class="option-name">Background — image fills card, content overlaid</div>
+          <div class="option-subtitle">dramatic · image-led · legibility-hostile</div>
+        </div>
+      </div>
+      <p class="option-desc">
+        Image fills the card; a bottom-up dark gradient scrim makes the content legible over it. <strong>Strongest visual impact, highest content risk:</strong> body copy contrast depends on where the image's content sits, so every card needs a carefully composed image with dark bottom space. Hover states are invisible (the image covers the background change). Breaks with abstract marks and numerals — those don't read as atmospheric backgrounds.
+      </p>
+      <div class="option-demo">
+        <article class="card layout-bg">
+          <div class="media img-screenshot"></div>
+          <div class="scrim"></div>
+          <div class="content">
+            <div class="kicker">Selected work · 02</div>
+            <h3><a class="card-link" href="#">The Weekly App<span class="arrow-inline">→</span></a></h3>
+            <p>Meal-kit POC pulling Coles recipes into a consolidated trolley.</p>
+            <div class="tags">
+              <span class="tag">REACT</span>
+              <span class="tag">VITE</span>
+              <span class="tag">NETLIFY</span>
+            </div>
+          </div>
+        </article>
+        <article class="card writing layout-bg">
+          <div class="media img-gradient-mark"></div>
+          <div class="scrim"></div>
+          <div class="content">
+            <div class="kicker">Essay · architecture</div>
+            <h3><a class="card-link" href="#">Three guardrails that saved the spend budget<span class="arrow-inline">→</span></a></h3>
+            <p>Shipping a paid-API product without a single "oh god" moment.</p>
+            <div class="tags">
+              <span class="tag thinking">ARCHITECTURE</span>
+              <span class="tag thinking">POSTMORTEM</span>
+            </div>
+          </div>
+        </article>
+      </div>
+      <div class="option-notes">
+        <div><span class="note-label">Where it works</span><strong>Landing hero grid only</strong> — when imagery is all-in and curated</div>
+        <div><span class="note-label">Author cost</span><strong>Very high</strong> — every image must be composed with dark bottom space</div>
+        <div><span class="note-label">Risk</span><strong>Hover state invisible</strong>; body legibility depends on image content</div>
+      </div>
+    </div>
+
+    <!-- ==================================== OPTION D -->
+    <div class="option">
+      <div class="option-header">
+        <div class="option-letter">D</div>
+        <div>
+          <div class="option-name">Corner accent — small mark top-right, content dominant</div>
+          <div class="option-subtitle">additive · minimal · mix-tolerant</div>
+        </div>
+      </div>
+      <p class="option-desc">
+        64×64 mark in the top-right corner, content takes the rest. The image is a <strong>tag</strong> rather than decoration — it identifies the project or essay at a glance without demanding visual weight. <strong>Key property:</strong> cards with and without the corner mark sit together cleanly in the same grid; the difference reads as "some cards have an icon" rather than "some cards are different animals". Lowest author cost: a 64px square asset for work, a two-character numeral for writing.
+      </p>
+      <div class="option-demo">
+        <article class="card layout-corner">
+          <div class="media-corner img-screenshot"></div>
+          <div class="content">
+            <div class="kicker">Selected work · 02</div>
+            <h3><a class="card-link" href="#">The Weekly App<span class="arrow-inline">→</span></a></h3>
+            <p>Meal-kit POC pulling Coles recipes into a consolidated trolley.</p>
+            <div class="tags">
+              <span class="tag">REACT</span>
+              <span class="tag">VITE</span>
+              <span class="tag">NETLIFY</span>
+            </div>
+          </div>
+        </article>
+        <article class="card writing layout-corner">
+          <div class="media-corner img-numeral"><span>01</span></div>
+          <div class="content">
+            <div class="kicker">Essay · architecture</div>
+            <h3><a class="card-link" href="#">Three guardrails that saved the spend budget<span class="arrow-inline">→</span></a></h3>
+            <p>Shipping a paid-API product without a single "oh god" moment.</p>
+            <div class="tags">
+              <span class="tag thinking">ARCHITECTURE</span>
+              <span class="tag thinking">POSTMORTEM</span>
+            </div>
+          </div>
+        </article>
+      </div>
+      <div class="option-notes">
+        <div><span class="note-label">Where it works</span><strong>All surfaces</strong> — mixes freely with non-image cards</div>
+        <div><span class="note-label">Author cost</span><strong>Low</strong> — 64px icon or two-char string</div>
+        <div><span class="note-label">Risk</span><strong>Visual weight is small</strong>; corner mark doesn't rescue a dull content block</div>
+      </div>
+    </div>
+
+    <!-- ==================================== OPTION E -->
+    <div class="option">
+      <div class="option-header">
+        <div class="option-letter">E</div>
+        <div>
+          <div class="option-name">Asymmetric half — image takes 42% of card width</div>
+          <div class="option-subtitle">editorial · distinctive · authoring-heavy</div>
+        </div>
+      </div>
+      <p class="option-desc">
+        58/42 asymmetric split — content on the left, image on the right taking the full height of the card. The split is deliberately off-centre to feel editorial rather than utilitarian. <strong>Distinctive look,</strong> but has the same mixing problem as A: cards with and without imagery create two visual species. Also needs the card to have a minimum height, which loses the "natural height" property of the current card.
+      </p>
+      <div class="option-demo">
+        <article class="card layout-asym">
+          <div class="content">
+            <div class="kicker">Selected work · 02</div>
+            <h3><a class="card-link" href="#">The Weekly App<span class="arrow-inline">→</span></a></h3>
+            <p>Meal-kit POC pulling Coles recipes into a consolidated trolley.</p>
+            <div class="tags">
+              <span class="tag">REACT</span>
+              <span class="tag">VITE</span>
+              <span class="tag">NETLIFY</span>
+            </div>
+          </div>
+          <div class="media img-screenshot"></div>
+        </article>
+        <article class="card writing layout-asym">
+          <div class="content">
+            <div class="kicker">Essay · architecture</div>
+            <h3><a class="card-link" href="#">Three guardrails that saved the spend budget<span class="arrow-inline">→</span></a></h3>
+            <p>Shipping a paid-API product without a single "oh god" moment.</p>
+            <div class="tags">
+              <span class="tag thinking">ARCHITECTURE</span>
+              <span class="tag thinking">POSTMORTEM</span>
+            </div>
+          </div>
+          <div class="media img-numeral"><span>01</span></div>
+        </article>
+      </div>
+      <div class="option-notes">
+        <div><span class="note-label">Where it works</span><strong>Landing hero grid</strong> — loses its charm in list mode</div>
+        <div><span class="note-label">Author cost</span><strong>High</strong> — image must work at tall/narrow aspect</div>
+        <div><span class="note-label">Risk</span><strong>Mixing problem</strong>; loses natural card height</div>
+      </div>
+    </div>
+
+    <!-- ==================================== OPTION F -->
+    <div class="option">
+      <div class="option-header">
+        <div class="option-letter">F</div>
+        <div>
+          <div class="option-name">Full-bleed overlap — image top, content floats up</div>
+          <div class="option-subtitle">collage · layered · craft-sensitive</div>
+        </div>
+      </div>
+      <p class="option-desc">
+        Image fills the top 140px of the card; content sits in a bordered inset that rises 28px <em>into</em> the image. Reads as a two-layer collage — image and content are clearly separate layers, not stacked blocks. <strong>Distinctive when it works,</strong> but requires precise image framing: the top third of every image is wasted behind the card's visible edge, and the bottom 28px sits behind the content inset.
+      </p>
+      <div class="option-demo">
+        <article class="card layout-overlap">
+          <div class="media img-screenshot"></div>
+          <div class="content">
+            <div class="kicker">Selected work · 02</div>
+            <h3><a class="card-link" href="#">The Weekly App<span class="arrow-inline">→</span></a></h3>
+            <p>Meal-kit POC pulling Coles recipes into a consolidated trolley.</p>
+            <div class="tags">
+              <span class="tag">REACT</span>
+              <span class="tag">VITE</span>
+              <span class="tag">NETLIFY</span>
+            </div>
+          </div>
+        </article>
+        <article class="card writing layout-overlap">
+          <div class="media img-gradient-mark"></div>
+          <div class="content">
+            <div class="kicker">Essay · architecture</div>
+            <h3><a class="card-link" href="#">Three guardrails that saved the spend budget<span class="arrow-inline">→</span></a></h3>
+            <p>Shipping a paid-API product without a single "oh god" moment.</p>
+            <div class="tags">
+              <span class="tag thinking">ARCHITECTURE</span>
+              <span class="tag thinking">POSTMORTEM</span>
+            </div>
+          </div>
+        </article>
+      </div>
+      <div class="option-notes">
+        <div><span class="note-label">Where it works</span><strong>Landing grid</strong> — novelty wears off in list mode</div>
+        <div><span class="note-label">Author cost</span><strong>High</strong> — every image needs precise top/bottom framing</div>
+        <div><span class="note-label">Risk</span><strong>Novelty trap</strong>; craft-sensitive; mixing problem persists</div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ============================================ -->
+  <!-- SUMMARY TABLE                                  -->
+  <!-- ============================================ -->
+  <section class="section">
+    <div class="section-label">summary</div>
+    <h2 class="section-title">How the options compare</h2>
+    <p class="section-blurb">
+      Scored against the five things that actually matter for this portfolio: fit in the 2×2 landing grid, fit in list surfaces (/writing, related-work), author cost, content-first alignment (boring &gt; clever), and tolerance for mixing image and non-image cards in the same group.
+    </p>
+
+    <table class="summary-table">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Name</th>
+          <th>2×2 grid</th>
+          <th>List mode</th>
+          <th>Author cost</th>
+          <th>Content-first</th>
+          <th>Mix tolerance</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="letter">A</td>
+          <td class="name">Top third</td>
+          <td class="verdict"><span class="pass">Pass</span></td>
+          <td class="verdict"><span class="pass">Pass</span></td>
+          <td class="verdict"><span class="fail">High</span></td>
+          <td class="verdict"><span class="partial">Partial</span></td>
+          <td class="verdict"><span class="fail">Fail</span></td>
+        </tr>
+        <tr>
+          <td class="letter">B</td>
+          <td class="name">Left half</td>
+          <td class="verdict"><span class="fail">Fail</span></td>
+          <td class="verdict"><span class="pass">Pass</span></td>
+          <td class="verdict"><span class="partial">Medium</span></td>
+          <td class="verdict"><span class="pass">Pass</span></td>
+          <td class="verdict"><span class="partial">Partial</span></td>
+        </tr>
+        <tr>
+          <td class="letter">C</td>
+          <td class="name">Background</td>
+          <td class="verdict"><span class="pass">Pass</span></td>
+          <td class="verdict"><span class="fail">Fail</span></td>
+          <td class="verdict"><span class="fail">Very high</span></td>
+          <td class="verdict"><span class="fail">Fail</span></td>
+          <td class="verdict"><span class="fail">Fail</span></td>
+        </tr>
+        <tr class="recommended">
+          <td class="letter">D</td>
+          <td class="name">Corner accent</td>
+          <td class="verdict"><span class="pass">Pass</span></td>
+          <td class="verdict"><span class="pass">Pass</span></td>
+          <td class="verdict"><span class="pass">Low</span></td>
+          <td class="verdict"><span class="pass">Pass</span></td>
+          <td class="verdict"><span class="pass">Pass</span></td>
+        </tr>
+        <tr>
+          <td class="letter">E</td>
+          <td class="name">Asymmetric half</td>
+          <td class="verdict"><span class="pass">Pass</span></td>
+          <td class="verdict"><span class="fail">Fail</span></td>
+          <td class="verdict"><span class="fail">High</span></td>
+          <td class="verdict"><span class="partial">Partial</span></td>
+          <td class="verdict"><span class="fail">Fail</span></td>
+        </tr>
+        <tr>
+          <td class="letter">F</td>
+          <td class="name">Full-bleed overlap</td>
+          <td class="verdict"><span class="pass">Pass</span></td>
+          <td class="verdict"><span class="partial">Partial</span></td>
+          <td class="verdict"><span class="fail">High</span></td>
+          <td class="verdict"><span class="partial">Partial</span></td>
+          <td class="verdict"><span class="fail">Fail</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- RECOMMENDATION                                 -->
+  <!-- ============================================ -->
+  <div class="recommend-box">
+    <h2>Recommendation — D (corner accent)</h2>
+    <p>
+      <strong>D is the only option that passes all five criteria.</strong> The other five each fail at least one — mostly mix tolerance, which matters because "optional imagery" (Q2=B) implies some cards will have imagery and some won't, in the same grid. If that's the answer, only a layout that tolerates mixing survives contact with reality.
+    </p>
+    <p>
+      <strong>The deeper reason D wins:</strong> it reframes imagery as a <em>tag</em> rather than a <em>hero</em>. A 64px corner mark identifies the card ("this is the planner app", "this is essay 01") without making a visual claim. Cards without the mark look like cards that haven't been given a mark yet, not cards from a different system. That's the exact property you want when the content itself is the point — which this portfolio's style guide says it is.
+    </p>
+    <p>
+      <strong>The tradeoff to be honest about:</strong> D's visual impact is low. If you want the landing grid to feel visually <em>striking</em>, D won't get you there on its own. Striking comes from the hero block, the gradient CTA, and the signature divider — the card grid is supposed to feel orderly, not loud. If you later decide the landing grid needs more weight, the upgrade path is to swap D for A with the rule "when used on the landing grid, all four cards must have imagery" (making A work despite its mix intolerance).
+    </p>
+    <p>
+      <strong>Second choice:</strong> A, but only on the landing grid specifically, and only with the all-or-nothing rule. I'd rather ship D everywhere than ship A with a mix of image and non-image cards.
+    </p>
+    <p>
+      <strong>Next step if you pick D:</strong> I'll mock the corner accent at higher fidelity — featured variant (with FEATURED pin + gradient border), loading state, imagery-absent fallback, and /writing index density. Then we wire it into the token spec and move to chunk 4b.
+    </p>
+    <p>
+      <strong>If you pick something else:</strong> tell me which one and I'll mock <em>that</em> at higher fidelity, same follow-ups.
+    </p>
+  </div>
+
+</div>
+</body>
+</html>

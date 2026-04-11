@@ -6,7 +6,11 @@ Final token spec for the portfolio. To be dropped into `globals.css` after `npx 
 
 ---
 
-## Colours — Royal Tonal (12-step scale anchored on `#3B5BDB`)
+## Colours — Royal Tonal + Violet Signal
+
+**Status update (2026-04-12):** Palette extended from pure monochromatic to an analogous family. Royal Tonal (12 steps) handles all page chrome and the "work/craft" content register. Violet Signal (5 steps, 8–12 only) handles the "thinking/writing" content register. A single `--grad-rv` gradient serves as a sparing signature moment. Decisions finalised via `accent-palette-explorer-v1.html` through `v4.html` in this folder.
+
+### Royal Tonal (12 steps, chrome + work register)
 
 Single-hue tonal system in the Radix / Material 3 tradition. Every step has a defined role. Periwinkle `#A5B4FF` (which the user loved) is step 11 of this scale — so "royal + periwinkle" is just two roles of the same colour.
 
@@ -24,12 +28,24 @@ Single-hue tonal system in the Radix / Material 3 tradition. Every step has a de
   --royal-9:  #4D6DE8;  /* hovered solid */
   --royal-10: #6C85FF;  /* text link (on dark bg) */
   --royal-11: #A5B4FF;  /* low-contrast text (kickers, metadata highlights) */
-  --royal-12: #D5DCFA;  /* high-contrast text on royal-8 */
+  --royal-12: #D5DCFA;  /* high-contrast text on royal-8 (AA large only — see accessibility rules) */
+
+  /* Violet Signal — 5 steps (8-12 only, thinking/writing register) */
+  --violet-8:  #8C3BDB;  /* solid brand — writing CTAs, thinking-mode callouts */
+  --violet-9:  #9D4DE8;  /* hovered solid */
+  --violet-10: #B47CFF;  /* text link (on dark bg) — writing links */
+  --violet-11: #C89BFF;  /* low-contrast text (writing kickers, thinking metadata) */
+  --violet-12: #E6D4FF;  /* high-contrast text on violet-8 (AA large only — see accessibility rules) */
+
+  /* Signature gradient — Royal → Violet, used sparingly (hero CTA + section divider only) */
+  --grad-rv:      linear-gradient(135deg, var(--royal-8) 0%, var(--violet-8) 100%);
+  --grad-rv-line: linear-gradient(180deg, var(--royal-8) 0%, var(--violet-8) 100%);
+  --grad-rv-soft: linear-gradient(135deg, var(--royal-10) 0%, var(--violet-10) 100%);
 
   /* Ink — off-white body text */
   --ink:       #E6E2D9;  /* primary body text */
-  --ink-dim:   #9C968A;  /* secondary text (tldr, metadata body) */
-  --ink-faint: #5E584F;  /* tertiary text (footers, least-important) */
+  --ink-dim:   #9C968A;  /* secondary text (tldr, metadata body, code comments) */
+  --ink-faint: #5E584F;  /* DECORATIVE ONLY — dividers, non-text icons. NEVER use for text (fails WCAG AA at all sizes). */
 
   /* Semantic aliases (use these in components, not the royal-N tokens directly) */
   --bg:             var(--royal-2);
@@ -41,14 +57,26 @@ Single-hue tonal system in the Radix / Material 3 tradition. Every step has a de
   --primary:        var(--royal-8);
   --primary-hover:  var(--royal-9);
   --link:           var(--royal-10);
-  --kicker:         var(--royal-11);  /* small caps section labels, build log dates */
+  --kicker:         var(--royal-11);           /* small caps section labels, build log dates */
+  --button-fg:      #FFFFFF;                    /* CTA button label — pure white (not royal-12, see accessibility rules) */
   --tag-border:     var(--royal-8);
   --tag-fg:         var(--royal-11);
   --tag-bg:         rgba(59, 91, 219, 0.08);
+
+  /* Thinking/writing register (violet) */
+  --thinking:         var(--violet-8);
+  --thinking-hover:   var(--violet-9);
+  --thinking-link:    var(--violet-10);
+  --thinking-kicker:  var(--violet-11);         /* writing post kickers, essay metadata */
+  --thinking-tag-border: var(--violet-8);
+  --thinking-tag-fg:     var(--violet-11);
+  --thinking-tag-bg:     rgba(140, 59, 219, 0.10);
+
+  /* Code */
   --code-bg:        var(--royal-1);
   --code-keyword:   var(--royal-10);
   --code-string:    var(--royal-11);
-  --code-comment:   var(--ink-faint);
+  --code-comment:   var(--ink-dim);             /* was ink-faint; ink-faint fails WCAG for text */
 }
 ```
 
@@ -67,13 +95,84 @@ Single-hue tonal system in the Radix / Material 3 tradition. Every step has a de
 | `--royal-9`  | `#4D6DE8`  | Brand hover                                        |
 | `--royal-10` | `#6C85FF`  | Body text links, "Read case study →"               |
 | `--royal-11` | `#A5B4FF`  | Kickers ("Selected work · 01"), small-caps labels  |
-| `--royal-12` | `#D5DCFA`  | White-ish text on royal-8 buttons                  |
+| `--royal-12` | `#D5DCFA`  | Text on royal-8 buttons (large only — not for 16px labels, see rules) |
+| `--violet-8` | `#8C3BDB`  | Brand (thinking/writing) — writing CTA, section divider endpoint |
+| `--violet-9` | `#9D4DE8`  | Violet brand hover                                 |
+| `--violet-10`| `#B47CFF`  | Writing post body text links                       |
+| `--violet-11`| `#C89BFF`  | Writing kickers, thinking metadata                 |
+| `--violet-12`| `#E6D4FF`  | Text on violet-8 buttons (large only)              |
 
-### Contrast notes
-- Text `--ink` (`#E6E2D9`) on `--bg` (`#121428`): AAA large, AA body
-- `--link` (`#6C85FF`) on `--bg`: AA body (4.5:1+)
-- `--kicker` (`#A5B4FF`) on `--bg`: AAA large, AA small — only use for 11px+ small caps or larger
-- `--royal-12` (`#D5DCFA`) on `--royal-8` (`#3B5BDB`): AAA button label
+### Contrast notes (WCAG 2.1 AA audit, 2026-04-12)
+
+All 29 in-system pairings computed with the standard WCAG algorithm. Full results in `accent-palette-explorer-v4.html` and the audit script output.
+
+**Passes AA body or AAA:**
+- `--ink` on any bg (royal-2/3/4): **11.74:1 to 14.05:1** — AAA body everywhere
+- `--ink-dim` on bg/card: **5.16:1 to 6.18:1** — AA body
+- `--royal-10` link on bg/card: **4.65:1 to 5.57:1** — AA body
+- `--royal-11` kicker on bg/card: **7.64:1 to 9.14:1** — AAA body (not just large)
+- `--violet-10` link on bg/card: **5.25:1 to 6.28:1** — AA body
+- `--violet-11` kicker on bg/card: **6.93:1 to 8.29:1** — AAA body
+
+**Passes AA large, fails AA body (fix required):**
+- `--royal-12` on `--royal-8`: **4.17:1** — OK for 18px+ regular or 14pt+ bold, fails for 16px button labels
+- `--violet-12` on `--violet-8`: **4.05:1** — same issue
+
+**Passes WCAG 1.4.11 non-text (3:1):**
+- `--royal-8` on `--bg`: 3.20:1 ✓ (CTA surface identifiable)
+- `--violet-8` on `--bg`: 3.25:1 ✓
+- `--royal-9` hover: 4.04:1 ✓
+- `--violet-9` hover: 4.03:1 ✓
+
+**Below 3:1 but decoratively exempt (WCAG 1.4.11 does not apply to purely decorative fills/borders):**
+- `--royal-7` border on bg: 1.94:1
+- `--royal-4` card fill vs bg: 1.20:1
+- `--royal-3` subtle bg vs bg: 1.08:1
+
+**Fails completely — do not use for text:**
+- `--ink-faint` (`#5E584F`) on bg: **2.58:1** — fails AA large and body
+- `--ink-faint` on card: **2.16:1** — fails everything
+
+**Critical structural finding:**
+- `--royal-8` vs `--violet-8`: **1.02:1** — near-identical luminance. The `--grad-rv` gradient is a hue shift only, not a brightness shift. It is nearly imperceptible to users with low vision or colour-blindness, and disappears entirely in Windows High Contrast Mode. Colour alone cannot be the identity signal anywhere in the system; typography or labels must always reinforce.
+
+---
+
+## Accessibility rules (non-negotiable)
+
+These flow from the audit above. They are project-level rules, not component-level suggestions.
+
+### 1. `--ink-faint` is decorative only
+
+`--ink-faint` (`#5E584F`) fails every WCAG threshold for text. It may be used for:
+- Dividers and horizontal rules
+- Icon fills where the icon is paired with a text label
+- Decorative borders
+
+It must **never** be used for readable text. `--ink-dim` is the lowest text tier. Footer metadata, "reading time", least-important captions all use `--ink-dim`.
+
+### 2. Button labels use `#FFFFFF`, never `--royal-12` / `--violet-12`
+
+A 16px/600-weight button label on `--royal-8` or `--violet-8` using the `*-12` token is below AA body (4.17:1 and 4.05:1, respectively). Three fix options, pick one per component:
+
+1. **Use `--button-fg` (`#FFFFFF`)** for all CTA labels. Raises both buttons above 4.5:1. Default choice.
+2. **Bump font-size to 18px+** and keep `--royal-12` / `--violet-12`. Qualifies as "large text" at 3:1. Use only when the button text genuinely wants to be 18px for hierarchy reasons.
+3. Never use `--royal-12` / `--violet-12` on `--royal-8` / `--violet-8` for labels smaller than 18px regular or 14pt bold.
+
+The default portfolio CTA uses option 1.
+
+### 3. Transcript role labels are mandatory
+
+Because `--royal-8` and `--violet-8` are at 1.02:1 luminance (imperceptible to a meaningful fraction of users), the `<ChatTranscript>` component cannot rely on colour alone to distinguish Dylan from Claude. This is a WCAG 1.4.1 requirement ("use of colour"): information must not be conveyed by colour alone.
+
+Therefore:
+- The role label ("Dylan" / "Claude") is **required** on every turn. It cannot be hidden by responsive rules or design variants.
+- The typography split (Dylan = Geist sans, Claude = Geist Mono) is a compliance feature, not just an aesthetic one. It carries identity in greyscale, high-contrast mode, and for colour-blind users.
+- Colour on the role label and container border is reinforcement only.
+
+### 4. Any status colour outside this system must be added explicitly
+
+Royal and violet carry content register meaning (work vs thinking), not semantic status. A future success/error/warning colour is an open slot that will need its own WCAG audit when added. Do not overload royal or violet with status meaning.
 
 ---
 
