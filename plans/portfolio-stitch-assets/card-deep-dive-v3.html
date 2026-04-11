@@ -1,0 +1,1435 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Card deep-dive v3 — Layout A with six visual types + mobile screenshot fit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Geist+Mono:wght@400;500&family=Geist:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --royal-1:#0a0d1a; --royal-2:#0f1428; --royal-3:#141c3a; --royal-4:#1b2652;
+    --royal-5:#233270; --royal-6:#2b4094; --royal-7:#3350bf; --royal-8:#3B5BDB;
+    --royal-9:#5773e3; --royal-10:#8098ec; --royal-11:#adbcf2; --royal-12:#d8dff9;
+
+    --violet-8:#8C3BDB; --violet-9:#a157e3; --violet-10:#b77cec;
+    --violet-11:#cfa3f2; --violet-12:#e6cff9;
+
+    --ink:#e8ecff; --ink-muted:#a0aac4; --ink-dim:#6b7390;
+
+    --bg:#0a0d1a; --card:#0f1428; --card-hover:#141c3a; --rule:#1b2652;
+
+    --grad-rv: linear-gradient(135deg, var(--royal-8) 0%, var(--violet-8) 100%);
+    --grad-rv-soft: linear-gradient(135deg, rgba(59,91,219,0.12) 0%, rgba(140,59,219,0.12) 100%);
+
+    --font-display:"Fraunces",serif;
+    --font-sans:"Geist",system-ui,sans-serif;
+    --font-mono:"Geist Mono",monospace;
+
+    --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px; --s8:64px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    padding: var(--s8) var(--s5) var(--s8);
+    max-width: 1180px;
+    margin: 0 auto;
+  }
+
+  /* ---------- Doc framing ---------- */
+
+  .doc-head { margin-bottom: var(--s8); }
+  .doc-head .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--royal-10);
+    margin-bottom: var(--s3);
+  }
+  .doc-head h1 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 52px;
+    line-height: 1.0;
+    letter-spacing: -0.025em;
+    margin-bottom: var(--s4);
+  }
+  .doc-head p {
+    color: var(--ink-muted);
+    font-size: 17px;
+    max-width: 68ch;
+  }
+  .doc-head p + p { margin-top: var(--s3); }
+  .doc-head strong { color: var(--ink); font-weight: 500; }
+  .doc-head em { font-style: italic; color: var(--ink); }
+
+  section {
+    margin-top: var(--s8);
+    padding-top: var(--s6);
+    border-top: 1px solid var(--rule);
+  }
+  section:first-of-type { border-top: none; padding-top: 0; }
+  section > .kicker {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--royal-10);
+    margin-bottom: var(--s2);
+  }
+  section > h2 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 34px;
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+    margin-bottom: var(--s3);
+  }
+  section > .lede {
+    color: var(--ink-muted);
+    max-width: 68ch;
+    margin-bottom: var(--s6);
+    font-size: 15.5px;
+  }
+  section > .lede strong { color: var(--ink); font-weight: 500; }
+  section > .lede em { font-style: italic; color: var(--ink); }
+
+  .note {
+    background: var(--grad-rv-soft);
+    border: 1px solid var(--royal-7);
+    border-radius: 8px;
+    padding: var(--s4) var(--s5);
+    margin-top: var(--s5);
+    font-size: 14px;
+    color: var(--ink);
+    line-height: 1.65;
+  }
+  .note strong { color: var(--royal-11); }
+
+  .warning {
+    background: color-mix(in srgb, var(--violet-8) 10%, var(--royal-1));
+    border: 1px solid color-mix(in srgb, var(--violet-8) 35%, var(--rule));
+    border-radius: 8px;
+    padding: var(--s4) var(--s5);
+    margin-top: var(--s5);
+    font-size: 14px;
+    color: var(--ink);
+    line-height: 1.65;
+  }
+  .warning strong { color: var(--violet-11); }
+
+  .variant-label {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-muted);
+    margin-bottom: var(--s3);
+    letter-spacing: 0.04em;
+  }
+  .variant-label strong { color: var(--ink); font-weight: 500; }
+
+  .variant-group { margin-top: var(--s6); }
+  .variant-group:first-of-type { margin-top: var(--s5); }
+
+  /* ===================================================================
+     CARDS — Layout A: top third strip, content below
+     =================================================================== */
+
+  .cards-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--s5);
+  }
+  .cards-row.three { grid-template-columns: repeat(3, 1fr); }
+
+  .card {
+    position: relative;
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: background 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
+  }
+  .card:hover {
+    background: var(--card-hover);
+    border-color: var(--royal-8);
+    box-shadow: inset 0 1px 0 rgba(165, 180, 255, 0.18);
+  }
+  .card.writing:hover {
+    border-color: var(--violet-8);
+  }
+
+  /* layout A — top strip */
+  .card .strip {
+    position: relative;
+    height: 160px;
+    border-bottom: 1px solid var(--rule);
+    overflow: hidden;
+  }
+  .card .content {
+    padding: var(--s4) var(--s5) var(--s5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--s3);
+  }
+
+  .card .kicker {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--royal-10);
+    line-height: 1;
+    margin-top: var(--s1);
+  }
+  .card.writing .kicker { color: var(--violet-10); }
+
+  .card h3 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 22px;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+  .card h3 a.card-link {
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .card h3 a.card-link::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+  .card h3 a.card-link .arrow {
+    color: var(--royal-10);
+    margin-left: 6px;
+    display: inline-block;
+    transition: transform 140ms ease;
+  }
+  .card.writing h3 a.card-link .arrow { color: var(--violet-10); }
+  .card:hover h3 a.card-link .arrow { transform: translateX(3px); }
+
+  .card p.desc {
+    color: var(--ink-muted);
+    font-size: 14px;
+    line-height: 1.55;
+  }
+
+  .card .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s2);
+    list-style: none;
+    margin-top: var(--s2);
+    position: relative;
+    z-index: 2;
+  }
+  .card .tags li {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 3px var(--s2);
+    background: var(--royal-3);
+    color: var(--royal-11);
+    border-radius: 2px;
+    border: 1px solid var(--royal-4);
+  }
+  .card.writing .tags li {
+    background: color-mix(in srgb, var(--violet-8) 18%, var(--card));
+    color: var(--violet-11);
+    border-color: color-mix(in srgb, var(--violet-8) 35%, var(--card));
+  }
+
+  /* ===================================================================
+     VISUAL TYPE RENDERINGS — at strip scale (full-width, 160px tall)
+     All text marks (numeral, monogram) use the CARD'S register colour,
+     never the signature gradient.
+     =================================================================== */
+
+  /* ---- Type 1: screenshot (auto-tinted) ---- */
+  .strip.v-screenshot .photo {
+    position: absolute;
+    inset: 0;
+    /* intentionally off-palette fake screenshot so auto-tint proof is obvious */
+    background:
+      linear-gradient(135deg, #ff4d8f 0%, #ffe14d 45%, #4dc8ff 100%);
+    filter: saturate(0.75);
+  }
+  .strip.v-screenshot .photo::before {
+    content: "";
+    position: absolute;
+    top: 22%; left: 8%; right: 8%; height: 8%;
+    background: rgba(255,255,255,0.9);
+    border-radius: 2px;
+  }
+  .strip.v-screenshot .photo::after {
+    content: "";
+    position: absolute;
+    bottom: 18%; left: 8%; right: 30%; height: 6%;
+    background: rgba(255,255,255,0.62);
+    border-radius: 2px;
+    box-shadow:
+      0 12px 0 rgba(255,255,255,0.5),
+      0 24px 0 rgba(255,255,255,0.34),
+      0 36px 0 rgba(255,255,255,0.2);
+  }
+  .strip.v-screenshot::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--royal-8);
+    mix-blend-mode: color;
+    opacity: 0.55;
+    pointer-events: none;
+  }
+  .card.writing .strip.v-screenshot::after { background: var(--violet-8); }
+
+  /* ---- Type 2: diagram (palette-locked, SVG-style) ---- */
+  .strip.v-diagram {
+    background:
+      radial-gradient(circle at 50% 50%, var(--royal-2) 0%, var(--royal-1) 100%);
+  }
+  .strip.v-diagram svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .strip.v-diagram .d-stroke { stroke: var(--royal-10); stroke-width: 1.5; fill: none; }
+  .strip.v-diagram .d-stroke-dim { stroke: var(--royal-9); stroke-width: 1; fill: none; stroke-dasharray: 3 4; }
+  .strip.v-diagram .d-fill { fill: var(--royal-2); stroke: var(--royal-9); stroke-width: 1; }
+  .strip.v-diagram .d-label { fill: var(--royal-11); font-family: var(--font-mono); font-size: 9px; }
+  .card.writing .strip.v-diagram .d-stroke { stroke: var(--violet-10); }
+  .card.writing .strip.v-diagram .d-stroke-dim { stroke: var(--violet-9); }
+  .card.writing .strip.v-diagram .d-fill { stroke: var(--violet-9); }
+  .card.writing .strip.v-diagram .d-label { fill: var(--violet-11); }
+
+  /* ---- Type 3: numeral — CARD COLOUR, not gradient (new rule) ---- */
+  .strip.v-numeral {
+    display: grid;
+    place-items: center;
+    background: var(--royal-1);
+    position: relative;
+  }
+  .strip.v-numeral::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(0deg, transparent 0 22px, color-mix(in srgb, var(--royal-8) 8%, transparent) 22px 23px);
+    pointer-events: none;
+  }
+  .card.writing .strip.v-numeral::before {
+    background-image:
+      repeating-linear-gradient(0deg, transparent 0 22px, color-mix(in srgb, var(--violet-8) 8%, transparent) 22px 23px);
+  }
+  .strip.v-numeral .num {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: 112px;
+    line-height: 0.85;
+    letter-spacing: -0.04em;
+    color: var(--royal-10);
+    position: relative;
+  }
+  .card.writing .strip.v-numeral .num { color: var(--violet-10); }
+
+  /* ---- Type 4: gradient mark (the signature — use sparingly) ---- */
+  .strip.v-gradmark {
+    background:
+      radial-gradient(circle at 28% 32%, var(--royal-8), transparent 62%),
+      radial-gradient(circle at 74% 72%, var(--violet-8), transparent 58%),
+      var(--royal-1);
+    position: relative;
+  }
+  .strip.v-gradmark::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(
+      135deg,
+      transparent 0 7px,
+      rgba(255,255,255,0.055) 7px 8px
+    );
+  }
+
+  /* ---- Type 5: icon (lucide, palette stroke) ---- */
+  .strip.v-icon {
+    display: grid;
+    place-items: center;
+    background: var(--royal-1);
+    position: relative;
+  }
+  .strip.v-icon::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--royal-8) 14%, transparent) 0%, transparent 55%);
+  }
+  .strip.v-icon svg {
+    width: 68px;
+    height: 68px;
+    stroke: var(--royal-10);
+    stroke-width: 1.5;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    position: relative;
+  }
+  .card.writing .strip.v-icon svg { stroke: var(--violet-10); }
+  .card.writing .strip.v-icon::before {
+    background-image:
+      radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--violet-8) 14%, transparent) 0%, transparent 55%);
+  }
+
+  /* ---- Type 6: monogram — CARD COLOUR ---- */
+  .strip.v-monogram {
+    display: grid;
+    place-items: center;
+    background: var(--royal-1);
+    position: relative;
+  }
+  .strip.v-monogram::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(90deg, transparent 0 31px, color-mix(in srgb, var(--royal-8) 7%, transparent) 31px 32px);
+  }
+  .card.writing .strip.v-monogram::before {
+    background-image:
+      repeating-linear-gradient(90deg, transparent 0 31px, color-mix(in srgb, var(--violet-8) 7%, transparent) 31px 32px);
+  }
+  .strip.v-monogram .mono {
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: 44px;
+    letter-spacing: -0.03em;
+    color: var(--royal-11);
+    position: relative;
+  }
+  .card.writing .strip.v-monogram .mono { color: var(--violet-11); }
+
+  /* ===================================================================
+     MOBILE SCREENSHOT OPTIONS — Layout A meets a 1:2.16 phone
+     =================================================================== */
+
+  /* Fake phone — same markup across all options, just wrapped differently */
+  .phone {
+    aspect-ratio: 9 / 19.5;
+    background: linear-gradient(180deg, #161a38 0%, #0b0e22 100%);
+    border: 1.5px solid #232a55;
+    border-radius: 22px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.03);
+  }
+  .phone::before {
+    /* notch */
+    content: "";
+    position: absolute;
+    top: 6px; left: 50%;
+    transform: translateX(-50%);
+    width: 34%;
+    height: 8px;
+    background: #050716;
+    border-radius: 0 0 6px 6px;
+  }
+  .phone .p-bar {
+    position: absolute;
+    top: 26px; left: 10%; right: 10%;
+    height: 22px;
+    background: var(--royal-8);
+    border-radius: 3px;
+    opacity: 0.9;
+  }
+  .phone .p-bar::after {
+    content: "";
+    position: absolute;
+    top: 7px; left: 8px;
+    width: 28%;
+    height: 8px;
+    background: #fff;
+    border-radius: 1px;
+    opacity: 0.85;
+  }
+  .phone .p-card-1,
+  .phone .p-card-2,
+  .phone .p-card-3 {
+    position: absolute;
+    left: 8%; right: 8%;
+    height: 14%;
+    background: linear-gradient(135deg, rgba(139,165,255,0.22) 0%, rgba(184,132,255,0.18) 100%);
+    border: 1px solid rgba(165,180,255,0.22);
+    border-radius: 4px;
+  }
+  .phone .p-card-1 { top: 20%; }
+  .phone .p-card-2 { top: 36%; }
+  .phone .p-card-3 { top: 52%; }
+  .phone .p-btn {
+    position: absolute;
+    left: 8%; right: 8%;
+    bottom: 9%;
+    height: 8%;
+    background: var(--royal-10);
+    border-radius: 4px;
+    opacity: 0.85;
+  }
+  .phone .p-btn::after {
+    content: "";
+    position: absolute;
+    top: 38%; left: 30%;
+    width: 40%;
+    height: 22%;
+    background: #0a0d1a;
+    border-radius: 1px;
+    opacity: 0.6;
+  }
+
+  /* Auto-tint wrapper (reused across all phone layouts) */
+  .tinted-screenshot {
+    position: absolute;
+    inset: 0;
+  }
+  .tinted-screenshot::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--royal-8);
+    mix-blend-mode: color;
+    opacity: 0.55;
+    pointer-events: none;
+    z-index: 5;
+  }
+  .card.writing .tinted-screenshot::after { background: var(--violet-8); }
+
+  /* Option M1 — Crop: top slice of phone (UI header focus) */
+  .strip.m-crop-top {
+    background: var(--royal-1);
+    overflow: hidden;
+  }
+  .strip.m-crop-top .phone {
+    position: absolute;
+    top: 0;
+    left: 10%;
+    width: 80%;
+    border-radius: 22px 22px 0 0;
+    border-bottom: none;
+    aspect-ratio: 9 / 19.5;
+    /* grows downward off-strip */
+  }
+
+  /* Option M2 — Contain: centered device, small */
+  .strip.m-contain {
+    background:
+      radial-gradient(ellipse at 50% 50%, var(--royal-3) 0%, var(--royal-1) 75%);
+    display: grid;
+    place-items: center;
+  }
+  .strip.m-contain .phone {
+    position: relative;
+    height: 85%;
+    width: auto;
+    aspect-ratio: 9 / 19.5;
+  }
+
+  /* Option M3 — Tilted phone, bleeds right */
+  .strip.m-tilted {
+    background: var(--royal-1);
+  }
+  .strip.m-tilted .phone {
+    position: absolute;
+    height: 240px;
+    aspect-ratio: 9 / 19.5;
+    top: 50%;
+    left: 62%;
+    transform: translateY(-50%) rotate(10deg);
+    transform-origin: center;
+  }
+  .strip.m-tilted::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 22% 52%, color-mix(in srgb, var(--royal-8) 30%, transparent) 0%, transparent 55%);
+    z-index: 1;
+  }
+  .card.writing .strip.m-tilted::before {
+    background:
+      radial-gradient(ellipse at 22% 52%, color-mix(in srgb, var(--violet-8) 30%, transparent) 0%, transparent 55%);
+  }
+
+  /* Option M4 — Dual phone cascade */
+  .strip.m-dual {
+    background: var(--royal-1);
+  }
+  .strip.m-dual .phone {
+    position: absolute;
+    height: 200px;
+    aspect-ratio: 9 / 19.5;
+    top: 55%;
+    transform-origin: center;
+  }
+  .strip.m-dual .phone.one {
+    left: 22%;
+    transform: translateY(-50%) rotate(-8deg);
+    z-index: 2;
+  }
+  .strip.m-dual .phone.two {
+    left: 44%;
+    transform: translateY(-50%) rotate(8deg);
+    z-index: 1;
+    opacity: 0.92;
+  }
+
+  /* Option M5 — Phone + metadata split */
+  .strip.m-split {
+    background: var(--royal-1);
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+  }
+  .strip.m-split .meta {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-left: var(--s5);
+    padding-right: var(--s4);
+    gap: 6px;
+  }
+  .strip.m-split .meta .m-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--royal-11);
+  }
+  .strip.m-split .meta .m-num {
+    font-family: var(--font-display);
+    font-size: 60px;
+    line-height: 0.85;
+    font-weight: 300;
+    letter-spacing: -0.04em;
+    color: var(--royal-10);
+  }
+  .card.writing .strip.m-split .meta .m-eyebrow { color: var(--violet-11); }
+  .card.writing .strip.m-split .meta .m-num { color: var(--violet-10); }
+  .strip.m-split .phone-holder {
+    position: relative;
+    overflow: hidden;
+    border-left: 1px solid var(--rule);
+  }
+  .strip.m-split .phone {
+    position: absolute;
+    height: 220px;
+    aspect-ratio: 9 / 19.5;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -46%) rotate(-4deg);
+  }
+
+  /* Option M6 — UI detail zoom (one UI fragment, not the whole phone) */
+  .strip.m-detail {
+    background: var(--royal-1);
+    display: grid;
+    place-items: center;
+    padding: var(--s4);
+  }
+  .strip.m-detail .detail {
+    position: relative;
+    width: 78%;
+    height: 82%;
+    background: linear-gradient(180deg, #141938 0%, #0c0f24 100%);
+    border: 1px solid var(--royal-4);
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.5);
+  }
+  .strip.m-detail .detail::before {
+    content: "";
+    position: absolute;
+    top: 10px; left: 12px; right: 12px;
+    height: 12px;
+    background: var(--royal-8);
+    border-radius: 2px;
+  }
+  .strip.m-detail .detail .row {
+    position: absolute;
+    left: 12px; right: 12px;
+    height: 14px;
+    background: linear-gradient(90deg, rgba(139,165,255,0.25), rgba(184,132,255,0.12));
+    border: 1px solid rgba(165,180,255,0.22);
+    border-radius: 3px;
+  }
+  .strip.m-detail .detail .row.r1 { top: 34px; }
+  .strip.m-detail .detail .row.r2 { top: 54px; }
+  .strip.m-detail .detail .row.r3 { top: 74px; }
+  .strip.m-detail .detail .row.r4 { top: 94px; }
+  .strip.m-detail::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--royal-8);
+    mix-blend-mode: color;
+    opacity: 0.4;
+    pointer-events: none;
+  }
+  .card.writing .strip.m-detail::after { background: var(--violet-8); }
+
+  /* ===================================================================
+     Comparison table
+     =================================================================== */
+
+  .compare {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: var(--s6);
+    font-size: 13px;
+  }
+  .compare th, .compare td {
+    padding: var(--s3) var(--s4);
+    text-align: left;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+  }
+  .compare th {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--royal-11);
+    font-weight: 500;
+  }
+  .compare td.opt {
+    font-family: var(--font-display);
+    color: var(--ink);
+    font-weight: 500;
+    font-size: 15px;
+    width: 22%;
+  }
+  .compare td.verdict {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    width: 15%;
+  }
+  .compare .good  { color: #7BD88F; }
+  .compare .mid   { color: var(--royal-11); }
+  .compare .bad   { color: var(--violet-11); }
+  .compare td.desc { color: var(--ink-muted); }
+  .compare tr.pick { background: color-mix(in srgb, var(--violet-8) 7%, transparent); }
+  .compare tr.pick td.opt { color: var(--violet-12); }
+
+  /* ---------- Recommend box ---------- */
+
+  .recommend {
+    margin-top: var(--s8);
+    padding: var(--s6);
+    background:
+      linear-gradient(var(--royal-1), var(--royal-1)) padding-box,
+      var(--grad-rv) border-box;
+    border: 1px solid transparent;
+    border-radius: 12px;
+  }
+  .recommend h2 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 28px;
+    margin-bottom: var(--s3);
+  }
+  .recommend p {
+    color: var(--ink-muted);
+    font-size: 15px;
+    line-height: 1.7;
+    max-width: 66ch;
+  }
+  .recommend p + p { margin-top: var(--s3); }
+  .recommend strong { color: var(--ink); font-weight: 500; }
+  .recommend em { font-style: italic; color: var(--ink); }
+  .recommend code {
+    font-family: var(--font-mono);
+    background: rgba(165, 180, 255, 0.1);
+    padding: 1px 6px;
+    border-radius: 2px;
+    color: var(--royal-11);
+    font-size: 13px;
+  }
+  .recommend ul {
+    margin-top: var(--s4);
+    padding-left: var(--s5);
+    color: var(--ink-muted);
+    font-size: 14px;
+    line-height: 1.8;
+  }
+  .recommend ul strong { color: var(--ink); }
+
+  @media (max-width: 760px) {
+    .cards-row { grid-template-columns: 1fr; }
+    .doc-head h1 { font-size: 38px; }
+    section > h2 { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="doc-head">
+  <div class="eyebrow">Portfolio · card deep-dive · v3 · 2026-04-12</div>
+  <h1>Layout A with<br>every visual type</h1>
+  <p>
+    Follow-up to <strong>v1</strong> (six layouts) and <strong>v2</strong> (mandatory imagery, auto-tint, writing differentiation). This doc pins <strong>Layout A — top third strip</strong> as the card structure and asks: <em>does it hold up across all six visual types</em>, and <em>what happens when the screenshot is a mobile app</em>?
+  </p>
+  <p>
+    Two decisions baked in before this doc opens a single card:
+    <strong>(1)</strong> Layout A is fixed — every card has a 160px top strip with content below. v2's concern about mixed-species grids is resolved because imagery is now compulsory on every card.
+    <strong>(2)</strong> Numerals and monograms render in the <em>card's register colour</em>, not the signature gradient. The gradient is reserved for the gradient-mark type and featured cards — overusing it on text marks weakens the visual system and turns the page into soup.
+  </p>
+</header>
+
+<!-- ============================================================ -->
+<section>
+  <div class="kicker">§1 · visual types</div>
+  <h2>Six visual types, one layout</h2>
+  <p class="lede">
+    Each pair shows a <strong>work card</strong> (royal) beside a <strong>writing card</strong> (violet). The strip is 160px tall, spanning full card width. Content below is identical across pairs so the only thing that varies is the imagery treatment. Same hover state across all six: background lift + border change to the card's register colour. No per-type one-offs.
+  </p>
+
+  <!-- Type 1: screenshot -->
+  <div class="variant-group">
+    <div class="variant-label">Type 1 — <strong>Screenshot</strong> · auto-tinted via <code style="font-family:var(--font-mono);font-size:11px;color:var(--royal-11)">mix-blend-mode: color</code>. Author drops in any screenshot, component forces it into palette.</div>
+    <div class="cards-row">
+      <article class="card">
+        <div class="strip v-screenshot"><div class="photo"></div></div>
+        <div class="content">
+          <div class="kicker">SELECTED WORK · 02</div>
+          <h3><a class="card-link" href="#">The Weekly App<span class="arrow">→</span></a></h3>
+          <p class="desc">Meal-kit POC that turns Coles recipes into a consolidated trolley.</p>
+          <ul class="tags"><li>REACT</li><li>VITE</li><li>NETLIFY</li></ul>
+        </div>
+      </article>
+      <article class="card writing">
+        <div class="strip v-screenshot"><div class="photo"></div></div>
+        <div class="content">
+          <div class="kicker">ESSAY · CRAFT</div>
+          <h3><a class="card-link" href="#">Screenshots that don't lie<span class="arrow">→</span></a></h3>
+          <p class="desc">Why every portfolio image should be captured at render time, never baked in.</p>
+          <ul class="tags"><li>tooling</li><li>craft</li></ul>
+        </div>
+      </article>
+    </div>
+  </div>
+
+  <!-- Type 2: diagram -->
+  <div class="variant-group">
+    <div class="variant-label">Type 2 — <strong>Diagram</strong> · palette-locked strokes (royal-10 / violet-10). Mermaid + Excalidraw exports swap in at render time.</div>
+    <div class="cards-row">
+      <article class="card">
+        <div class="strip v-diagram">
+          <svg viewBox="0 0 400 160" preserveAspectRatio="xMidYMid meet">
+            <rect class="d-fill" x="40"  y="58" width="70" height="44" rx="4"/>
+            <rect class="d-fill" x="165" y="58" width="70" height="44" rx="4"/>
+            <rect class="d-fill" x="290" y="58" width="70" height="44" rx="4"/>
+            <line class="d-stroke" x1="110" y1="80" x2="165" y2="80"/>
+            <line class="d-stroke" x1="235" y1="80" x2="290" y2="80"/>
+            <line class="d-stroke-dim" x1="75"  y1="40" x2="75"  y2="58"/>
+            <line class="d-stroke-dim" x1="200" y1="40" x2="200" y2="58"/>
+            <line class="d-stroke-dim" x1="325" y1="40" x2="325" y2="58"/>
+            <circle class="d-fill" cx="75"  cy="34" r="4"/>
+            <circle class="d-fill" cx="200" cy="34" r="4"/>
+            <circle class="d-fill" cx="325" cy="34" r="4"/>
+            <text class="d-label" x="75"  y="124" text-anchor="middle">request</text>
+            <text class="d-label" x="200" y="124" text-anchor="middle">killswitch</text>
+            <text class="d-label" x="325" y="124" text-anchor="middle">vendor</text>
+          </svg>
+        </div>
+        <div class="content">
+          <div class="kicker">SELECTED WORK · 01</div>
+          <h3><a class="card-link" href="#">Planner App<span class="arrow">→</span></a></h3>
+          <p class="desc">GTD planner with persistent SMS, four-layer spend protection, and a killswitch that works.</p>
+          <ul class="tags"><li>TYPESCRIPT</li><li>CLOUDFLARE</li><li>D1</li></ul>
+        </div>
+      </article>
+      <article class="card writing">
+        <div class="strip v-diagram">
+          <svg viewBox="0 0 400 160" preserveAspectRatio="xMidYMid meet">
+            <rect class="d-fill" x="130" y="54" width="140" height="52" rx="4"/>
+            <line class="d-stroke" x1="40"  y1="80" x2="130" y2="80"/>
+            <line class="d-stroke" x1="270" y1="80" x2="360" y2="80"/>
+            <polyline class="d-stroke" points="120,72 130,80 120,88"/>
+            <polyline class="d-stroke" points="350,72 360,80 350,88"/>
+            <text class="d-label" x="200" y="84" text-anchor="middle">CHOKE POINT</text>
+          </svg>
+        </div>
+        <div class="content">
+          <div class="kicker">ESSAY · ARCHITECTURE</div>
+          <h3><a class="card-link" href="#">One module for every paid call<span class="arrow">→</span></a></h3>
+          <p class="desc">Convention-based spend discipline fails under pressure. Structural choke points don't.</p>
+          <ul class="tags"><li>architecture</li><li>reliability</li></ul>
+        </div>
+      </article>
+    </div>
+  </div>
+
+  <!-- Type 3: numeral — NEW colour rule -->
+  <div class="variant-group">
+    <div class="variant-label">Type 3 — <strong>Numeral</strong> · Fraunces display at 112px in the card's register colour. <em>Changed from v2</em>: solid colour, not gradient.</div>
+    <div class="cards-row">
+      <article class="card">
+        <div class="strip v-numeral"><div class="num">01</div></div>
+        <div class="content">
+          <div class="kicker">SELECTED WORK · 01</div>
+          <h3><a class="card-link" href="#">Planner App<span class="arrow">→</span></a></h3>
+          <p class="desc">When no screenshot or diagram fits the brief, the numeral carries the card on typography alone.</p>
+          <ul class="tags"><li>TYPESCRIPT</li><li>GTD</li></ul>
+        </div>
+      </article>
+      <article class="card writing">
+        <div class="strip v-numeral"><div class="num">04</div></div>
+        <div class="content">
+          <div class="kicker">ESSAY · LESSONS</div>
+          <h3><a class="card-link" href="#">Four guardrails that saved the budget<span class="arrow">→</span></a></h3>
+          <p class="desc">Writing-register numeral in violet only — never the gradient. Pure register signal, no dilution.</p>
+          <ul class="tags"><li>postmortem</li><li>lessons</li></ul>
+        </div>
+      </article>
+    </div>
+  </div>
+
+  <!-- Type 4: gradient mark -->
+  <div class="variant-group">
+    <div class="variant-label">Type 4 — <strong>Gradient mark</strong> · the signature. Use sparingly (see §2).</div>
+    <div class="cards-row">
+      <article class="card">
+        <div class="strip v-gradmark"></div>
+        <div class="content">
+          <div class="kicker">SELECTED WORK · FEATURED</div>
+          <h3><a class="card-link" href="#">Design system retrofit<span class="arrow">→</span></a></h3>
+          <p class="desc">Tokens-first architecture applied across three projects. Gradient-mark carries the abstract weight.</p>
+          <ul class="tags"><li>TOKENS</li><li>REFACTOR</li></ul>
+        </div>
+      </article>
+      <article class="card writing">
+        <div class="strip v-gradmark"></div>
+        <div class="content">
+          <div class="kicker">ESSAY · SIGNATURE</div>
+          <h3><a class="card-link" href="#">Royal Tonal in twelve steps<span class="arrow">→</span></a></h3>
+          <p class="desc">When the content IS the palette — gradient-mark is the only imagery that makes sense here.</p>
+          <ul class="tags"><li>colour</li><li>design</li></ul>
+        </div>
+      </article>
+    </div>
+  </div>
+
+  <div class="warning">
+    <strong>Open question on gradient-mark.</strong> Your feedback: when many cards show the gradient, visual identity weakens and the page becomes soup. Fix for text marks (numeral, monogram) is done — they use card colour now. But gradient-mark <em>is</em> the gradient. Proposed rule: gradient-mark is reserved for <strong>featured cards only</strong> and for posts where the gradient itself is the subject matter (see "Royal Tonal in twelve steps" above). This caps its appearance at roughly one per page and preserves it as a moment-of-emphasis mark, not a filler type. If you agree, gradient-mark drops out of the author's default-choice set and becomes a conscious reach.
+  </div>
+
+  <!-- Type 5: icon -->
+  <div class="variant-group">
+    <div class="variant-label">Type 5 — <strong>Icon</strong> · lucide-react, 68px stroke in card register colour. Subtle radial tint backs the icon.</div>
+    <div class="cards-row">
+      <article class="card">
+        <div class="strip v-icon">
+          <svg viewBox="0 0 24 24">
+            <path d="M20 12V8a2 2 0 0 0-2-2h-3"/>
+            <path d="M9 6H6a2 2 0 0 0-2 2v4"/>
+            <path d="M4 16v2a2 2 0 0 0 2 2h3"/>
+            <path d="M15 20h3a2 2 0 0 0 2-2v-2"/>
+            <rect x="8" y="10" width="8" height="6" rx="1"/>
+          </svg>
+        </div>
+        <div class="content">
+          <div class="kicker">SELECTED WORK · 03</div>
+          <h3><a class="card-link" href="#">MOB analysis<span class="arrow">→</span></a></h3>
+          <p class="desc">Quarter-by-quarter breakdown of a two-year B2B sales cycle from raw Salesforce exports.</p>
+          <ul class="tags"><li>ANALYSIS</li><li>SQL</li></ul>
+        </div>
+      </article>
+      <article class="card writing">
+        <div class="strip v-icon">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 20h9"/>
+            <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+          </svg>
+        </div>
+        <div class="content">
+          <div class="kicker">ESSAY · META</div>
+          <h3><a class="card-link" href="#">Writing as research<span class="arrow">→</span></a></h3>
+          <p class="desc">The posts that forced me to understand what I was actually claiming about the systems I was building.</p>
+          <ul class="tags"><li>craft</li><li>meta</li></ul>
+        </div>
+      </article>
+    </div>
+  </div>
+
+  <!-- Type 6: monogram -->
+  <div class="variant-group">
+    <div class="variant-label">Type 6 — <strong>Monogram</strong> · Geist Mono at 44px in card register colour. Lightest-weight option, works when nothing else fits.</div>
+    <div class="cards-row">
+      <article class="card">
+        <div class="strip v-monogram"><div class="mono">PLN</div></div>
+        <div class="content">
+          <div class="kicker">SELECTED WORK · 01</div>
+          <h3><a class="card-link" href="#">Planner App<span class="arrow">→</span></a></h3>
+          <p class="desc">Short-code lockup — the fallback when diagram and screenshot both feel forced.</p>
+          <ul class="tags"><li>TYPOGRAPHY</li></ul>
+        </div>
+      </article>
+      <article class="card writing">
+        <div class="strip v-monogram"><div class="mono">R/W</div></div>
+        <div class="content">
+          <div class="kicker">NOTE · FRAGMENT</div>
+          <h3><a class="card-link" href="#">Read-write reciprocity<span class="arrow">→</span></a></h3>
+          <p class="desc">Monogram in violet only. Good for index pages where many cards need to feel like siblings.</p>
+          <ul class="tags"><li>notes</li></ul>
+        </div>
+      </article>
+    </div>
+  </div>
+
+  <div class="note">
+    <strong>Consistency mechanics.</strong> Every type shares: (1) 160px strip height, (2) card-register palette — royal for work, violet for writing, gradient reserved for §2 edge cases, (3) identical border, radius, hover transition. Six visual languages, one system. The auto-tint on screenshots is the load-bearing trick — it means the author never has to negotiate with palette on arbitrary image input.
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section>
+  <div class="kicker">§2 · the gradient rule</div>
+  <h2>Why text marks use card colour, not gradient</h2>
+  <p class="lede">
+    v2 rendered the numeral with <code style="font-family:var(--font-mono);font-size:13px;color:var(--royal-11)">background: var(--grad-rv); -webkit-background-clip: text</code>. That looked great on a single card. It looked muddy on a 2×2 grid because <em>every text mark became the same gradient</em>, regardless of whether the card was work or writing. The register split collapsed into visual noise.
+  </p>
+  <p class="lede">
+    The rule now: <strong>text marks inherit the card's register colour.</strong> Work gets royal-10. Writing gets violet-10. Nothing in between. The gradient still exists — it lives on the <strong>gradient-mark</strong> type and on <strong>featured card borders</strong> (see v2 §4) — but it doesn't leak into every card that happens to use a numeral.
+  </p>
+
+  <div class="variant-label" style="margin-top:var(--s5)">Before — numeral uses <strong>gradient fill</strong> (v2 behaviour). Work and writing numerals look identical from 2m away.</div>
+  <div class="cards-row">
+    <article class="card">
+      <div class="strip" style="display:grid;place-items:center;background:var(--royal-1)">
+        <div style="font-family:var(--font-display);font-weight:300;font-size:112px;line-height:0.85;letter-spacing:-0.04em;background:var(--grad-rv);-webkit-background-clip:text;background-clip:text;color:transparent">01</div>
+      </div>
+      <div class="content">
+        <div class="kicker">SELECTED WORK · 01</div>
+        <h3><a class="card-link" href="#">Planner App<span class="arrow">→</span></a></h3>
+        <p class="desc">Gradient fill. Pretty in isolation; works against register signal in context.</p>
+        <ul class="tags"><li>TYPESCRIPT</li></ul>
+      </div>
+    </article>
+    <article class="card writing">
+      <div class="strip" style="display:grid;place-items:center;background:var(--royal-1)">
+        <div style="font-family:var(--font-display);font-weight:300;font-size:112px;line-height:0.85;letter-spacing:-0.04em;background:var(--grad-rv);-webkit-background-clip:text;background-clip:text;color:transparent">04</div>
+      </div>
+      <div class="content">
+        <div class="kicker">ESSAY · LESSONS</div>
+        <h3><a class="card-link" href="#">Four guardrails<span class="arrow">→</span></a></h3>
+        <p class="desc">Writing card — but the gradient is indistinguishable from the work card on the left.</p>
+        <ul class="tags"><li>postmortem</li></ul>
+      </div>
+    </article>
+  </div>
+
+  <div class="variant-label" style="margin-top:var(--s6)">After — numeral uses <strong>register colour</strong>. Royal vs violet reads instantly, kicker and tags reinforce rather than compete.</div>
+  <div class="cards-row">
+    <article class="card">
+      <div class="strip v-numeral"><div class="num">01</div></div>
+      <div class="content">
+        <div class="kicker">SELECTED WORK · 01</div>
+        <h3><a class="card-link" href="#">Planner App<span class="arrow">→</span></a></h3>
+        <p class="desc">Royal-10 numeral — same colour family as the kicker and the arrow. The card reads as one thing.</p>
+        <ul class="tags"><li>TYPESCRIPT</li></ul>
+      </div>
+    </article>
+    <article class="card writing">
+      <div class="strip v-numeral"><div class="num">04</div></div>
+      <div class="content">
+        <div class="kicker">ESSAY · LESSONS</div>
+        <h3><a class="card-link" href="#">Four guardrails<span class="arrow">→</span></a></h3>
+        <p class="desc">Violet-10 numeral. The writing register is now carried by three coordinated signals, not one gradient.</p>
+        <ul class="tags"><li>postmortem</li></ul>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section>
+  <div class="kicker">§3 · mobile screenshots</div>
+  <h2>When the "screenshot" is a phone</h2>
+  <p class="lede">
+    Layout A's strip is <strong>~420px × 160px</strong> on a 2×2 landing grid (~2.6:1). A mobile screenshot is <strong>~390 × 844</strong> (~1:2.16). The strip is about <em>six times wider than tall</em>, relative to the phone. Cover-cropping shows ~18% of the screen; contain-sizing leaves a 72×156 phone floating in a sea of padding. Neither reads as intentional.
+  </p>
+  <p class="lede">
+    Six options below, each rendered as a real strip so you can judge them directly. Same fake phone markup in all of them — the only variable is how it's placed inside the frame.
+  </p>
+
+  <!-- M1 crop-top -->
+  <div class="variant-group">
+    <div class="variant-label">Option M1 — <strong>Top slice</strong>. Phone positioned at the top of the strip, growing downward off-frame. Shows header + nav + first rows only.</div>
+    <div class="cards-row">
+      <article class="card">
+        <div class="strip m-crop-top">
+          <div class="tinted-screenshot">
+            <div class="phone">
+              <div class="p-bar"></div>
+              <div class="p-card-1"></div>
+              <div class="p-card-2"></div>
+              <div class="p-card-3"></div>
+              <div class="p-btn"></div>
+            </div>
+          </div>
+        </div>
+        <div class="content">
+          <div class="kicker">SELECTED WORK · 01</div>
+          <h3><a class="card-link" href="#">Planner App<span class="arrow">→</span></a></h3>
+          <p class="desc">M1 — natural if the app bar is the most recognisable UI element.</p>
+          <ul class="tags"><li>TYPESCRIPT</li><li>CLOUDFLARE</li></ul>
+        </div>
+      </article>
+      <article class="card writing">
+        <div class="strip m-crop-top">
+          <div class="tinted-screenshot">
+            <div class="phone">
+              <div class="p-bar"></div>
+              <div class="p-card-1"></div>
+              <div class="p-card-2"></div>
+              <div class="p-card-3"></div>
+              <div class="p-btn"></div>
+            </div>
+          </div>
+        </div>
+        <div class="content">
+          <div class="kicker">ESSAY · BUILD</div>
+          <h3><a class="card-link" href="#">The app bar problem<span class="arrow">→</span></a></h3>
+          <p class="desc">Feels fine in isolation. Weakness: the phone looks <em>cut off</em>, not framed.</p>
+          <ul class="tags"><li>mobile</li></ul>
+        </div>
+      </article>
+    </div>
+  </div>
+
+  <!-- M2 contain -->
+  <div class="variant-group">
+    <div class="variant-label">Option M2 — <strong>Contained device</strong>. Whole phone visible, centered, small. Radial glow frames it.</div>
+    <div class="cards-row">
+      <article class="card">
+        <div class="strip m-contain">
+          <div class="phone">
+            <div class="p-bar"></div>
+            <div class="p-card-1"></div>
+            <div class="p-card-2"></div>
+            <div class="p-card-3"></div>
+            <div class="p-btn"></div>
+          </div>
+        </div>
+        <div class="content">
+          <div class="kicker">SELECTED WORK · 01</div>
+          <h3><a class="card-link" href="#">Planner App<span class="arrow">→</span></a></h3>
+          <p class="desc">M2 — the phone is honest about being a phone. Reads as "here is the product".</p>
+          <ul class="tags"><li>TYPESCRIPT</li></ul>
+        </div>
+      </article>
+      <article class="card writing">
+        <div class="strip m-contain">
+          <div class="phone">
+            <div class="p-bar"></div>
+            <div class="p-card-1"></div>
+            <div class="p-card-2"></div>
+            <div class="p-card-3"></div>
+            <div class="p-btn"></div>
+          </div>
+        </div>
+        <div class="content">
+          <div class="kicker">ESSAY · SHIPPING</div>
+          <h3><a class="card-link" href="#">Holding the phone<span class="arrow">→</span></a></h3>
+          <p class="desc">Weakness: the phone is small — UI detail reads as "something" but not "this specific thing".</p>
+          <ul class="tags"><li>mobile</li></ul>
+        </div>
+      </article>
+    </div>
+  </div>
+
+  <!-- M3 tilted -->
+  <div class="variant-group">
+    <div class="variant-label">Option M3 — <strong>Tilted, bleeds right</strong>. Phone rotated 10°, positioned right-of-centre, extending above and below the strip. Radial glow on left feels intentional.</div>
+    <div class="cards-row">
+      <article class="card">
+        <div class="strip m-tilted">
+          <div class="phone">
+            <div class="p-bar"></div>
+            <div class="p-card-1"></div>
+            <div class="p-card-2"></div>
+            <div class="p-card-3"></div>
+            <div class="p-btn"></div>
+          </div>
+        </div>
+        <div class="content">
+          <div class="kicker">SELECTED WORK · 01</div>
+          <h3><a class="card-link" href="#">Planner App<span class="arrow">→</span></a></h3>
+          <p class="desc">M3 — the tilt converts "cropped phone" into "composed phone". Most editorial.</p>
+          <ul class="tags"><li>TYPESCRIPT</li><li>MOBILE</li></ul>
+        </div>
+      </article>
+      <article class="card writing">
+        <div class="strip m-tilted">
+          <div class="phone">
+            <div class="p-bar"></div>
+            <div class="p-card-1"></div>
+            <div class="p-card-2"></div>
+            <div class="p-card-3"></div>
+            <div class="p-btn"></div>
+          </div>
+        </div>
+        <div class="content">
+          <div class="kicker">ESSAY · FEATURE</div>
+          <h3><a class="card-link" href="#">Why tilt the phone<span class="arrow">→</span></a></h3>
+          <p class="desc">Weakness: applies one "art direction" gesture per card — starts to feel like a trick if every work card uses it.</p>
+          <ul class="tags"><li>design</li></ul>
+        </div>
+      </article>
+    </div>
+  </div>
+
+  <!-- M4 dual -->
+  <div class="variant-group">
+    <div class="variant-label">Option M4 — <strong>Dual cascade</strong>. Two phones, counter-tilted, overlapping. Suggests a flow or a before/after.</div>
+    <div class="cards-row">
+      <article class="card">
+        <div class="strip m-dual">
+          <div class="phone one">
+            <div class="p-bar"></div>
+            <div class="p-card-1"></div>
+            <div class="p-card-2"></div>
+            <div class="p-card-3"></div>
+            <div class="p-btn"></div>
+          </div>
+          <div class="phone two">
+            <div class="p-bar"></div>
+            <div class="p-card-1"></div>
+            <div class="p-card-2"></div>
+            <div class="p-card-3"></div>
+            <div class="p-btn"></div>
+          </div>
+        </div>
+        <div class="content">
+          <div class="kicker">SELECTED WORK · 01</div>
+          <h3><a class="card-link" href="#">Planner App<span class="arrow">→</span></a></h3>
+          <p class="desc">M4 — good for products with a two-screen story. Overkill for single-screen apps.</p>
+          <ul class="tags"><li>TYPESCRIPT</li></ul>
+        </div>
+      </article>
+      <article class="card writing">
+        <div class="strip m-dual">
+          <div class="phone one">
+            <div class="p-bar"></div>
+            <div class="p-card-1"></div>
+            <div class="p-card-2"></div>
+            <div class="p-card-3"></div>
+            <div class="p-btn"></div>
+          </div>
+          <div class="phone two">
+            <div class="p-bar"></div>
+            <div class="p-card-1"></div>
+            <div class="p-card-2"></div>
+            <div class="p-card-3"></div>
+            <div class="p-btn"></div>
+          </div>
+        </div>
+        <div class="content">
+          <div class="kicker">ESSAY · PATTERN</div>
+          <h3><a class="card-link" href="#">Before and after<span class="arrow">→</span></a></h3>
+          <p class="desc">Weakness: requires two screens that pair cleanly. The author has to do art direction, not just capture.</p>
+          <ul class="tags"><li>pattern</li></ul>
+        </div>
+      </article>
+    </div>
+  </div>
+
+  <!-- M5 split meta+phone -->
+  <div class="variant-group">
+    <div class="variant-label">Option M5 — <strong>Meta split</strong>. Left half is a numeral or label; right half is a tilted contained phone. Hybrid of Type 3 (numeral) and mobile screenshot.</div>
+    <div class="cards-row">
+      <article class="card">
+        <div class="strip m-split">
+          <div class="meta">
+            <div class="m-eyebrow">SELECTED WORK</div>
+            <div class="m-num">01</div>
+          </div>
+          <div class="phone-holder">
+            <div class="phone">
+              <div class="p-bar"></div>
+              <div class="p-card-1"></div>
+              <div class="p-card-2"></div>
+              <div class="p-card-3"></div>
+              <div class="p-btn"></div>
+            </div>
+          </div>
+        </div>
+        <div class="content">
+          <div class="kicker">SELECTED WORK · 01</div>
+          <h3><a class="card-link" href="#">Planner App<span class="arrow">→</span></a></h3>
+          <p class="desc">M5 — strongest editorial feel. Meta label anchors the card, phone supplies proof.</p>
+          <ul class="tags"><li>TYPESCRIPT</li><li>CLOUDFLARE</li></ul>
+        </div>
+      </article>
+      <article class="card writing">
+        <div class="strip m-split">
+          <div class="meta">
+            <div class="m-eyebrow">ESSAY</div>
+            <div class="m-num">04</div>
+          </div>
+          <div class="phone-holder">
+            <div class="phone">
+              <div class="p-bar"></div>
+              <div class="p-card-1"></div>
+              <div class="p-card-2"></div>
+              <div class="p-card-3"></div>
+              <div class="p-btn"></div>
+            </div>
+          </div>
+        </div>
+        <div class="content">
+          <div class="kicker">ESSAY · 04</div>
+          <h3><a class="card-link" href="#">Guardrails for mobile<span class="arrow">→</span></a></h3>
+          <p class="desc">Weakness: the numeral now duplicates the kicker number. Redundant if both are shown.</p>
+          <ul class="tags"><li>mobile</li></ul>
+        </div>
+      </article>
+    </div>
+  </div>
+
+  <!-- M6 detail zoom -->
+  <div class="variant-group">
+    <div class="variant-label">Option M6 — <strong>UI detail zoom</strong>. Not the phone — one UI fragment (button group, list, panel) rendered at the strip's aspect ratio. Reads as "here is the interesting bit".</div>
+    <div class="cards-row">
+      <article class="card">
+        <div class="strip m-detail">
+          <div class="detail">
+            <div class="row r1"></div>
+            <div class="row r2"></div>
+            <div class="row r3"></div>
+            <div class="row r4"></div>
+          </div>
+        </div>
+        <div class="content">
+          <div class="kicker">SELECTED WORK · 01</div>
+          <h3><a class="card-link" href="#">Planner App<span class="arrow">→</span></a></h3>
+          <p class="desc">M6 — doesn't pretend to show the whole app. Shows the exact moment the card is about.</p>
+          <ul class="tags"><li>TYPESCRIPT</li><li>DETAIL</li></ul>
+        </div>
+      </article>
+      <article class="card writing">
+        <div class="strip m-detail">
+          <div class="detail">
+            <div class="row r1"></div>
+            <div class="row r2"></div>
+            <div class="row r3"></div>
+            <div class="row r4"></div>
+          </div>
+        </div>
+        <div class="content">
+          <div class="kicker">ESSAY · DETAIL</div>
+          <h3><a class="card-link" href="#">The shape of a list<span class="arrow">→</span></a></h3>
+          <p class="desc">Weakness: requires a crop decision per card. No automatic answer from "here's the screenshot".</p>
+          <ul class="tags"><li>craft</li></ul>
+        </div>
+      </article>
+    </div>
+  </div>
+
+  <!-- comparison -->
+  <table class="compare">
+    <thead>
+      <tr>
+        <th>Option</th>
+        <th>Author effort</th>
+        <th>Honest to UI</th>
+        <th>Grid rhythm</th>
+        <th>Read</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="opt">M1 · Top slice</td>
+        <td class="verdict good">low</td>
+        <td class="verdict mid">partial</td>
+        <td class="verdict good">clean</td>
+        <td class="desc">Safe default. Reads as "cut off" when the app bar isn't load-bearing.</td>
+      </tr>
+      <tr>
+        <td class="opt">M2 · Contained</td>
+        <td class="verdict good">none</td>
+        <td class="verdict good">yes</td>
+        <td class="verdict good">clean</td>
+        <td class="desc">Honest but tiny. UI detail disappears at grid scale.</td>
+      </tr>
+      <tr class="pick">
+        <td class="opt">M3 · Tilted bleed</td>
+        <td class="verdict mid">medium</td>
+        <td class="verdict mid">partial</td>
+        <td class="verdict good">clean</td>
+        <td class="desc">Best balance. Composition signals "this is a product shot", phone reads as intentional.</td>
+      </tr>
+      <tr>
+        <td class="opt">M4 · Dual cascade</td>
+        <td class="verdict bad">high</td>
+        <td class="verdict good">yes</td>
+        <td class="verdict mid">mixed</td>
+        <td class="desc">Great for two-screen stories, heavy otherwise. Save for hero cards.</td>
+      </tr>
+      <tr>
+        <td class="opt">M5 · Meta split</td>
+        <td class="verdict mid">medium</td>
+        <td class="verdict good">yes</td>
+        <td class="verdict mid">mixed</td>
+        <td class="desc">Strong editorial feel, but duplicates kicker number if the meta shows the same digit.</td>
+      </tr>
+      <tr>
+        <td class="opt">M6 · Detail zoom</td>
+        <td class="verdict bad">high</td>
+        <td class="verdict good">yes</td>
+        <td class="verdict good">clean</td>
+        <td class="desc">Highest craft ceiling, highest author cost — requires a crop decision per card.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="note">
+    <strong>My read: M3 (tilted bleed) as default, M1 (top slice) as fallback.</strong> M3 handles single-screen apps gracefully and turns the aspect-ratio problem into a compositional feature. M1 is the no-decisions escape hatch when M3's art direction feels wrong for a specific piece (e.g. a writing post where the phone is referenced but isn't the subject).
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<div class="recommend">
+  <h2>Recommendation</h2>
+  <p>
+    Lock <strong>Layout A</strong> (top third strip, content below) as the card spec. All six visual types render cleanly in it, the strip is big enough to carry meaningful imagery, and the content-below pattern is the most familiar scan order.
+  </p>
+  <p>
+    Adopt the <strong>text-mark colour rule</strong>: numerals and monograms use the card's register colour (royal-10 for work, violet-10 for writing). The signature gradient lives only on the <strong>gradient-mark</strong> type and on featured card borders. Treat gradient-mark as a deliberate reach — suitable for featured cards and posts where the palette is the subject, not as a filler for cards that have no better image.
+  </p>
+  <p>
+    For <strong>mobile screenshots</strong>, make <code>M3 tilted bleed</code> the default and <code>M1 top slice</code> the fallback. Document both in the imagery standards so the author has a one-sentence rule: <em>"Mobile case study → tilted bleed. If the bleed composition fights the content, fall back to top slice."</em>
+  </p>
+  <p>
+    Open question to resolve before closing this doc:
+  </p>
+  <ul>
+    <li><strong>Does gradient-mark stay in the type pool or drop to a reserved slot?</strong> My recommendation is to reserve it, because the whole point of the colour rule change is to keep the gradient rare. But if the portfolio ends up with a lot of "palette / colour / system" writing posts, gradient-mark needs to be available for those without special permission.</li>
+    <li><strong>Do we add M3 and M1 as explicit <code>image.kind: "mobile-screenshot"</code> sub-types in the Card props API</strong>, or just leave them as capture-time decisions handled by the imagery standards doc? Sub-typing in TS makes the system louder and harder to misuse — but also harder to evolve.</li>
+  </ul>
+</div>
+
+</body>
+</html>
