@@ -1,6 +1,6 @@
 # Portfolio — Implementation Plan (Phase 7)
 
-**Status:** In progress. Chunk 3 complete (2026-04-11). Chunk 4 restructured into 4a–4d (content-first), plus new chunks 5.5 (writing posts) and 5.6 (/about one-off) — 2026-04-11.
+**Status:** In progress. Chunk 3 complete (2026-04-11). Chunk 4 restructured into 4a–4d (content-first), plus new chunks 5.5 (writing posts) and 5.6 (/about one-off) — 2026-04-11. Chunk 4a expanded to include 4a.6 (transcript capture workflow) — 2026-04-12. Chunks 4b and 4c.1 amended to treat verbatim chat transcripts as a first-class artefact type alongside screenshots and diagrams.
 
 **Tailwind v4 gotcha discovered in chunk 1:** `astro add tailwind` installs `@tailwindcss/vite` (Vite plugin) not `@astrojs/tailwind`. No `tailwind.config.mjs` needed. CSS variables in `globals.css` are the token system. References to `tailwind.config.mjs` in this plan are obsolete — skip those sub-steps.
 
@@ -156,6 +156,92 @@ Retro-apply the style guide to the diary capture process so future entries arriv
 
 ---
 
+## Chunk 4a.6 — Transcript capture workflow (portfolio repo)
+
+**Deliverable:** an in-flow `/bookmark` skill, a promote script, and a Zod-validated `transcripts` content collection, so that verbatim chat transcripts can be captured as a first-class portfolio artefact without trawling back through sessions after the fact.
+
+**Why this chunk exists:** the portfolio is largely a "learning to ship with Claude Code" narrative. Verbatim transcripts are the single strongest product-thinking signal available — they show real reasoning, real pivots, real mistakes in the user's own words and Claude's actual replies. The expensive cognitive step is judging "is this moment worth capturing?" — which is cheapest in the moment, with full context, when judgment is sharpest. Everything downstream (extraction, storage, formatting) is mechanical and must be automated so the judgment call is the only effort the user ever spends.
+
+**Placement in 4a:** this is the last sub-chunk of the foundation phase. 4a.1–4a.5 are workspace-wide writing/imagery/diary foundations; 4a.6 is portfolio-repo tooling, but it sits in 4a because the first validating use happens *during* 4b–4d and the capture library starts accumulating from the very next session.
+
+### Step 4a.6.1 — Define the `transcripts` content collection
+
+- Add a `transcripts` entry to `src/content.config.ts` alongside `projects`, `writing`, `log`
+- Zod schema fields: `id` (slug), `title`, `date`, `project` (optional reference to a `projects` entry), `context` (one-line description of the moment), `note` (Dylan's inline annotation), `sourceSessionId`, `turns: Array<{ role: 'user' | 'assistant', text: string, collapsedTools?: string[] }>`
+- Loader: `glob({ pattern: '**/*.json', base: './src/content/transcripts' })` — excludes the `drafts/` subdirectory via pattern negation so drafts never enter the build
+- `astro check` validates the schema at build time; a malformed transcript fails the build, same discipline as the other collections
+
+### Step 4a.6.2 — Build `scripts/bookmark-transcript.mjs`
+
+The backing script for the `/bookmark` skill. Node, no dependencies beyond the standard library.
+
+**Inputs (via CLI args):**
+- `--slug <kebab-case-slug>` — required
+- `--note "<short string>"` — optional but encouraged
+- `--back <N>` — optional, default 6
+- `--extend` — optional flag; if a draft with this slug already exists, append the most recent N turns instead of overwriting
+
+**Behaviour:**
+1. Locate the active session JSONL: the most-recently-modified file in `~/.claude/projects/C--Users-User-Documents-Claude-code/`. Validate mtime is within the last 5 minutes (otherwise error with a clear message — bookmarking a stale session is almost always a mistake).
+2. Parse the JSONL, filter to user + assistant message events, preserve order.
+3. Extract the last `N` turns (or the turns since the last bookmark for the same slug if `--extend`).
+4. For each turn: extract the text, detect tool_use/tool_result blocks and replace them with a one-line label (`[Read <path>]`, `[Edit <path>]`, `[Bash <first 40 chars of command>]`, etc.). Never store raw tool JSON.
+5. Run the automated redaction pass (see 4a.3 "Redaction rules"): secret prefixes → `[REDACTED]`, `C:\Users\User\…` → `~/…`, email addresses → `[redacted-email]`.
+6. Write (or merge, with `--extend`) the draft to `src/content/transcripts/drafts/<slug>.json` using the content collection schema shape.
+7. Print: `✓ bookmarked <N> turns → drafts/<slug>.json — remember to hand-review before promoting`.
+
+**Error cases to handle:**
+- No recent session file → clear error, suggest checking the projects folder
+- Slug already exists in published `transcripts/` (not `drafts/`) → refuse, tell user to pick a new slug or edit the published file directly
+- `--extend` on a slug that has no existing draft → treat as a fresh bookmark
+- Session file parse error → report the bad line but don't crash the whole capture
+
+### Step 4a.6.3 — Build `scripts/promote-transcript.mjs`
+
+The promote script. Runs at the user's discretion after hand-review.
+
+**Inputs:** `--slug <slug>` — required. Optional `--dry-run` to print what would change without moving files.
+
+**Behaviour:**
+1. Read the draft at `src/content/transcripts/drafts/<slug>.json`.
+2. Re-run the redaction regex pass (defence in depth — catches anything hand-edits re-introduced).
+3. Run a structural check: min 2 turns, max 8 turns, every turn has non-empty text, no role other than `user`/`assistant`.
+4. Validate against the Zod schema (import from `content.config.ts`).
+5. Print a hand-review checklist to stdout: "Have you checked for real names? Absolute paths missed by regex? Private project names? Anything you wouldn't want a hiring manager to see?" — require the user to type `yes` to proceed.
+6. Move the file to `src/content/transcripts/<slug>.json`.
+7. Print: `✓ promoted <slug>. Commit when ready.`
+
+### Step 4a.6.4 — Wire up the `/bookmark` slash command
+
+Create a skill at `.claude/skills/bookmark/SKILL.md` (portfolio repo) that wraps `scripts/bookmark-transcript.mjs`. The skill takes the slug + optional note as arguments, runs the script via Bash, and reports the result inline. The skill description must make the in-flow use case obvious so Claude suggests it when the user signals a moment is worth capturing ("that was the key decision", "that's when I realised", etc.).
+
+### Step 4a.6.5 — Wire draft review into `/session-end`
+
+Update the `/session-end` skill (workspace) so that at session close it lists any files in `portfolio/src/content/transcripts/drafts/` created this session and prints:
+- Slug
+- Note
+- Turn count
+- Path
+
+Prompt the user: "Promote, edit, or delete?" — with one-keystroke options. This is the single guarantee that drafts don't pile up forgotten.
+
+### Step 4a.6.6 — First-use validation gate
+
+Before chunk 4b starts: bookmark one real moment from the next portfolio session using `/bookmark`. Promote it end-to-end. If any friction appears (wrong default window, regex missed something, session file not found, etc.), fix it before 4b rather than learning about it during the-weekly workshop.
+
+### Acceptance
+
+- `transcripts` content collection schema exists and `astro check` passes with an empty `transcripts/` folder
+- `scripts/bookmark-transcript.mjs` and `scripts/promote-transcript.mjs` exist and are tested against a real session JSONL
+- `/bookmark` skill invokable from within Claude Code, runs the script, returns success
+- `/session-end` lists pending drafts
+- At least one real transcript has been captured, hand-reviewed, promoted, and committed
+- The `<ChatTranscript>` component does **not** exist yet — that's chunk 4c.1
+
+**Commit:** `portfolio: transcript capture workflow (/bookmark skill, promote script, transcripts collection)`
+
+---
+
 ## Chunk 4b — Case study content hierarchy (template scaffold)
 
 **Deliverable:** A locked case study template defined purely as content hierarchy — sections, what each section answers, target word counts, required artefacts (screenshots, pull-quotes, links). No layout, no prose.
@@ -170,11 +256,19 @@ Hero:          title + one-line TL;DR + tags + live link + primary image slot
 Problem:       what was broken or missing + why it mattered (~80 words)
 Process:       key product decisions + rejected alternatives + why (~200 words)
                [diagram slot: decision tree or architecture sketch]
+               [optional transcript slot: one decision-moment embed, inline or breakout]
 Outcome:       what shipped + measurable result + screenshots (~80 words)
                [screenshot slot: 2–3 hero shots]
 Lessons:       honest reflection, what would be done differently (~80 words)
+               [optional transcript slot: one mistake-moment embed, inline only]
 Next:          related writing post OR next case study
 ```
+
+**Transcript slot rules (per 4a.3 "Chat transcripts"):**
+- Transcripts are only allowed in **Process** (showing a decision moment) or **Lessons** (showing the mistake). Never in Hero, Problem, or Outcome — those are claim sections, and a transcript in a claim section invites the reader to audit the dialogue instead of trusting the prose.
+- Full case studies can have up to 2 transcript embeds total, max 1 in breakout mode.
+- Lightweight case studies can have up to 1 transcript embed, inline only.
+- Every transcript embed must have a real note explaining why it was marked — "here's a conversation" is not enough.
 
 ### Step 4b.2 — Validate against the style guide
 
@@ -183,6 +277,7 @@ Check that every section has a clear home for the signals from `writing-style.md
 - Where do **trade-offs** live? (Process — rejected alternatives)
 - Where does **honest reflection** live? (Lessons)
 - Where do **imagery slots** live? (Hero, Process, Outcome — each with purpose)
+- Where do **transcript slots** live? (Process for decisions, Lessons for mistakes — per 4a.3)
 
 Adjust the scaffold until every signal has a home and every section earns its place.
 
@@ -191,6 +286,7 @@ Adjust the scaffold until every signal has a home and every section earns its pl
 - **Full case studies** (the-weekly, planner-app): 400–600 words body
 - **Lightweight case studies** (workspace-audit, portfolio itself): 200–350 words body
 - Each section gets a target band — writer knows when they're over budget
+- **Transcript embeds count as 50 words against the section budget regardless of actual turn length.** This prevents embeds from being used to pad word counts while still discouraging over-embedding — a section with 3 transcripts loses 150 words of its prose budget, which is usually the whole section.
 
 ### Step 4b.4 — Lock
 
@@ -218,8 +314,18 @@ This is the most important layout in the portfolio. It needs to:
 - Fit the content hierarchy from 4b exactly
 - Handle both full (400–600w) and lightweight (200–350w) variants gracefully
 - Integrate imagery slots per 4a.3 (hero image, inline screenshots, diagrams)
+- Integrate **transcript slots** per 4a.3 ("Chat transcripts" section) — the `<ChatTranscript>` component is a required layout element alongside `<Screenshot>`
 - Work on mobile without degrading the reading experience
 - End with a clear "next" artefact (related writing post or next case study)
+
+**`<ChatTranscript>` component — built here in 4c.1:**
+- Two display modes: `inline` (prose-column width, routine decisions) and `breakout` (extends into the right margin on desktop, for pivotal moments). Mobile collapses breakout → inline width.
+- Full frame spec (background, radius, padding, sender label typography, turn separator, tool-call label style, annotation margin note) is locked in 4a.3. Component implements it exactly — no per-page overrides.
+- Reads transcript data from the `transcripts` content collection (built in 4a.6). Usage: `<ChatTranscript id="the-weekly-pivot" mode="breakout" />`.
+- Lives at `src/components/ChatTranscript.astro`. Sibling to `Screenshot.astro`.
+- Zero client-side JS — static render, no interactivity. No expand/collapse on tool calls (they're always collapsed per 4a.3).
+
+**Sample transcripts in the design explorers:** both `case-study-v1.html` and `case-study-v2.html` must render at least one `inline` transcript and one `breakout` transcript using placeholder turns (e.g. from an early portfolio session, bookmarked via 4a.6). This is how we pick the layout — on how the transcripts read in context, not in isolation.
 
 Produce 2 layout options, pick one. Save both (`case-study-v1.html`, `case-study-v2.html`) — rejected options are part of the design trail.
 

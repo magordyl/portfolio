@@ -11,9 +11,9 @@ Not a style-guide replacement. The final workspace-wide rules live in `writing-s
 
 ## Aesthetic direction
 
-**One sentence:** Cutler-influenced sketch aesthetic for diagrams, Royal Tonal-framed screenshots of real artefacts, no figurative illustration.
+**One sentence:** Cutler-influenced sketch aesthetic for diagrams, Royal Tonal-framed screenshots of real artefacts, verbatim chat transcripts as a first-class artefact type, no figurative illustration.
 
-The portfolio is a product-thinking portfolio, not an illustrated essay collection. Diagrams earn their place by replacing paragraphs, not by decorating them. Screenshots show real things that actually shipped. Everything else is absent on purpose.
+The portfolio is a product-thinking portfolio, not an illustrated essay collection. Diagrams earn their place by replacing paragraphs, not by decorating them. Screenshots show real things that actually shipped. Chat transcripts show real decision moments from real sessions — unedited, un-paraphrased, captured in-flow. Everything else is absent on purpose.
 
 **Two influences to borrow from, one to ignore:**
 
@@ -184,6 +184,103 @@ Exported PNGs get wrapped in the same `<Screenshot>` component as Puppeteer capt
 
 ---
 
+## Chat transcripts
+
+Verbatim snippets from Claude Code sessions are a **first-class artefact type**, not a novelty. The portfolio is largely about the journey of learning to ship with Claude Code, so showing real dialogue — real decision moments, real pivots, real mistakes — is the strongest available product-thinking signal. A paraphrased or fabricated exchange is worse than none at all.
+
+### What counts as a transcript
+
+Real Claude Code session turns captured via the bookmark workflow (chunk 4a.6). Specifically:
+
+- User prompts and assistant replies from a real session, unedited text
+- Tool calls **collapsed** to a one-line label (`[Read package.json]`, `[Edit src/foo.ts]`) — never expanded JSON
+- Optional inline note/annotation from Dylan explaining *why* this moment was marked
+
+Not transcripts:
+- Paraphrased or tidied-up versions of conversations
+- Fabricated dialogue for illustrative purposes
+- Transcripts from other AI tools (ChatGPT, Cursor) — this portfolio is about Claude Code specifically
+- Terminal-only shell session captures (those are screenshots, use Ray.so)
+
+### Why verbatim and nothing else
+
+The credibility of a transcript embed comes entirely from its rawness. The moment a reader suspects it's been polished, the signal inverts — it starts reading like a marketing asset. Rules:
+
+- **Never edit turn text** beyond the redaction pass below
+- **Never reorder turns**
+- **Never combine turns from different sessions** into one embed
+- **Never add turns that didn't happen**
+
+If the real transcript doesn't make the point, don't fabricate — either pick a different moment or tell the story in prose without the embed.
+
+### Redaction rules (automated pass, then hand-review)
+
+The capture workflow runs an automated regex pass before writing the draft:
+
+- **Secrets:** `sk-…`, `ghp_…`, `AKIA…`, anything matching obvious token prefixes → replaced with `[REDACTED]`
+- **Absolute Windows paths:** `C:\Users\User\…` → `~/…` (keeps the relative shape, hides the home dir)
+- **Email addresses:** replaced with `[redacted-email]`
+- **Real names** other than Dylan's: caught on hand-review, not automated
+
+Hand-review is mandatory after the automated pass. The draft lives in `src/content/transcripts/drafts/` until it's been reviewed; only then does it move to `src/content/transcripts/`. No exceptions — a transcript that hasn't been hand-reviewed must not appear in a published page.
+
+### Embed length — min 2, max ~8 turns
+
+- **Fewer than 2 turns** is a quote, not a transcript. Use a pull-quote styled block instead.
+- **More than 8 turns** loses the reader. Pick the pivotal sub-range, or split into two separate embeds with prose between them.
+- Tool calls count as zero turns for this budget — only user/assistant prose counts.
+
+The `/bookmark` skill defaults to capturing the last 6 turns, which hits this range comfortably.
+
+### Frame specification — `<ChatTranscript>` component
+
+Built in chunk 4c.1 alongside the layout mockups. Two display modes, selected via a `mode` prop:
+
+| Property | `inline` | `breakout` |
+|---|---|---|
+| Width | Prose column (matches body text) | Wider than prose (extends into the right margin on desktop) |
+| Use when | Showing a routine decision or small exchange | Showing the pivotal moment of the case study |
+| Per case study | Up to 2 | Max 1 |
+| Mobile behaviour | Unchanged | Collapses to prose-column width, same as inline |
+
+Shared frame values:
+
+| Property | Value | Reason |
+|---|---|---|
+| Background | `var(--color-royal-950)` (darker than screenshot frame) | Distinct visual register — "this is a different medium" |
+| Outer radius | 12px | Slightly tighter than screenshot's 16px, reads as "dialogue box" not "photo" |
+| Padding | 24px all sides | Room for sender labels without feeling cramped |
+| Sender label font | Geist Mono at caption size | Consistent with captions elsewhere |
+| User sender label | "Dylan" in Royal Tonal 300 | Warm accent, slightly lighter than body |
+| Assistant sender label | "Claude" in Royal Tonal 500 | Core brand accent — anchor colour of the palette |
+| Turn separator | 1px hairline in Royal Tonal 900 | Quiet, not a box-in-box |
+| Turn text font | Geist (sans body) at body size | Readable, not "chat bubble" styled |
+| Tool-call label | Geist Mono at caption size, Royal Tonal 700 | Visibly lesser — "this happened but it's not the point" |
+| Annotation margin note | Geist Mono at caption size, italic, Royal Tonal 400 | Hand-written feel without an actual handwriting font |
+| Max height | None — transcripts are never scroll-trapped | Scroll-within-scroll is a UX failure |
+
+### MDX usage pattern
+
+```mdx
+<ChatTranscript id="the-weekly-pivot" mode="breakout" />
+```
+
+Astro resolves the `id` against the `transcripts` content collection (Zod schema, validated at build). `mode` defaults to `inline`. Any additional prop validation is the component's responsibility.
+
+### Banlist additions (extends the Sourcing rules below)
+
+**Banned for transcripts specifically:**
+- Any non-verbatim content (edited, paraphrased, reconstructed from memory)
+- Transcripts from other tools presented as Claude Code
+- Transcripts with unredacted secrets, paths, or PII
+- Transcripts with fewer than 2 turns of real dialogue
+
+### Where transcripts live in case studies
+
+Per chunk 4b rules, transcripts are only allowed in **Process** (showing a decision moment) or **Lessons** (showing the mistake). Never in Hero, Problem, or Outcome sections — those are claim sections, and a transcript embed in a claim section invites the reader to scan the dialogue for validation instead of trusting the prose.
+
+---
+
 ## Illustrations — deliberately absent
 
 No figurative illustrations. No characters, no scenes, no hand-drawn metaphors. Reasoning:
@@ -233,6 +330,7 @@ Caption: `Source: <site name>, <date>.` One line, mono, same style as diagram ca
 - **Screenshots:** WebP at quality 90 (30-50% smaller than PNG, universal 2026 support).
 - **Code screenshots:** PNG exported from Ray.so / Carbon, converted to WebP via `cwebp` for repo storage.
 - **Photographs (if ever used):** WebP at quality 85.
+- **Chat transcripts:** JSON, one file per transcript, stored in the `transcripts` content collection (Zod-validated at build).
 
 ### Repo layout (portfolio repo)
 
@@ -244,12 +342,18 @@ src/
     og/                    # committed OG/social WebPs (chunk 6+)
   components/
     Screenshot.astro       # framing component (chunk 4c)
+    ChatTranscript.astro   # transcript framing component (chunk 4c.1)
+  content/
+    transcripts/           # published transcripts (JSON, Zod-validated)
+      drafts/              # pending hand-review — not rendered on the site
 diagrams-src/              # source files, committed, NOT referenced at runtime
   *.mmd                    # Mermaid source for flowcharts
   *.excalidraw             # Excalidraw JSON for non-flowchart diagrams
 scripts/
   capture-screenshots.ts   # Puppeteer capture script (chunk 4d)
   render-diagrams.sh       # mmdc batch script (chunk 4d)
+  bookmark-transcript.mjs  # /bookmark backing script — captures a draft (chunk 4a.6)
+  promote-transcript.mjs   # draft → published, runs redaction regex (chunk 4a.6)
 ```
 
 ### Naming convention
@@ -304,13 +408,22 @@ Total: ~3 minutes per new screenshot after initial script setup.
 4. Commit the WebP.
 Total: ~3 minutes.
 
+**Chat transcript:**
+1. Notice a moment worth capturing during a live session (0s — just pay attention).
+2. Fire `/bookmark <slug> "short note"` inline (5s).
+3. Skill writes a draft JSON to `src/content/transcripts/drafts/<slug>.json` with the last 6 turns (default) and runs the automated redaction pass (5s, invisible to user).
+4. At session-end, review the draft (hand-check for PII/paths the regex missed, tighten the note if useful, delete if on reflection it's not worth shipping) — 1–3 min per draft.
+5. Run `npm run promote-transcript <slug>` to move draft → published and commit.
+Total: ~5 seconds in-session, ~3 minutes at session-end.
+
 ---
 
 ## What this feeds into
 
 - **Chunk 4a.4** — this doc is the input for the "Imagery & illustration standards" section of `.claude/rules/writing-style.md` (workspace repo). That section is a compressed version of this research, not a copy.
-- **Chunk 4c** — layout mockups include real imagery slots per these rules. The `<Screenshot>` component is built here so the layouts can demo it.
-- **Chunk 4d** — the-weekly case study workshop produces the first real diagrams and screenshots using this workflow, and validates it end-to-end. The Puppeteer capture script and mmdc batch script are built here.
+- **Chunk 4a.6** — the bookmark/capture/promote workflow and the `transcripts` content collection schema are built here. First-use gate: bookmark one real moment from the next portfolio session before chunk 4b starts, to validate the flow end-to-end.
+- **Chunk 4c** — layout mockups include real imagery slots per these rules. The `<Screenshot>` and `<ChatTranscript>` components are built here so the layouts can demo both.
+- **Chunk 4d** — the-weekly case study workshop produces the first real diagrams, screenshots, and transcript embeds using this workflow, and validates it end-to-end. The Puppeteer capture script and mmdc batch script are built here.
 
 ## Open items deferred
 
