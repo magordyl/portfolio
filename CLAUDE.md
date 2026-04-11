@@ -40,6 +40,10 @@ Astro uses `@tailwindcss/vite` (Vite plugin), NOT `@astrojs/tailwind`. The `astr
 
 ## Current Status (2026-04-12)
 
+**Card deep-dive v2 shipped (2026-04-12, this session)** — `plans/portfolio-stitch-assets/card-deep-dive-v2.html` (commit `0f88780`). Three decisions locked vs v1: (1) imagery is mandatory on every card, no empty state; (2) auto-tint via CSS `mix-blend-mode: color` — zero author effort, works on arbitrary screenshot input, per-register palette (royal for work, violet for writing); (3) writing left stripe dropped in favour of five lighter alternatives mocked side-by-side — baseline (kicker+tag colour only), top rule, kicker dot, kicker icon, tinted corner frame. Recommendation: baseline + tinted corner together, since tint is already happening per-register and doubles the signal for free. Also includes six visual type mocks (screenshot, diagram, numeral, gradient-mark, icon, monogram) in one frame, featured variant (gradient border + FEATURED pin), shimmer loading state, and whole-card click via `::after` overlay with tags on `z-index: 2`. v1 preserved as iteration trail. **Pending user review** — pick a writing differentiation variant (my rec: baseline + tinted corner), then lock as card spec and proceed to chunk 4b.
+
+**Backfill commit (2026-04-12, this session)** — commit `05098d9` brought seven accumulated artefacts from prior sessions into version control: `accent-palette-explorer-v1.html` through `v5.html` (iteration trail of gestalt critique and audit fixes), `card-deep-dive-v1.html` (first pass scoping six card layout options, recommending layout D corner accent), and the expanded `portfolio-design-tokens.md` (violet signal 5-step scale, signature gradient tokens, WCAG 2.1 AA audit notes). Prior sessions produced these but never pushed them.
+
 **Chunk 3 complete** — landing page with asymmetric hero split, BuildLogTicker, 2x2 CaseStudyCard grid, About teaser, closing quote. `npm run check` passes clean.
 
 **Deployed** — Cloudflare Pages connected to `magordyl/portfolio` (`main` branch). Live at `dylan-portfolio.magordyl.workers.dev`. Every push to `main` auto-deploys.
