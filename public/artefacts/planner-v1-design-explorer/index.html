@@ -1,0 +1,1412 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Planner V1 — Design Explorer v1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* ─────────────────────────────────────────────────────────
+     Locked frame — the bits every candidate shares.
+     Only the --accent triplet changes per candidate column.
+     ───────────────────────────────────────────────────────── */
+
+  :root {
+    /* Canvas — warm near-monochrome ("paper + ink") */
+    --bg:          36 35% 97%;   /* faint cream */
+    --fg:          30 12% 14%;   /* warm near-black */
+    --muted:       36 22% 93%;
+    --muted-2:     36 18% 88%;
+    --muted-fg:    30  8% 42%;
+    --border:      36 15% 85%;
+    --border-strong: 30 10% 70%;
+
+    /* Page chrome only — not part of the app design */
+    --page-bg:     30 12% 12%;
+    --page-fg:     36 20% 92%;
+    --page-accent: 36 40% 68%;
+  }
+
+  /* per-column accent — overridden inline on each frame */
+  .frame {
+    --accent:        8 65% 45%;
+    --accent-fg:     0  0% 100%;
+    --accent-soft:   8 55% 96%;
+    --accent-border: 8 40% 82%;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    background: hsl(var(--page-bg));
+    color: hsl(var(--page-fg));
+    font-family: "Inter", -apple-system, system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ─── Page chrome (explainer shell) ─── */
+
+  .page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 48px 32px 80px;
+  }
+
+  .page-header {
+    max-width: 760px;
+    margin-bottom: 56px;
+  }
+
+  .page-kicker {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: hsl(var(--page-accent));
+    margin-bottom: 12px;
+  }
+
+  .page-title {
+    font-family: "Fraunces", serif;
+    font-weight: 500;
+    font-size: 44px;
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    margin: 0 0 16px;
+    color: hsl(36 30% 97%);
+    font-variation-settings: "opsz" 144, "SOFT" 30;
+  }
+
+  .page-lede {
+    font-size: 16px;
+    line-height: 1.55;
+    color: hsl(36 15% 78%);
+    margin: 0;
+  }
+
+  .page-lede em {
+    font-family: "Fraunces", serif;
+    font-style: italic;
+    font-variation-settings: "opsz" 14, "SOFT" 80;
+    font-weight: 400;
+    color: hsl(var(--page-accent));
+  }
+
+  /* ─── The locked-frame specimen (type + canvas) ─── */
+
+  .specimen {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 32px;
+    padding: 28px 32px;
+    margin-bottom: 64px;
+    background: hsl(30 10% 16%);
+    border: 1px solid hsl(30 8% 24%);
+    border-radius: 14px;
+  }
+
+  .specimen-label {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: hsl(var(--page-accent));
+    margin-bottom: 6px;
+  }
+
+  .specimen h3 {
+    font-family: "Fraunces", serif;
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 1.15;
+    margin: 0 0 4px;
+    font-variation-settings: "opsz" 72, "SOFT" 50;
+  }
+
+  .specimen-meta {
+    font-size: 12px;
+    color: hsl(36 10% 60%);
+    line-height: 1.55;
+  }
+
+  .swatch-row {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 8px;
+  }
+
+  .swatch {
+    aspect-ratio: 1;
+    border-radius: 6px;
+    display: flex;
+    align-items: flex-end;
+    padding: 6px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 9px;
+    color: hsl(30 15% 20% / 0.85);
+    border: 1px solid hsl(30 10% 24%);
+  }
+
+  .swatch.on-dark { color: hsl(36 30% 97% / 0.7); }
+
+  /* ─── Candidate row (3 frames) ─── */
+
+  .candidates {
+    display: flex;
+    gap: 40px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 72px;
+  }
+
+  .candidate {
+    width: 390px;
+    flex: 0 0 390px;
+  }
+
+  .candidate-label {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: hsl(var(--page-accent));
+    margin-bottom: 8px;
+  }
+
+  .candidate-name {
+    font-family: "Fraunces", serif;
+    font-size: 24px;
+    font-weight: 500;
+    line-height: 1.1;
+    margin: 0 0 4px;
+    color: hsl(36 30% 97%);
+    font-variation-settings: "opsz" 72, "SOFT" 50;
+  }
+
+  .candidate-hue {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    color: hsl(36 10% 60%);
+    margin-bottom: 18px;
+  }
+
+  .candidate-note {
+    font-size: 13px;
+    line-height: 1.5;
+    color: hsl(36 12% 68%);
+    margin-top: 18px;
+    font-family: "Fraunces", serif;
+    font-style: italic;
+    font-variation-settings: "opsz" 14, "SOFT" 80;
+  }
+
+  /* ─────────────────────────────────────────────────────────
+     MOBILE FRAME — the actual app mock
+     ───────────────────────────────────────────────────────── */
+
+  .frame {
+    width: 390px;
+    height: 780px;
+    background: hsl(var(--bg));
+    color: hsl(var(--fg));
+    border-radius: 38px;
+    overflow: hidden;
+    position: relative;
+    font-family: "Inter", sans-serif;
+    font-size: 14px;
+    box-shadow:
+      0 0 0 10px hsl(30 15% 8%),
+      0 0 0 11px hsl(36 15% 30%),
+      0 40px 80px -20px hsl(0 0% 0% / 0.55);
+  }
+
+  .frame .status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 28px 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: hsl(var(--fg));
+  }
+
+  .frame .notch {
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 22px;
+    background: hsl(30 15% 8%);
+    border-radius: 0 0 14px 14px;
+    z-index: 2;
+  }
+
+  .frame-scroll {
+    height: calc(100% - 32px);
+    overflow: hidden;
+    padding: 0 20px 20px;
+  }
+
+  /* ─── Type scale (shared) ─── */
+
+  .display {
+    font-family: "Fraunces", serif;
+    font-weight: 500;
+    font-size: 30px;
+    line-height: 1.05;
+    letter-spacing: -0.015em;
+    font-variation-settings: "opsz" 144, "SOFT" 40;
+    color: hsl(var(--fg));
+    margin: 0;
+  }
+
+  .h2 {
+    font-family: "Fraunces", serif;
+    font-weight: 500;
+    font-size: 19px;
+    line-height: 1.15;
+    letter-spacing: -0.005em;
+    font-variation-settings: "opsz" 36, "SOFT" 50;
+    margin: 0;
+  }
+
+  .kicker {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: hsl(var(--muted-fg));
+  }
+
+  .meta {
+    font-size: 12px;
+    color: hsl(var(--muted-fg));
+    line-height: 1.4;
+  }
+
+  .mono {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px;
+    letter-spacing: -0.01em;
+  }
+
+  /* ─── App header (inside the frame) ─── */
+
+  .app-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 8px 0 18px;
+  }
+
+  .app-header .display { font-size: 32px; }
+
+  .app-date {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    color: hsl(var(--muted-fg));
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  /* ─── Section heading ─── */
+
+  .section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 0 10px;
+    border-top: 1px solid hsl(var(--border));
+    margin-top: 6px;
+  }
+
+  .section-head:first-child { border-top: none; margin-top: 0; padding-top: 0; }
+
+  .section-head .h2 { font-size: 16px; }
+
+  .section-count {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    color: hsl(var(--muted-fg));
+  }
+
+  /* ─── Task row ─── */
+
+  .task {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid hsl(var(--border));
+  }
+
+  .task:last-child { border-bottom: none; }
+
+  .task-check {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 1.5px solid hsl(var(--border-strong));
+    flex-shrink: 0;
+    margin-top: 2px;
+    background: hsl(var(--bg));
+  }
+
+  .task.done .task-check {
+    background: hsl(var(--accent));
+    border-color: hsl(var(--accent));
+    position: relative;
+  }
+
+  .task.done .task-check::after {
+    content: "";
+    position: absolute;
+    inset: 4px 4px 5px 5px;
+    border-bottom: 2px solid hsl(var(--accent-fg));
+    border-right: 2px solid hsl(var(--accent-fg));
+    transform: rotate(40deg) translate(-1px, -3px);
+  }
+
+  .task-body { flex: 1; min-width: 0; }
+
+  .task-title {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.35;
+    color: hsl(var(--fg));
+    margin: 0;
+  }
+
+  .task.done .task-title {
+    color: hsl(var(--muted-fg));
+    text-decoration: line-through;
+    text-decoration-color: hsl(var(--muted-fg) / 0.5);
+  }
+
+  .task-meta {
+    margin-top: 3px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: hsl(var(--muted-fg));
+  }
+
+  .task-time {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    font-weight: 500;
+    color: hsl(var(--fg));
+    flex-shrink: 0;
+    padding-top: 2px;
+  }
+
+  .task.overdue .task-time { color: hsl(var(--accent)); }
+
+  .task-badge {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 9px;
+    font-weight: 500;
+    padding: 1px 6px;
+    border-radius: 3px;
+    background: hsl(var(--muted-2));
+    color: hsl(var(--muted-fg));
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .task-badge.accent {
+    background: hsl(var(--accent-soft));
+    color: hsl(var(--accent));
+  }
+
+  /* ─── FAB ─── */
+
+  .fab {
+    position: absolute;
+    bottom: 30px;
+    right: 22px;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: hsl(var(--accent));
+    color: hsl(var(--accent-fg));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Fraunces", serif;
+    font-size: 26px;
+    font-weight: 400;
+    font-variation-settings: "opsz" 144;
+    box-shadow: 0 8px 24px -8px hsl(var(--accent) / 0.6);
+    line-height: 1;
+  }
+
+  /* ─── Tab bar ─── */
+
+  .tab-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 64px;
+    background: hsl(var(--bg));
+    border-top: 1px solid hsl(var(--border));
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0 28px 14px;
+  }
+
+  .tab {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: hsl(var(--muted-fg));
+    text-align: center;
+  }
+
+  .tab.active { color: hsl(var(--accent)); }
+
+  .tab .dot {
+    display: block;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: hsl(var(--accent));
+    margin: 4px auto 0;
+    opacity: 0;
+  }
+
+  .tab.active .dot { opacity: 1; }
+
+  /* ─────────────────────────────────────────────────────────
+     Demo row — below the three candidates: wider mocks
+     showing Detail view and Weekly Review using the middle
+     candidate so user sees the full flow in action.
+     ───────────────────────────────────────────────────────── */
+
+  .demo-header {
+    max-width: 760px;
+    margin-bottom: 32px;
+  }
+
+  .demo-header .page-kicker { margin-bottom: 12px; }
+  .demo-header h2 {
+    font-family: "Fraunces", serif;
+    font-weight: 500;
+    font-size: 32px;
+    line-height: 1.1;
+    margin: 0 0 12px;
+    color: hsl(36 30% 97%);
+    font-variation-settings: "opsz" 72, "SOFT" 30;
+  }
+  .demo-header p {
+    font-size: 15px;
+    color: hsl(36 15% 72%);
+    margin: 0;
+    max-width: 680px;
+  }
+
+  .demo-row {
+    display: flex;
+    gap: 40px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  /* ─── Detail view ─── */
+
+  .back {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    color: hsl(var(--muted-fg));
+    padding: 4px 0 16px;
+    letter-spacing: 0.06em;
+  }
+
+  .detail-title {
+    font-family: "Fraunces", serif;
+    font-weight: 500;
+    font-size: 24px;
+    line-height: 1.18;
+    letter-spacing: -0.01em;
+    font-variation-settings: "opsz" 72, "SOFT" 40;
+    margin: 0 0 10px;
+  }
+
+  .detail-meta {
+    display: flex;
+    gap: 14px;
+    padding: 8px 0 18px;
+    border-bottom: 1px solid hsl(var(--border));
+  }
+
+  .detail-meta > div { flex: 1; }
+  .detail-meta .kicker { display: block; margin-bottom: 3px; }
+  .detail-meta .val {
+    font-size: 13px;
+    font-weight: 500;
+    color: hsl(var(--fg));
+  }
+  .detail-meta .val.mono {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px;
+  }
+
+  .thread {
+    padding: 16px 0 8px;
+  }
+
+  .thread-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+
+  .thread-head .kicker { color: hsl(var(--muted-fg)); }
+
+  .msg {
+    display: flex;
+    gap: 10px;
+    padding: 10px 0;
+  }
+
+  .msg-rail {
+    width: 2px;
+    background: hsl(var(--border));
+    flex-shrink: 0;
+    border-radius: 2px;
+  }
+
+  .msg.user .msg-rail { background: hsl(var(--accent) / 0.6); }
+
+  .msg-body { flex: 1; min-width: 0; }
+
+  .msg-from {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: hsl(var(--muted-fg));
+    margin-bottom: 3px;
+  }
+
+  .msg.user .msg-from { color: hsl(var(--accent)); }
+
+  .msg-text {
+    font-family: "Fraunces", serif;
+    font-style: italic;
+    font-size: 14px;
+    line-height: 1.45;
+    color: hsl(var(--fg));
+    font-variation-settings: "opsz" 14, "SOFT" 80;
+  }
+
+  .msg-text.reply {
+    font-style: normal;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13px;
+    letter-spacing: -0.01em;
+    color: hsl(var(--fg));
+  }
+
+  .msg-time {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    color: hsl(var(--muted-fg));
+    margin-top: 3px;
+  }
+
+  .msg.system-done .msg-text::before {
+    content: "✓ ";
+    color: hsl(var(--accent));
+    font-family: "Inter", sans-serif;
+    font-style: normal;
+    font-weight: 600;
+  }
+
+  .detail-actions {
+    display: flex;
+    gap: 8px;
+    padding: 14px 0;
+    border-top: 1px solid hsl(var(--border));
+    margin-top: 14px;
+  }
+
+  .btn {
+    flex: 1;
+    padding: 11px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    font-family: "Inter", sans-serif;
+    text-align: center;
+    border: 1px solid hsl(var(--border-strong));
+    background: hsl(var(--bg));
+    color: hsl(var(--fg));
+    letter-spacing: -0.005em;
+  }
+
+  .btn.primary {
+    background: hsl(var(--accent));
+    color: hsl(var(--accent-fg));
+    border-color: hsl(var(--accent));
+  }
+
+  /* ─── Weekly review ─── */
+
+  .review-step {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+
+  .review-step .kicker { color: hsl(var(--accent)); }
+
+  .step-pills {
+    display: flex;
+    gap: 4px;
+  }
+
+  .step-pill {
+    width: 24px;
+    height: 3px;
+    border-radius: 2px;
+    background: hsl(var(--muted-2));
+  }
+
+  .step-pill.active { background: hsl(var(--accent)); }
+  .step-pill.done { background: hsl(var(--fg) / 0.7); }
+
+  .review-title {
+    font-family: "Fraunces", serif;
+    font-weight: 500;
+    font-size: 24px;
+    line-height: 1.15;
+    font-variation-settings: "opsz" 72, "SOFT" 40;
+    margin: 6px 0 6px;
+  }
+
+  .review-lede {
+    font-size: 13px;
+    color: hsl(var(--muted-fg));
+    line-height: 1.5;
+    margin: 0 0 16px;
+  }
+
+  .assign {
+    padding: 14px 0;
+    border-top: 1px solid hsl(var(--border));
+  }
+
+  .assign:first-of-type { border-top: none; }
+
+  .assign-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .assign-title {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.3;
+  }
+
+  .assign-cadence {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: hsl(var(--muted-fg));
+  }
+
+  .weekdays {
+    display: flex;
+    gap: 4px;
+  }
+
+  .wd {
+    flex: 1;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    font-weight: 500;
+    background: hsl(var(--muted));
+    color: hsl(var(--muted-fg));
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+
+  .wd.selected {
+    background: hsl(var(--accent));
+    color: hsl(var(--accent-fg));
+  }
+
+  .load-strip {
+    position: absolute;
+    left: 20px;
+    right: 20px;
+    bottom: 78px;
+    padding: 12px 14px;
+    background: hsl(var(--muted));
+    border: 1px solid hsl(var(--border));
+    border-radius: 10px;
+  }
+
+  .load-strip .kicker { display: block; margin-bottom: 6px; }
+
+  .load-bars {
+    display: flex;
+    gap: 4px;
+    align-items: flex-end;
+    height: 26px;
+  }
+
+  .load-bars > div {
+    flex: 1;
+    background: hsl(var(--accent) / 0.3);
+    border-radius: 2px;
+    position: relative;
+  }
+
+  .load-bars > div::after {
+    content: attr(data-day);
+    position: absolute;
+    bottom: -14px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 9px;
+    color: hsl(var(--muted-fg));
+    text-transform: uppercase;
+  }
+
+  .review-footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 14px 20px;
+    background: hsl(var(--bg));
+    border-top: 1px solid hsl(var(--border));
+    display: flex;
+    gap: 8px;
+  }
+
+  /* ─── Footer / explainer ─── */
+
+  .explainer {
+    max-width: 860px;
+    margin: 80px auto 0;
+    padding: 32px;
+    background: hsl(30 10% 16%);
+    border: 1px solid hsl(30 8% 24%);
+    border-radius: 14px;
+  }
+
+  .explainer h3 {
+    font-family: "Fraunces", serif;
+    font-weight: 500;
+    font-size: 22px;
+    margin: 0 0 14px;
+    color: hsl(36 30% 97%);
+    font-variation-settings: "opsz" 36, "SOFT" 40;
+  }
+
+  .explainer p {
+    font-size: 14px;
+    line-height: 1.6;
+    color: hsl(36 12% 72%);
+    margin: 0 0 12px;
+  }
+
+  .explainer code {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px;
+    color: hsl(var(--page-accent));
+    background: hsl(30 15% 10%);
+    padding: 2px 6px;
+    border-radius: 3px;
+  }
+
+  .explainer ul { padding-left: 18px; margin: 0 0 12px; }
+  .explainer li { margin-bottom: 4px; font-size: 14px; color: hsl(36 12% 72%); }
+
+  /* ───── Section break ───── */
+
+  .rule {
+    height: 1px;
+    background: hsl(30 8% 22%);
+    margin: 64px 0 48px;
+  }
+
+  /* ─── Responsive: stack on narrow, but KEEP frame at 390 ─── */
+
+  @media (max-width: 900px) {
+    .candidates { flex-direction: column; align-items: center; }
+    .demo-row { flex-direction: column; align-items: center; }
+    .specimen { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<main class="page">
+
+  <header class="page-header">
+    <div class="page-kicker">Planner V1 · Design Explorer v1 · 2026-04-12</div>
+    <h1 class="page-title">A writer's planning journal with engineer's rigour.</h1>
+    <p class="page-lede">
+      The frame is locked: warm near-monochrome canvas, Fraunces display + Inter body + JetBrains Mono metadata, dense mobile-first layout, snappy <em>150–200ms</em> motion, accent used sparingly. The only thing that varies between columns below is the single accent hue. Pick one. The three mocks below the row show what the chosen direction feels like across the primary surfaces.
+    </p>
+  </header>
+
+  <!-- ─── Locked-frame specimen ─── -->
+  <section class="specimen">
+    <div>
+      <div class="specimen-label">Type system</div>
+      <h3>Fraunces · Inter · JetBrains Mono</h3>
+      <div class="specimen-meta">
+        Fraunces at high opsz for display, dropped to 14-opsz italic for editorial body (SMS thread messages, lede copy). Inter for interface body and interactive text. JetBrains Mono at 10–12px uppercase for metadata, timestamps, and command tokens — the "engineer's fingerprint" on an otherwise editorial surface.
+      </div>
+    </div>
+    <div>
+      <div class="specimen-label">Canvas — warm monochrome</div>
+      <div class="swatch-row">
+        <div class="swatch" style="background: hsl(36 35% 97%)">bg</div>
+        <div class="swatch" style="background: hsl(36 25% 94%)">100</div>
+        <div class="swatch" style="background: hsl(36 22% 88%)">200</div>
+        <div class="swatch" style="background: hsl(36 18% 80%)">300</div>
+        <div class="swatch" style="background: hsl(30 12% 62%)">400</div>
+        <div class="swatch on-dark" style="background: hsl(30 10% 42%)">500</div>
+        <div class="swatch on-dark" style="background: hsl(30 12% 26%)">700</div>
+        <div class="swatch on-dark" style="background: hsl(30 12% 14%)">fg</div>
+      </div>
+      <div class="specimen-meta" style="margin-top:12px">
+        Warm-hue tonal ramp — 36° at the light end drifts to 30° at the dark end, so the canvas reads as aged paper with ink, not as blue-grey SaaS. No cool greys anywhere in the app.
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Three accent candidates ─── -->
+  <section class="candidates">
+
+    <!-- CANDIDATE A: INK RED -->
+    <div class="candidate">
+      <div class="candidate-label">Option A</div>
+      <h2 class="candidate-name">Ink Red</h2>
+      <div class="candidate-hue">hsl(8 65% 45%)</div>
+
+      <div class="frame" style="--accent: 8 65% 45%; --accent-soft: 8 55% 96%; --accent-border: 8 40% 82%;">
+        <div class="notch"></div>
+        <div class="status-bar"><span>9:41</span><span>•••</span></div>
+        <div class="frame-scroll">
+          <div class="app-header">
+            <h1 class="display">Today</h1>
+            <div class="app-date">Sun · 12 Apr</div>
+          </div>
+
+          <div class="section-head">
+            <h2 class="h2">On today</h2>
+            <div class="section-count">4 / 7 done</div>
+          </div>
+
+          <div class="task done">
+            <div class="task-check"></div>
+            <div class="task-body">
+              <p class="task-title">Morning pages — 3 pages longhand</p>
+              <div class="task-meta"><span class="task-badge">daily</span><span>done 07:12</span></div>
+            </div>
+            <div class="task-time">07:00</div>
+          </div>
+          <div class="task done">
+            <div class="task-check"></div>
+            <div class="task-body">
+              <p class="task-title">Stretch — 10 min mobility routine</p>
+              <div class="task-meta"><span class="task-badge">daily</span></div>
+            </div>
+            <div class="task-time">07:30</div>
+          </div>
+          <div class="task">
+            <div class="task-check"></div>
+            <div class="task-body">
+              <p class="task-title">Call the dentist — reschedule cleaning</p>
+              <div class="task-meta"><span class="task-badge accent">overdue</span><span>1 snooze</span></div>
+            </div>
+            <div class="task-time">11:00</div>
+          </div>
+          <div class="task">
+            <div class="task-check"></div>
+            <div class="task-body">
+              <p class="task-title">V1 design explorer — review with Dylan</p>
+              <div class="task-meta"><span class="task-badge">one-off</span></div>
+            </div>
+            <div class="task-time">14:30</div>
+          </div>
+          <div class="task">
+            <div class="task-check"></div>
+            <div class="task-body">
+              <p class="task-title">Weekly review — 4 steps · ~10 min</p>
+              <div class="task-meta"><span class="task-badge">weekly</span></div>
+            </div>
+            <div class="task-time">18:00</div>
+          </div>
+
+          <div class="section-head">
+            <h2 class="h2">This week</h2>
+            <div class="section-count">+11 more</div>
+          </div>
+
+          <div class="task">
+            <div class="task-check"></div>
+            <div class="task-body">
+              <p class="task-title">Pay rent — standing order check</p>
+              <div class="task-meta"><span class="task-badge">monthly</span></div>
+            </div>
+            <div class="task-time">Mon</div>
+          </div>
+          <div class="task">
+            <div class="task-check"></div>
+            <div class="task-body">
+              <p class="task-title">Run long — 10 km, park loop</p>
+              <div class="task-meta"><span class="task-badge">weekly</span></div>
+            </div>
+            <div class="task-time">Sat</div>
+          </div>
+        </div>
+        <div class="fab">+</div>
+        <div class="tab-bar">
+          <div class="tab active">Today<span class="dot"></span></div>
+          <div class="tab">Week<span class="dot"></span></div>
+          <div class="tab">Review<span class="dot"></span></div>
+          <div class="tab">You<span class="dot"></span></div>
+        </div>
+      </div>
+
+      <p class="candidate-note">Manuscript correction ink. Warm red on cream reads as physical — a margin note, a struck line. The most editorial of the three.</p>
+    </div>
+
+    <!-- CANDIDATE B: BRASS -->
+    <div class="candidate">
+      <div class="candidate-label">Option B</div>
+      <h2 class="candidate-name">Brass</h2>
+      <div class="candidate-hue">hsl(36 78% 42%)</div>
+
+      <div class="frame" style="--accent: 36 78% 42%; --accent-soft: 36 70% 95%; --accent-border: 36 55% 80%;">
+        <div class="notch"></div>
+        <div class="status-bar"><span>9:41</span><span>•••</span></div>
+        <div class="frame-scroll">
+          <div class="app-header">
+            <h1 class="display">Today</h1>
+            <div class="app-date">Sun · 12 Apr</div>
+          </div>
+
+          <div class="section-head">
+            <h2 class="h2">On today</h2>
+            <div class="section-count">4 / 7 done</div>
+          </div>
+
+          <div class="task done">
+            <div class="task-check"></div>
+            <div class="task-body">
+              <p class="task-title">Morning pages — 3 pages longhand</p>
+              <div class="task-meta"><span class="task-badge">daily</span><span>done 07:12</span></div>
+            </div>
+            <div class="task-time">07:00</div>
+          </div>
+          <div class="task done">
+            <div class="task-check"></div>
+            <div class="task-body">
+              <p class="task-title">Stretch — 10 min mobility routine</p>
+              <div class="task-meta"><span class="task-badge">daily</span></div>
+            </div>
+            <div class="task-time">07:30</div>
+          </div>
+          <div class="task">
+            <div class="task-check"></div>
+            <div class="task-body">
+              <p class="task-title">Call the dentist — reschedule cleaning</p>
+              <div class="task-meta"><span class="task-badge accent">overdue</span><span>1 snooze</span></div>
+            </div>
+            <div class="task-time">11:00</div>
+          </div>
+          <div class="task">
+            <div class="task-check"></div>
+            <div class="task-body">
+              <p class="task-title">V1 design explorer — review with Dylan</p>
+              <div class="task-meta"><span class="task-badge">one-off</span></div>
+            </div>
+            <div class="task-time">14:30</div>
+          </div>
+          <div class="task">
+            <div class="task-check"></div>
+            <div class="task-body">
+              <p class="task-title">Weekly review — 4 steps · ~10 min</p>
+              <div class="task-meta"><span class="task-badge">weekly</span></div>
+            </div>
+            <div class="task-time">18:00</div>
+          </div>
+
+          <div class="section-head">
+            <h2 class="h2">This week</h2>
+            <div class="section-count">+11 more</div>
+          </div>
+
+          <div class="task">
+            <div class="task-check"></div>
+            <div class="task-body">
+              <p class="task-title">Pay rent — standing order check</p>
+              <div class="task-meta"><span class="task-badge">monthly</span></div>
+            </div>
+            <div class="task-time">Mon</div>
+          </div>
+          <div class="task">
+            <div class="task-check"></div>
+            <div class="task-body">
+              <p class="task-title">Run long — 10 km, park loop</p>
+              <div class="task-meta"><span class="task-badge">weekly</span></div>
+            </div>
+            <div class="task-time">Sat</div>
+          </div>
+        </div>
+        <div class="fab">+</div>
+        <div class="tab-bar">
+          <div class="tab active">Today<span class="dot"></span></div>
+          <div class="tab">Week<span class="dot"></span></div>
+          <div class="tab">Review<span class="dot"></span></div>
+          <div class="tab">You<span class="dot"></span></div>
+        </div>
+      </div>
+
+      <p class="candidate-note">Warm gold, like foil stamping on a cloth-bound notebook. Optimistic and traditional at once. Pushes closer to "journal" than "tool."</p>
+    </div>
+
+    <!-- CANDIDATE C: BRAMBLE -->
+    <div class="candidate">
+      <div class="candidate-label">Option C</div>
+      <h2 class="candidate-name">Bramble</h2>
+      <div class="candidate-hue">hsl(340 50% 38%)</div>
+
+      <div class="frame" style="--accent: 340 50% 38%; --accent-soft: 340 40% 96%; --accent-border: 340 30% 82%;">
+        <div class="notch"></div>
+        <div class="status-bar"><span>9:41</span><span>•••</span></div>
+        <div class="frame-scroll">
+          <div class="app-header">
+            <h1 class="display">Today</h1>
+            <div class="app-date">Sun · 12 Apr</div>
+          </div>
+
+          <div class="section-head">
+            <h2 class="h2">On today</h2>
+            <div class="section-count">4 / 7 done</div>
+          </div>
+
+          <div class="task done">
+            <div class="task-check"></div>
+            <div class="task-body">
+              <p class="task-title">Morning pages — 3 pages longhand</p>
+              <div class="task-meta"><span class="task-badge">daily</span><span>done 07:12</span></div>
+            </div>
+            <div class="task-time">07:00</div>
+          </div>
+          <div class="task done">
+            <div class="task-check"></div>
+            <div class="task-body">
+              <p class="task-title">Stretch — 10 min mobility routine</p>
+              <div class="task-meta"><span class="task-badge">daily</span></div>
+            </div>
+            <div class="task-time">07:30</div>
+          </div>
+          <div class="task">
+            <div class="task-check"></div>
+            <div class="task-body">
+              <p class="task-title">Call the dentist — reschedule cleaning</p>
+              <div class="task-meta"><span class="task-badge accent">overdue</span><span>1 snooze</span></div>
+            </div>
+            <div class="task-time">11:00</div>
+          </div>
+          <div class="task">
+            <div class="task-check"></div>
+            <div class="task-body">
+              <p class="task-title">V1 design explorer — review with Dylan</p>
+              <div class="task-meta"><span class="task-badge">one-off</span></div>
+            </div>
+            <div class="task-time">14:30</div>
+          </div>
+          <div class="task">
+            <div class="task-check"></div>
+            <div class="task-body">
+              <p class="task-title">Weekly review — 4 steps · ~10 min</p>
+              <div class="task-meta"><span class="task-badge">weekly</span></div>
+            </div>
+            <div class="task-time">18:00</div>
+          </div>
+
+          <div class="section-head">
+            <h2 class="h2">This week</h2>
+            <div class="section-count">+11 more</div>
+          </div>
+
+          <div class="task">
+            <div class="task-check"></div>
+            <div class="task-body">
+              <p class="task-title">Pay rent — standing order check</p>
+              <div class="task-meta"><span class="task-badge">monthly</span></div>
+            </div>
+            <div class="task-time">Mon</div>
+          </div>
+          <div class="task">
+            <div class="task-check"></div>
+            <div class="task-body">
+              <p class="task-title">Run long — 10 km, park loop</p>
+              <div class="task-meta"><span class="task-badge">weekly</span></div>
+            </div>
+            <div class="task-time">Sat</div>
+          </div>
+        </div>
+        <div class="fab">+</div>
+        <div class="tab-bar">
+          <div class="tab active">Today<span class="dot"></span></div>
+          <div class="tab">Week<span class="dot"></span></div>
+          <div class="tab">Review<span class="dot"></span></div>
+          <div class="tab">You<span class="dot"></span></div>
+        </div>
+      </div>
+
+      <p class="candidate-note">Deep mulberry, like an inkpot stain. Unexpected but unmistakeably editorial. Distinctive — you won't see this in any other productivity app.</p>
+    </div>
+
+  </section>
+
+  <div class="rule"></div>
+
+  <!-- ─── Demo row ─── -->
+  <header class="demo-header">
+    <div class="page-kicker">In context · same frame, two more surfaces</div>
+    <h2>How it reads across the full flow</h2>
+    <p>
+      The two mocks below use <em style="font-family:Fraunces;font-style:italic">Ink Red</em> as a stand-in so you can see the detail view and the weekly review in action. Whichever hue wins above, these surfaces inherit it with no other changes.
+    </p>
+  </header>
+
+  <section class="demo-row">
+
+    <!-- TASK DETAIL + SMS THREAD -->
+    <div class="candidate">
+      <div class="candidate-label">Surface 2</div>
+      <h2 class="candidate-name">Task detail — SMS thread inline</h2>
+      <div class="candidate-hue">leans into the differentiator typographically</div>
+
+      <div class="frame" style="--accent: 8 65% 45%; --accent-soft: 8 55% 96%; --accent-border: 8 40% 82%;">
+        <div class="notch"></div>
+        <div class="status-bar"><span>9:41</span><span>•••</span></div>
+        <div class="frame-scroll">
+          <div class="back">← Today</div>
+          <h1 class="detail-title">Call the dentist — reschedule cleaning</h1>
+
+          <div class="detail-meta">
+            <div>
+              <span class="kicker">Due</span>
+              <div class="val">Today · 11:00</div>
+            </div>
+            <div>
+              <span class="kicker">Cadence</span>
+              <div class="val">One-off</div>
+            </div>
+            <div>
+              <span class="kicker">Snoozed</span>
+              <div class="val mono">1×</div>
+            </div>
+          </div>
+
+          <div class="thread">
+            <div class="thread-head">
+              <span class="kicker">SMS thread</span>
+              <span class="kicker">3 messages</span>
+            </div>
+
+            <div class="msg">
+              <div class="msg-rail"></div>
+              <div class="msg-body">
+                <div class="msg-from">Reminder sent · 10:00</div>
+                <div class="msg-text">Heads up — <em>Call the dentist</em> is due at 11:00. Reply <span class="mono">done</span>, <span class="mono">snooze 1h</span>, or <span class="mono">skip</span>.</div>
+              </div>
+            </div>
+
+            <div class="msg user">
+              <div class="msg-rail"></div>
+              <div class="msg-body">
+                <div class="msg-from">You replied · 10:03</div>
+                <div class="msg-text reply">snooze 1h</div>
+              </div>
+            </div>
+
+            <div class="msg">
+              <div class="msg-rail"></div>
+              <div class="msg-body">
+                <div class="msg-from">Confirmed · 10:03</div>
+                <div class="msg-text">Nudging you again at 11:00. Same task, same reply options.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="detail-actions">
+            <div class="btn">Snooze</div>
+            <div class="btn">Skip</div>
+            <div class="btn primary">Mark done</div>
+          </div>
+        </div>
+      </div>
+
+      <p class="candidate-note">The SMS thread lives inside the task detail. Incoming messages are Fraunces italic (editorial, conversational); user replies are mono (command-as-typed). The web UI acknowledges the SMS loop without mimicking iMessage.</p>
+    </div>
+
+    <!-- WEEKLY REVIEW — DAY ASSIGNMENT -->
+    <div class="candidate">
+      <div class="candidate-label">Surface 3</div>
+      <h2 class="candidate-name">Weekly review — assign the week</h2>
+      <div class="candidate-hue">step 3 of 4 — the commitment gate</div>
+
+      <div class="frame" style="--accent: 8 65% 45%; --accent-soft: 8 55% 96%; --accent-border: 8 40% 82%;">
+        <div class="notch"></div>
+        <div class="status-bar"><span>9:41</span><span>•••</span></div>
+        <div class="frame-scroll">
+          <div class="review-step">
+            <span class="kicker">Step 3 of 4</span>
+            <div class="step-pills">
+              <div class="step-pill done"></div>
+              <div class="step-pill done"></div>
+              <div class="step-pill active"></div>
+              <div class="step-pill"></div>
+            </div>
+          </div>
+          <h1 class="review-title">Commit this week's habits to a day.</h1>
+          <p class="review-lede">Tap a weekday for each weekly-cadence task. The load strip below shows how full each day becomes as you assign.</p>
+
+          <div class="assign">
+            <div class="assign-head">
+              <div class="assign-title">Run long — 10 km, park loop</div>
+              <div class="assign-cadence">weekly</div>
+            </div>
+            <div class="weekdays">
+              <div class="wd">M</div>
+              <div class="wd">T</div>
+              <div class="wd">W</div>
+              <div class="wd">T</div>
+              <div class="wd">F</div>
+              <div class="wd selected">S</div>
+              <div class="wd">S</div>
+            </div>
+          </div>
+
+          <div class="assign">
+            <div class="assign-head">
+              <div class="assign-title">Meal plan — Sunday cook-up list</div>
+              <div class="assign-cadence">weekly</div>
+            </div>
+            <div class="weekdays">
+              <div class="wd">M</div>
+              <div class="wd">T</div>
+              <div class="wd">W</div>
+              <div class="wd">T</div>
+              <div class="wd">F</div>
+              <div class="wd">S</div>
+              <div class="wd selected">S</div>
+            </div>
+          </div>
+
+          <div class="assign">
+            <div class="assign-head">
+              <div class="assign-title">Finance check — reconcile accounts</div>
+              <div class="assign-cadence">weekly</div>
+            </div>
+            <div class="weekdays">
+              <div class="wd">M</div>
+              <div class="wd">T</div>
+              <div class="wd">W</div>
+              <div class="wd">T</div>
+              <div class="wd selected">F</div>
+              <div class="wd">S</div>
+              <div class="wd">S</div>
+            </div>
+          </div>
+
+          <div class="assign">
+            <div class="assign-head">
+              <div class="assign-title">Call parents — Sunday catch-up</div>
+              <div class="assign-cadence">weekly</div>
+            </div>
+            <div class="weekdays">
+              <div class="wd">M</div>
+              <div class="wd">T</div>
+              <div class="wd">W</div>
+              <div class="wd">T</div>
+              <div class="wd">F</div>
+              <div class="wd">S</div>
+              <div class="wd">S</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="load-strip">
+          <span class="kicker">Load by day</span>
+          <div class="load-bars">
+            <div data-day="M" style="height: 30%"></div>
+            <div data-day="T" style="height: 45%"></div>
+            <div data-day="W" style="height: 25%"></div>
+            <div data-day="T" style="height: 55%"></div>
+            <div data-day="F" style="height: 70%"></div>
+            <div data-day="S" style="height: 80%"></div>
+            <div data-day="S" style="height: 90%"></div>
+          </div>
+        </div>
+
+        <div class="review-footer">
+          <div class="btn">Back</div>
+          <div class="btn primary">Next — preview briefings</div>
+        </div>
+      </div>
+
+      <p class="candidate-note">The commitment gate from ux-flows rev 2: you can't finish the review without assigning every weekly task a day. The load strip lives at the bottom so every tap updates it live.</p>
+    </div>
+
+  </section>
+
+  <!-- ─── Explainer ─── -->
+  <aside class="explainer">
+    <h3>What's locked, what's still up for grabs</h3>
+    <p><strong>Locked across all candidates:</strong></p>
+    <ul>
+      <li>Canvas — warm monochrome tonal ramp, 36°→30° hue drift</li>
+      <li>Type — Fraunces display (variable opsz), Inter body, JetBrains Mono metadata</li>
+      <li>Density — dense mobile-first rhythm (14px body, 10–12px meta, 8–12px row padding)</li>
+      <li>Motion — snappy 150–200ms, opacity + transform only, no bounce</li>
+      <li>SMS as typographic nod — Fraunces italic for incoming, mono for replies; no iMessage mimicry</li>
+    </ul>
+    <p><strong>The only thing varying above is <code>--accent</code></strong> — a single HSL triplet used for completed checkmarks, overdue state, FAB, primary button, active tab, and selected weekday. Everything else inherits the locked frame unchanged.</p>
+    <p><strong>Next step</strong> — pick A, B, or C (or redirect with what's missing), then this direction feeds the Phase 3 <code>design.tokens.ts</code> rewrite as part of R1. No Phase 5 second round — one decisive pass per the /new-feature skill.</p>
+  </aside>
+
+</main>
+
+</body>
+</html>
