@@ -1,0 +1,94 @@
+---
+import { getCollection } from 'astro:content';
+import KickerLabel from './KickerLabel.astro';
+
+const allEntries = await getCollection('log');
+const entries = allEntries
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+  .slice(0, 5);
+
+function formatDate(date: Date): string {
+  return date.toLocaleDateString('en-AU', { day: 'numeric', month: 'short' });
+}
+---
+
+<aside class="log-ticker">
+  <KickerLabel label="Build Log" />
+
+  <ul class="log-list">
+    {entries.map((entry, i) => (
+      <li class:list={['log-entry', i < entries.length - 1 && 'log-entry--bordered']}>
+        <time
+          datetime={entry.data.date.toISOString()}
+          class="log-date"
+        >
+          {formatDate(entry.data.date)}
+        </time>
+        <p class="log-title">{entry.data.title}</p>
+        <p class="log-summary">{entry.data.summary}</p>
+      </li>
+    ))}
+  </ul>
+
+  <a href="/log" class="log-all">All entries →</a>
+</aside>
+
+<style>
+  .log-ticker {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: var(--space-5);
+    height: fit-content;
+  }
+
+  .log-list {
+    list-style: none;
+    margin: var(--space-4) 0 0;
+    padding: 0;
+  }
+
+  .log-entry {
+    padding: var(--space-3) 0;
+  }
+
+  .log-entry--bordered {
+    border-bottom: 1px solid var(--border);
+  }
+
+  .log-date {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--ink-faint);
+    margin-bottom: var(--space-1);
+  }
+
+  .log-title {
+    font-size: var(--text-sm);
+    color: var(--ink);
+    margin: 0;
+    line-height: var(--lh-snug);
+  }
+
+  .log-summary {
+    font-size: var(--text-xs);
+    color: var(--ink-dim);
+    margin: var(--space-1) 0 0;
+    line-height: var(--lh-normal);
+  }
+
+  .log-all {
+    display: inline-block;
+    margin-top: var(--space-4);
+    font-family: var(--font-sans);
+    font-size: var(--text-xs);
+    color: var(--link);
+    letter-spacing: var(--ls-caps);
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+
+  .log-all:hover {
+    color: var(--royal-11);
+  }
+</style>

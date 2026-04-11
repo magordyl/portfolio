@@ -1,0 +1,21 @@
+---
+interface Props {
+  label: string;
+  class?: string;
+}
+const { label, class: className = '' } = Astro.props;
+---
+
+<span
+  class:list={['kicker-label', className]}
+  style="
+    font-family: var(--font-sans);
+    font-size: var(--text-kicker);
+    font-weight: 500;
+    letter-spacing: var(--ls-caps);
+    text-transform: uppercase;
+    color: var(--kicker);
+  "
+>
+  {label}
+</span>

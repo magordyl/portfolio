@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Portfolio — Design Token Explorer v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --surface: #14130f;
+    --ink: #e6e2d9;
+    --ink-dim: #9c968a;
+    --ink-faint: #5e584f;
+    --border: #2a2820;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--surface);
+    color: var(--ink);
+    font-family: 'Geist', -apple-system, system-ui, sans-serif;
+    font-weight: 400;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 72px 48px 120px; }
+
+  /* Doc header */
+  .doc-header { margin-bottom: 56px; border-bottom: 1px solid var(--border); padding-bottom: 48px; }
+  .doc-header .kicker { font-size: 11px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-dim); margin-bottom: 20px; }
+  .doc-header h1 { font-family: 'Fraunces', serif; font-weight: 400; font-size: 72px; line-height: 0.98; letter-spacing: -0.025em; margin: 0 0 16px; }
+  .doc-header p { color: var(--ink-dim); max-width: 720px; margin: 0; font-size: 16px; }
+
+  h2.section { font-family: 'Geist', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-dim); margin: 80px 0 24px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+  h2.section:first-of-type { margin-top: 48px; }
+
+  .lede { color: var(--ink-dim); max-width: 740px; margin: 0 0 40px; font-size: 15px; line-height: 1.65; }
+  .lede code { background: #1a1914; padding: 2px 6px; border-radius: 2px; color: var(--ink); font-family: 'Geist Mono', monospace; font-size: 13px; }
+
+  /* Locked card */
+  .locked-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+  .locked-card { border: 1px solid var(--border); border-radius: 8px; padding: 24px; background: #18170f; }
+  .locked-card .l-kicker { font-size: 10px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: #8B9CFF; margin-bottom: 8px; }
+  .locked-card .l-title { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 500; margin: 0 0 6px; }
+  .locked-card .l-desc { font-size: 13px; color: var(--ink-dim); margin: 0; }
+
+  /* Design-notes callout */
+  .notes { border-left: 2px solid #3B5BDB; padding: 4px 0 4px 24px; margin: 32px 0 48px; max-width: 760px; }
+  .notes h3 { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 500; margin: 0 0 12px; }
+  .notes p { color: var(--ink); font-size: 15px; line-height: 1.65; margin: 0 0 12px; }
+  .notes p:last-child { margin: 0; }
+  .notes strong { color: #8B9CFF; font-weight: 500; }
+
+  /* Palette option wrapper */
+  .palette {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 40px;
+    margin-bottom: 32px;
+    background: var(--surface);
+  }
+  .palette-header { margin-bottom: 32px; }
+  .palette-header .p-kicker { font-size: 10px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-dim); margin-bottom: 8px; }
+  .palette-header h3 { font-family: 'Fraunces', serif; font-size: 32px; font-weight: 500; margin: 0 0 10px; letter-spacing: -0.01em; }
+  .palette-header p { color: var(--ink-dim); font-size: 14px; margin: 0; max-width: 680px; line-height: 1.6; }
+
+  /* Tonal scale strip */
+  .scale-strip { display: grid; grid-template-columns: repeat(12, 1fr); gap: 2px; margin-bottom: 8px; border-radius: 4px; overflow: hidden; border: 1px solid var(--border); }
+  .scale-step { aspect-ratio: 1 / 1.2; position: relative; display: flex; align-items: flex-end; padding: 6px 6px 4px; font-family: 'Geist Mono', monospace; font-size: 9px; font-weight: 500; }
+  .scale-step .n { position: absolute; top: 6px; left: 6px; font-size: 10px; opacity: 0.7; }
+  .scale-label-row { display: grid; grid-template-columns: repeat(12, 1fr); gap: 2px; margin-bottom: 28px; }
+  .scale-label-row span { font-size: 9px; color: var(--ink-faint); text-align: center; padding: 0 2px; line-height: 1.3; }
+
+  /* Token list */
+  .tokens { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px 24px; margin-bottom: 32px; font-family: 'Geist Mono', monospace; font-size: 12px; }
+  .tokens .t-row { display: flex; align-items: center; gap: 10px; padding: 4px 0; border-bottom: 1px dashed #222119; }
+  .tokens .t-chip { width: 18px; height: 18px; border-radius: 3px; border: 1px solid rgba(255,255,255,0.08); flex: 0 0 18px; }
+  .tokens .t-name { flex: 0 0 auto; color: var(--ink); min-width: 140px; }
+  .tokens .t-hex { color: var(--ink-dim); margin-left: auto; }
+  .tokens .t-role { font-size: 10px; color: var(--ink-faint); font-family: 'Geist', sans-serif; letter-spacing: 0.04em; }
+
+  /* Mini preview — full case study card + build log strip + code block */
+  .preview { display: grid; grid-template-columns: 1.6fr 1fr; gap: 20px; margin-top: 16px; }
+  @media (max-width: 900px) { .preview { grid-template-columns: 1fr; } }
+
+  .prev-case {
+    padding: 36px 32px;
+    border-radius: 8px;
+    border: 1px solid var(--preview-border, #2a2820);
+    background: var(--preview-card, #1a1914);
+    transition: box-shadow 180ms;
+  }
+  .prev-case:hover { box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
+  .prev-case .pc-kicker { font-size: 11px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--preview-kicker, #8B9CFF); margin-bottom: 14px; }
+  .prev-case .pc-title { font-family: 'Fraunces', serif; font-size: 32px; font-weight: 500; line-height: 1.1; letter-spacing: -0.01em; margin: 0 0 12px; color: var(--preview-ink, #e6e2d9); }
+  .prev-case .pc-tldr { font-size: 16px; color: var(--preview-ink, #e6e2d9); margin: 0 0 20px; max-width: 46ch; line-height: 1.55; }
+  .prev-case .pc-meta { display: flex; align-items: center; gap: 16px; }
+  .prev-case .pc-link { font-size: 13px; font-weight: 500; color: var(--preview-link, #8B9CFF); text-decoration: none; border-bottom: 1px solid currentColor; padding-bottom: 1px; }
+  .prev-case .pc-date { font-family: 'Fraunces', serif; font-style: italic; font-size: 14px; color: var(--preview-meta, #9c968a); }
+  .prev-case .pc-tag { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; padding: 3px 9px; border-radius: 2px; border: 1px solid var(--preview-tag-border, #3B5BDB); color: var(--preview-tag-fg, #8B9CFF); background: var(--preview-tag-bg, transparent); }
+
+  .prev-side { display: flex; flex-direction: column; gap: 16px; }
+  .prev-log { padding: 24px; border-radius: 8px; border: 1px solid var(--preview-border, #2a2820); background: var(--preview-card, #1a1914); }
+  .prev-log .pl-label { font-size: 10px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--preview-kicker, #8B9CFF); margin-bottom: 14px; }
+  .prev-log .pl-item { display: grid; grid-template-columns: 72px 1fr; gap: 12px; padding: 6px 0; border-bottom: 1px dashed var(--preview-border, #2a2820); }
+  .prev-log .pl-item:last-child { border-bottom: 0; }
+  .prev-log .pl-date { font-family: 'Fraunces', serif; font-style: italic; font-size: 12px; color: var(--preview-meta, #9c968a); }
+  .prev-log .pl-title { font-size: 12px; color: var(--preview-ink, #e6e2d9); }
+
+  .prev-code { padding: 20px; border-radius: 8px; border: 1px solid var(--preview-border, #2a2820); background: var(--preview-codebg, #0e0d0a); }
+  .prev-code .pl-label { font-size: 9px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--preview-kicker, #8B9CFF); margin-bottom: 10px; }
+  .prev-code pre { font-family: 'Geist Mono', monospace; font-size: 11px; line-height: 1.6; color: var(--preview-ink, #e6e2d9); margin: 0; white-space: pre-wrap; }
+  .prev-code .keyword { color: var(--preview-link, #8B9CFF); }
+  .prev-code .string { color: var(--preview-tag-fg, #BFC8EA); }
+  .prev-code .comment { color: var(--preview-meta, #5e584f); font-style: italic; }
+
+  .footer-note { margin-top: 120px; padding-top: 32px; border-top: 1px solid var(--border); color: var(--ink-faint); font-size: 12px; }
+  .footer-note code { background: #1a1914; padding: 2px 6px; border-radius: 2px; color: var(--ink); font-family: 'Geist Mono', monospace; }
+
+  /* ============================= */
+  /* PALETTE A — ROYAL TONAL       */
+  /* ============================= */
+  .pa { --preview-card: #18192b; --preview-border: #222444; --preview-ink: #e6e2d9; --preview-kicker: #8B9CFF; --preview-link: #6C85FF; --preview-meta: #9c968a; --preview-tag-border: #3B5BDB; --preview-tag-fg: #A5B4FF; --preview-tag-bg: rgba(59,91,219,0.08); --preview-codebg: #0e1020; }
+  .pa .scale-step:nth-child(1) { background: #0E0F1C; color: #e6e2d9; }
+  .pa .scale-step:nth-child(2) { background: #121428; color: #e6e2d9; }
+  .pa .scale-step:nth-child(3) { background: #181B36; color: #e6e2d9; }
+  .pa .scale-step:nth-child(4) { background: #1E2346; color: #e6e2d9; }
+  .pa .scale-step:nth-child(5) { background: #252C58; color: #e6e2d9; }
+  .pa .scale-step:nth-child(6) { background: #2D366C; color: #e6e2d9; }
+  .pa .scale-step:nth-child(7) { background: #364280; color: #e6e2d9; }
+  .pa .scale-step:nth-child(8) { background: #3B5BDB; color: #ffffff; }
+  .pa .scale-step:nth-child(9) { background: #4D6DE8; color: #ffffff; }
+  .pa .scale-step:nth-child(10) { background: #6C85FF; color: #0e0f1c; }
+  .pa .scale-step:nth-child(11) { background: #A5B4FF; color: #0e0f1c; }
+  .pa .scale-step:nth-child(12) { background: #D5DCFA; color: #0e0f1c; }
+
+  /* ============================= */
+  /* PALETTE B — ROYAL + SAND      */
+  /* ============================= */
+  .pb { --preview-card: #19180f; --preview-border: #2a2820; --preview-ink: #e6e2d9; --preview-kicker: #D4B896; --preview-link: #4D6DE8; --preview-meta: #9c968a; --preview-tag-border: #3B5BDB; --preview-tag-fg: #A5B4FF; --preview-tag-bg: rgba(59,91,219,0.08); --preview-codebg: #0e0d0a; }
+  .pb .scale-step:nth-child(1) { background: #0E0F1C; color: #e6e2d9; }
+  .pb .scale-step:nth-child(2) { background: #14130f; color: #e6e2d9; }
+  .pb .scale-step:nth-child(3) { background: #1A1914; color: #e6e2d9; }
+  .pb .scale-step:nth-child(4) { background: #222119; color: #e6e2d9; }
+  .pb .scale-step:nth-child(5) { background: #2A2820; color: #e6e2d9; }
+  .pb .scale-step:nth-child(6) { background: #3B5BDB; color: #ffffff; }
+  .pb .scale-step:nth-child(7) { background: #4D6DE8; color: #ffffff; }
+  .pb .scale-step:nth-child(8) { background: #6C85FF; color: #0e0f1c; }
+  .pb .scale-step:nth-child(9) { background: #8A6F42; color: #ffffff; }
+  .pb .scale-step:nth-child(10) { background: #B89668; color: #14130f; }
+  .pb .scale-step:nth-child(11) { background: #D4B896; color: #14130f; }
+  .pb .scale-step:nth-child(12) { background: #EDD9B5; color: #14130f; }
+
+  /* ============================= */
+  /* PALETTE C — PERIWINKLE TONAL  */
+  /* ============================= */
+  .pc-pal { --preview-card: #1a1a22; --preview-border: #26263a; --preview-ink: #e6e2d9; --preview-kicker: #A5B4FF; --preview-link: #8B9CFF; --preview-meta: #9c968a; --preview-tag-border: #6C7EDB; --preview-tag-fg: #C4CDFF; --preview-tag-bg: rgba(139,156,255,0.07); --preview-codebg: #0f0f17; }
+  .pc-pal .scale-step:nth-child(1) { background: #0F0F17; color: #e6e2d9; }
+  .pc-pal .scale-step:nth-child(2) { background: #14141E; color: #e6e2d9; }
+  .pc-pal .scale-step:nth-child(3) { background: #1B1B28; color: #e6e2d9; }
+  .pc-pal .scale-step:nth-child(4) { background: #222236; color: #e6e2d9; }
+  .pc-pal .scale-step:nth-child(5) { background: #2A2A44; color: #e6e2d9; }
+  .pc-pal .scale-step:nth-child(6) { background: #333354; color: #e6e2d9; }
+  .pc-pal .scale-step:nth-child(7) { background: #3E3E68; color: #e6e2d9; }
+  .pc-pal .scale-step:nth-child(8) { background: #4A4A82; color: #ffffff; }
+  .pc-pal .scale-step:nth-child(9) { background: #6C7EDB; color: #ffffff; }
+  .pc-pal .scale-step:nth-child(10) { background: #8B9CFF; color: #0f0f17; }
+  .pc-pal .scale-step:nth-child(11) { background: #B6C1FF; color: #0f0f17; }
+  .pc-pal .scale-step:nth-child(12) { background: #DADFFF; color: #0f0f17; }
+
+  /* ============================= */
+  /* PALETTE D — ROYAL + CLARET    */
+  /* ============================= */
+  .pd { --preview-card: #1b1512; --preview-border: #2f221e; --preview-ink: #e6e2d9; --preview-kicker: #C27480; --preview-link: #4D6DE8; --preview-meta: #9c968a; --preview-tag-border: #8E3A4A; --preview-tag-fg: #D99AA3; --preview-tag-bg: rgba(142,58,74,0.1); --preview-codebg: #0f0b09; }
+  .pd .scale-step:nth-child(1) { background: #0F0B09; color: #e6e2d9; }
+  .pd .scale-step:nth-child(2) { background: #14110f; color: #e6e2d9; }
+  .pd .scale-step:nth-child(3) { background: #1A1914; color: #e6e2d9; }
+  .pd .scale-step:nth-child(4) { background: #221E1A; color: #e6e2d9; }
+  .pd .scale-step:nth-child(5) { background: #2D2621; color: #e6e2d9; }
+  .pd .scale-step:nth-child(6) { background: #3B5BDB; color: #ffffff; }
+  .pd .scale-step:nth-child(7) { background: #4D6DE8; color: #ffffff; }
+  .pd .scale-step:nth-child(8) { background: #6C85FF; color: #0f0b09; }
+  .pd .scale-step:nth-child(9) { background: #6B2A37; color: #ffffff; }
+  .pd .scale-step:nth-child(10) { background: #8E3A4A; color: #ffffff; }
+  .pd .scale-step:nth-child(11) { background: #C27480; color: #0f0b09; }
+  .pd .scale-step:nth-child(12) { background: #E3B0B7; color: #0f0b09; }
+
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="doc-header">
+    <div class="kicker">Phase 3 · Design Tokens · v2</div>
+    <h1>Design explorer, round 2</h1>
+    <p>Typography, type scale, and card treatment are locked. Palettes have been rethought: instead of "one accent + another accent", each revised palette is a <strong style="color:#8B9CFF;">tonal system</strong> — one hue expressed as a 12-step scale, with each step assigned a role. This is how Radix Colors and Material 3 work. It solves both your "doesn't feel cohesive" and "not enough colours" concerns in one move.</p>
+  </header>
+
+  <!-- ========== LOCKED ========== -->
+  <h2 class="section">Locked from round 1</h2>
+  <div class="locked-grid">
+    <div class="locked-card">
+      <div class="l-kicker">Typography (Option A)</div>
+      <h4 class="l-title">Fraunces × Geist Sans</h4>
+      <p class="l-desc">Characterful flared serif paired with modern narrow sans.</p>
+    </div>
+    <div class="locked-card">
+      <div class="l-kicker">Type scale (Option B, tweaked)</div>
+      <h4 class="l-title">72 / 32 / 16</h4>
+      <p class="l-desc">Hero 72px, case title 32px, body 16px. Big headline, tight case cards, readable body.</p>
+    </div>
+    <div class="locked-card">
+      <div class="l-kicker">Card treatment (Option A)</div>
+      <h4 class="l-title">Soft rounded, hover lifts</h4>
+      <p class="l-desc">8px corners, 1px border, subtle shadow + lift on hover. Interactions refined later.</p>
+    </div>
+  </div>
+
+  <!-- ========== DESIGN NOTES ========== -->
+  <div class="notes">
+    <h3>What I got wrong in round 1, and the fix</h3>
+    <p>Round 1 presented palettes as <em>"primary accent + secondary accent"</em>. Two of them clashed (B: royal + sky, D: cobalt + ember) because both colours in each pair were saturated and competing for the "brand" slot. The eye couldn't tell which was primary.</p>
+    <p>The fix: <strong>one hue, twelve steps</strong>. Each step has a role — near-surface tint, subtle background, element background, hover state, border, solid brand, hovered solid, low-contrast text, high-contrast text. This is how modern design systems work (Radix, Material 3, Tailwind v4). It gives you twenty usable tokens from one colour, which answers your "is this enough colours for a full portfolio?" question with a yes.</p>
+    <p>Below: <strong>three single-hue options</strong> (royal, periwinkle, a refined royal+sand dual) plus <strong>one true complementary option</strong> (royal + claret) for contrast. Every palette shows a case study card, a build log strip, and a code block (for writing posts) so you can see how the tokens hold up across real content types.</p>
+  </div>
+
+  <!-- ========== PALETTE A ========== -->
+  <h2 class="section">Revised palette A — Royal Tonal</h2>
+  <section class="palette pa">
+    <div class="palette-header">
+      <div class="p-kicker">Single hue · 12-step tonal scale</div>
+      <h3>Royal Tonal</h3>
+      <p>Built from royal <code style="color:#8B9CFF;">#3B5BDB</code> (your favourite from round 1). The "periwinkle" you loved in Option E is just step 11 of this scale — <code style="color:#8B9CFF;">#A5B4FF</code>. So your two favourite colours are already the same colour, at different roles: solid brand (step 8) and text link (step 10-11). Surfaces pick up a subtle blue undertone so the page reads cohesive, not "charcoal with a blue floating on top".</p>
+    </div>
+
+    <div class="scale-strip">
+      <div class="scale-step"><span class="n">1</span>#0E0F1C</div>
+      <div class="scale-step"><span class="n">2</span>#121428</div>
+      <div class="scale-step"><span class="n">3</span>#181B36</div>
+      <div class="scale-step"><span class="n">4</span>#1E2346</div>
+      <div class="scale-step"><span class="n">5</span>#252C58</div>
+      <div class="scale-step"><span class="n">6</span>#2D366C</div>
+      <div class="scale-step"><span class="n">7</span>#364280</div>
+      <div class="scale-step"><span class="n">8</span>#3B5BDB</div>
+      <div class="scale-step"><span class="n">9</span>#4D6DE8</div>
+      <div class="scale-step"><span class="n">10</span>#6C85FF</div>
+      <div class="scale-step"><span class="n">11</span>#A5B4FF</div>
+      <div class="scale-step"><span class="n">12</span>#D5DCFA</div>
+    </div>
+    <div class="scale-label-row">
+      <span>app bg</span><span>surface</span><span>subtle bg</span><span>element bg</span><span>hover bg</span><span>active bg</span><span>border</span><span>solid (brand)</span><span>hovered solid</span><span>text link</span><span>low ink</span><span>high ink</span>
+    </div>
+
+    <div class="preview">
+      <div class="prev-case">
+        <div class="pc-kicker">Selected work · 01</div>
+        <h4 class="pc-title">Shipping the-weekly in 11 days</h4>
+        <p class="pc-tldr">A "create your own meal kit" tool built around Coles recipes. I learned more about product scoping in these 11 days than in the 6 months before them.</p>
+        <div class="pc-meta">
+          <a class="pc-link" href="#">Read case study →</a>
+          <span class="pc-date">April 2026</span>
+          <span class="pc-tag">Vibe-coded</span>
+        </div>
+      </div>
+      <div class="prev-side">
+        <div class="prev-log">
+          <div class="pl-label">Build log · Recent</div>
+          <div class="pl-item"><span class="pl-date">Apr 10</span><span class="pl-title">Design workflow validated end-to-end</span></div>
+          <div class="pl-item"><span class="pl-date">Apr 08</span><span class="pl-title">MCP proxy setup for Stitch</span></div>
+          <div class="pl-item"><span class="pl-date">Apr 04</span><span class="pl-title">Planner app Phase A shipped</span></div>
+          <div class="pl-item"><span class="pl-date">Apr 01</span><span class="pl-title">Cloudflare migration plan locked</span></div>
+        </div>
+        <div class="prev-code">
+          <div class="pl-label">Code · mdx sample</div>
+<pre><span class="comment">// shadcn component</span>
+<span class="keyword">export function</span> CaseCard() {
+  <span class="keyword">return</span> <span class="string">"ship it"</span>
+}</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== PALETTE B ========== -->
+  <h2 class="section">Revised palette B — Royal + Sand</h2>
+  <section class="palette pb">
+    <div class="palette-header">
+      <div class="p-kicker">Dual hue · warm-biased editorial</div>
+      <h3>Royal + Sand</h3>
+      <p>Royal <code style="color:#A5B4FF;">#3B5BDB</code> for interactive (links, CTAs, brand). Warm sand <code style="color:#D4B896;">#D4B896</code> for editorial flourish — italic dates, kicker labels, "Selected work" numerals. This is the replacement for Option D (cobalt + ember). Sand is desaturated (not saturated amber), so it sits comfortably beside royal instead of fighting it. Uses the original warm charcoal base you liked — most editorial-feeling of the options.</p>
+    </div>
+
+    <div class="scale-strip">
+      <div class="scale-step"><span class="n">1</span>#0E0F1C</div>
+      <div class="scale-step"><span class="n">2</span>#14130F</div>
+      <div class="scale-step"><span class="n">3</span>#1A1914</div>
+      <div class="scale-step"><span class="n">4</span>#222119</div>
+      <div class="scale-step"><span class="n">5</span>#2A2820</div>
+      <div class="scale-step"><span class="n">6</span>#3B5BDB</div>
+      <div class="scale-step"><span class="n">7</span>#4D6DE8</div>
+      <div class="scale-step"><span class="n">8</span>#6C85FF</div>
+      <div class="scale-step"><span class="n">9</span>#8A6F42</div>
+      <div class="scale-step"><span class="n">10</span>#B89668</div>
+      <div class="scale-step"><span class="n">11</span>#D4B896</div>
+      <div class="scale-step"><span class="n">12</span>#EDD9B5</div>
+    </div>
+    <div class="scale-label-row">
+      <span>app bg</span><span>surface</span><span>card</span><span>elevated</span><span>border</span><span>royal solid</span><span>royal hover</span><span>royal text</span><span>sand deep</span><span>sand mid</span><span>sand light</span><span>sand pale</span>
+    </div>
+
+    <div class="preview">
+      <div class="prev-case">
+        <div class="pc-kicker">Selected work · 01</div>
+        <h4 class="pc-title">Shipping the-weekly in 11 days</h4>
+        <p class="pc-tldr">A "create your own meal kit" tool built around Coles recipes. I learned more about product scoping in these 11 days than in the 6 months before them.</p>
+        <div class="pc-meta">
+          <a class="pc-link" href="#">Read case study →</a>
+          <span class="pc-date">April 2026</span>
+          <span class="pc-tag">Vibe-coded</span>
+        </div>
+      </div>
+      <div class="prev-side">
+        <div class="prev-log">
+          <div class="pl-label">Build log · Recent</div>
+          <div class="pl-item"><span class="pl-date">Apr 10</span><span class="pl-title">Design workflow validated end-to-end</span></div>
+          <div class="pl-item"><span class="pl-date">Apr 08</span><span class="pl-title">MCP proxy setup for Stitch</span></div>
+          <div class="pl-item"><span class="pl-date">Apr 04</span><span class="pl-title">Planner app Phase A shipped</span></div>
+          <div class="pl-item"><span class="pl-date">Apr 01</span><span class="pl-title">Cloudflare migration plan locked</span></div>
+        </div>
+        <div class="prev-code">
+          <div class="pl-label">Code · mdx sample</div>
+<pre><span class="comment">// shadcn component</span>
+<span class="keyword">export function</span> CaseCard() {
+  <span class="keyword">return</span> <span class="string">"ship it"</span>
+}</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== PALETTE C ========== -->
+  <h2 class="section">Revised palette C — Periwinkle Tonal</h2>
+  <section class="palette pc-pal">
+    <div class="palette-header">
+      <div class="p-kicker">Single hue · softer anchor</div>
+      <h3>Periwinkle Tonal</h3>
+      <p>Same system as palette A, but anchored on periwinkle <code style="color:#A5B4FF;">#8B9CFF</code> as the solid brand step instead of royal. Softer, more restrained, leans literary. The deep royal you loved still lives in the scale at step 8 <code style="color:#A5B4FF;">#4A4A82</code> as the "active / pressed" state. Good if you want the overall tone to read as *quiet confidence* rather than *bold product*.</p>
+    </div>
+
+    <div class="scale-strip">
+      <div class="scale-step"><span class="n">1</span>#0F0F17</div>
+      <div class="scale-step"><span class="n">2</span>#14141E</div>
+      <div class="scale-step"><span class="n">3</span>#1B1B28</div>
+      <div class="scale-step"><span class="n">4</span>#222236</div>
+      <div class="scale-step"><span class="n">5</span>#2A2A44</div>
+      <div class="scale-step"><span class="n">6</span>#333354</div>
+      <div class="scale-step"><span class="n">7</span>#3E3E68</div>
+      <div class="scale-step"><span class="n">8</span>#4A4A82</div>
+      <div class="scale-step"><span class="n">9</span>#6C7EDB</div>
+      <div class="scale-step"><span class="n">10</span>#8B9CFF</div>
+      <div class="scale-step"><span class="n">11</span>#B6C1FF</div>
+      <div class="scale-step"><span class="n">12</span>#DADFFF</div>
+    </div>
+    <div class="scale-label-row">
+      <span>app bg</span><span>surface</span><span>subtle bg</span><span>element bg</span><span>hover bg</span><span>active bg</span><span>border</span><span>active/pressed</span><span>hovered solid</span><span>solid (brand)</span><span>low ink</span><span>high ink</span>
+    </div>
+
+    <div class="preview">
+      <div class="prev-case">
+        <div class="pc-kicker">Selected work · 01</div>
+        <h4 class="pc-title">Shipping the-weekly in 11 days</h4>
+        <p class="pc-tldr">A "create your own meal kit" tool built around Coles recipes. I learned more about product scoping in these 11 days than in the 6 months before them.</p>
+        <div class="pc-meta">
+          <a class="pc-link" href="#">Read case study →</a>
+          <span class="pc-date">April 2026</span>
+          <span class="pc-tag">Vibe-coded</span>
+        </div>
+      </div>
+      <div class="prev-side">
+        <div class="prev-log">
+          <div class="pl-label">Build log · Recent</div>
+          <div class="pl-item"><span class="pl-date">Apr 10</span><span class="pl-title">Design workflow validated end-to-end</span></div>
+          <div class="pl-item"><span class="pl-date">Apr 08</span><span class="pl-title">MCP proxy setup for Stitch</span></div>
+          <div class="pl-item"><span class="pl-date">Apr 04</span><span class="pl-title">Planner app Phase A shipped</span></div>
+          <div class="pl-item"><span class="pl-date">Apr 01</span><span class="pl-title">Cloudflare migration plan locked</span></div>
+        </div>
+        <div class="prev-code">
+          <div class="pl-label">Code · mdx sample</div>
+<pre><span class="comment">// shadcn component</span>
+<span class="keyword">export function</span> CaseCard() {
+  <span class="keyword">return</span> <span class="string">"ship it"</span>
+}</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== PALETTE D ========== -->
+  <h2 class="section">Revised palette D — Royal + Claret</h2>
+  <section class="palette pd">
+    <div class="palette-header">
+      <div class="p-kicker">Dual hue · true complementary</div>
+      <h3>Royal + Claret</h3>
+      <p>Royal <code style="color:#8B9CFF;">#3B5BDB</code> for interactive. Deep claret / wine <code style="color:#C27480;">#8E3A4A</code> for editorial flourish — kicker labels, italic metadata, "NEW" tags. Royal and claret are roughly on opposite ends of the colour wheel, so they don't compete for the same brand slot (unlike royal + sky). More dramatic than sand; feels like a literary quarterly. Risk: could read as sports-team-ish if over-used.</p>
+    </div>
+
+    <div class="scale-strip">
+      <div class="scale-step"><span class="n">1</span>#0F0B09</div>
+      <div class="scale-step"><span class="n">2</span>#14110F</div>
+      <div class="scale-step"><span class="n">3</span>#1A1914</div>
+      <div class="scale-step"><span class="n">4</span>#221E1A</div>
+      <div class="scale-step"><span class="n">5</span>#2D2621</div>
+      <div class="scale-step"><span class="n">6</span>#3B5BDB</div>
+      <div class="scale-step"><span class="n">7</span>#4D6DE8</div>
+      <div class="scale-step"><span class="n">8</span>#6C85FF</div>
+      <div class="scale-step"><span class="n">9</span>#6B2A37</div>
+      <div class="scale-step"><span class="n">10</span>#8E3A4A</div>
+      <div class="scale-step"><span class="n">11</span>#C27480</div>
+      <div class="scale-step"><span class="n">12</span>#E3B0B7</div>
+    </div>
+    <div class="scale-label-row">
+      <span>app bg</span><span>surface</span><span>card</span><span>elevated</span><span>border</span><span>royal solid</span><span>royal hover</span><span>royal text</span><span>claret deep</span><span>claret mid</span><span>claret light</span><span>claret pale</span>
+    </div>
+
+    <div class="preview">
+      <div class="prev-case">
+        <div class="pc-kicker">Selected work · 01</div>
+        <h4 class="pc-title">Shipping the-weekly in 11 days</h4>
+        <p class="pc-tldr">A "create your own meal kit" tool built around Coles recipes. I learned more about product scoping in these 11 days than in the 6 months before them.</p>
+        <div class="pc-meta">
+          <a class="pc-link" href="#">Read case study →</a>
+          <span class="pc-date">April 2026</span>
+          <span class="pc-tag">Vibe-coded</span>
+        </div>
+      </div>
+      <div class="prev-side">
+        <div class="prev-log">
+          <div class="pl-label">Build log · Recent</div>
+          <div class="pl-item"><span class="pl-date">Apr 10</span><span class="pl-title">Design workflow validated end-to-end</span></div>
+          <div class="pl-item"><span class="pl-date">Apr 08</span><span class="pl-title">MCP proxy setup for Stitch</span></div>
+          <div class="pl-item"><span class="pl-date">Apr 04</span><span class="pl-title">Planner app Phase A shipped</span></div>
+          <div class="pl-item"><span class="pl-date">Apr 01</span><span class="pl-title">Cloudflare migration plan locked</span></div>
+        </div>
+        <div class="prev-code">
+          <div class="pl-label">Code · mdx sample</div>
+<pre><span class="comment">// shadcn component</span>
+<span class="keyword">export function</span> CaseCard() {
+  <span class="keyword">return</span> <span class="string">"ship it"</span>
+}</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <p class="footer-note">
+    All samples rendered on each palette's own dark surface (not all the same warm charcoal — palettes A and C use blue-tinted surfaces to match the hue family; B and D keep the original warm charcoal). Type: Fraunces (serif) × Geist (sans) × Geist Mono (code). Type scale locked at 72 / 32 / 16. Card treatment: soft rounded, hover lifts. File: <code>plans/portfolio-stitch-assets/design-explorer.html</code>.
+  </p>
+</div>
+</body>
+</html>

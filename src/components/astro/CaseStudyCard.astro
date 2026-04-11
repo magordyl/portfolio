@@ -1,0 +1,126 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import KickerLabel from './KickerLabel.astro';
+
+interface Props {
+  project: CollectionEntry<'projects'>;
+}
+
+const { project } = Astro.props;
+const { title, tldr, tags, depth } = project.data;
+const slug = project.id;
+const kickerLabel = depth === 'full' ? 'Case Study' : 'Lightweight';
+---
+
+<article class="card">
+  <!-- Placeholder image area — replaced with real hero in chunk 5 -->
+  <div class="card-image" aria-hidden="true">
+    <span class="card-image-label">Image coming soon</span>
+  </div>
+
+  <div class="card-body">
+    <KickerLabel label={kickerLabel} />
+
+    <h3 class="card-title">{title}</h3>
+
+    <p class="card-tldr">{tldr}</p>
+
+    <div class="card-tags">
+      {tags.map(tag => (
+        <span class="tag">{tag}</span>
+      ))}
+    </div>
+
+    <a href={`/projects/${slug}`} class="card-link">Read case study →</a>
+  </div>
+</article>
+
+<style>
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .card:hover {
+    border-color: var(--border-strong);
+    box-shadow: var(--shadow-card-hover);
+  }
+
+  .card-image {
+    height: 180px;
+    background: linear-gradient(135deg, var(--royal-3) 0%, var(--royal-5) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .card-image-label {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--ink-faint);
+    letter-spacing: var(--ls-caps);
+    text-transform: uppercase;
+  }
+
+  .card-body {
+    padding: var(--space-5);
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+
+  .card-title {
+    font-family: var(--font-serif);
+    font-size: var(--text-case);
+    font-weight: 400;
+    letter-spacing: var(--ls-title);
+    color: var(--ink);
+    margin: var(--space-2) 0 var(--space-3);
+    line-height: var(--lh-tight);
+  }
+
+  .card-tldr {
+    font-size: var(--text-sm);
+    color: var(--ink-dim);
+    margin: 0 0 var(--space-4);
+    line-height: var(--lh-normal);
+    flex: 1;
+  }
+
+  .card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+  }
+
+  .tag {
+    font-family: var(--font-sans);
+    font-size: var(--text-xs);
+    color: var(--tag-fg);
+    background: var(--tag-bg);
+    border: 1px solid var(--tag-border);
+    border-radius: var(--radius-sm);
+    padding: 2px var(--space-2);
+    letter-spacing: 0.02em;
+  }
+
+  .card-link {
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    color: var(--link);
+    font-weight: 500;
+    text-decoration: none;
+    align-self: flex-start;
+  }
+
+  .card-link:hover {
+    color: var(--royal-11);
+  }
+</style>

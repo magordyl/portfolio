@@ -1,0 +1,148 @@
+@import "tailwindcss";
+
+/* Fonts — self-hosted via @fontsource */
+@import "@fontsource/fraunces/400.css";
+@import "@fontsource/fraunces/500.css";
+@import "@fontsource-variable/geist";
+@import "@fontsource/geist-mono/400.css";
+@import "@fontsource/geist-mono/500.css";
+
+/* ============================================================
+   Royal Tonal — 12-step colour system anchored on #3B5BDB
+   ============================================================ */
+:root {
+  /* Raw scale */
+  --royal-1:  #0E0F1C;
+  --royal-2:  #121428;
+  --royal-3:  #181B36;
+  --royal-4:  #1E2346;
+  --royal-5:  #252C58;
+  --royal-6:  #2D366C;
+  --royal-7:  #364280;
+  --royal-8:  #3B5BDB;
+  --royal-9:  #4D6DE8;
+  --royal-10: #6C85FF;
+  --royal-11: #A5B4FF;
+  --royal-12: #D5DCFA;
+
+  /* Ink — off-white text scale */
+  --ink:       #E6E2D9;
+  --ink-dim:   #9C968A;
+  --ink-faint: #5E584F;
+
+  /* Semantic aliases (use these in components) */
+  --bg:             var(--royal-2);
+  --bg-subtle:      var(--royal-3);
+  --card:           var(--royal-4);
+  --card-hover:     var(--royal-5);
+  --border:         var(--royal-7);
+  --border-strong:  var(--royal-8);
+  --primary:        var(--royal-8);
+  --primary-hover:  var(--royal-9);
+  --link:           var(--royal-10);
+  --kicker:         var(--royal-11);
+  --tag-border:     var(--royal-8);
+  --tag-fg:         var(--royal-11);
+  --tag-bg:         rgba(59, 91, 219, 0.08);
+  --code-bg:        var(--royal-1);
+  --code-keyword:   var(--royal-10);
+  --code-string:    var(--royal-11);
+  --code-comment:   var(--ink-faint);
+
+  /* ============================================================
+     Typography
+     ============================================================ */
+  --font-serif: 'Fraunces', Georgia, serif;
+  --font-sans:  'Geist Variable', -apple-system, system-ui, sans-serif;
+  --font-mono:  'Geist Mono', 'SF Mono', Menlo, monospace;
+
+  /* Type scale — 72/32/16 anchor */
+  --text-hero:     4.5rem;    /* 72px */
+  --text-display:  3rem;      /* 48px */
+  --text-case:     2rem;      /* 32px */
+  --text-h3:       1.5rem;    /* 24px */
+  --text-h4:       1.25rem;   /* 20px */
+  --text-body:     1rem;      /* 16px */
+  --text-sm:       0.875rem;  /* 14px */
+  --text-xs:       0.75rem;   /* 12px */
+  --text-kicker:   0.6875rem; /* 11px */
+
+  /* Line heights */
+  --lh-hero:   0.98;
+  --lh-tight:  1.1;
+  --lh-snug:   1.25;
+  --lh-normal: 1.55;
+  --lh-loose:  1.65;
+
+  /* Letter spacing */
+  --ls-hero:  -0.025em;
+  --ls-title: -0.01em;
+  --ls-body:  0;
+  --ls-caps:  0.18em;
+
+  /* ============================================================
+     Spacing — 4px base scale
+     ============================================================ */
+  --space-1:  0.25rem;
+  --space-2:  0.5rem;
+  --space-3:  0.75rem;
+  --space-4:  1rem;
+  --space-5:  1.5rem;
+  --space-6:  2rem;
+  --space-7:  3rem;
+  --space-8:  4.5rem;
+  --space-9:  6rem;
+  --space-10: 9rem;
+
+  /* Radius */
+  --radius-sm: 2px;
+  --radius:    8px;
+  --radius-lg: 12px;
+
+  /* Borders */
+  --border-1: 1px;
+  --border-2: 2px;
+
+  /* Shadows */
+  --shadow-card-hover: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+/* Mobile type scale overrides */
+@media (max-width: 640px) {
+  :root {
+    --text-hero:    2.75rem;
+    --text-display: 2rem;
+    --text-case:    1.5rem;
+  }
+}
+
+/* ============================================================
+   Base styles
+   ============================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-optical-sizing: auto;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  line-height: var(--lh-normal);
+  letter-spacing: var(--ls-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: var(--link);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--royal-11);
+}

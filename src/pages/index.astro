@@ -1,0 +1,194 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import KickerLabel from '../components/astro/KickerLabel.astro';
+import BuildLogTicker from '../components/astro/BuildLogTicker.astro';
+import CaseStudyCard from '../components/astro/CaseStudyCard.astro';
+
+const allProjects = await getCollection('projects');
+const projects = allProjects.sort((a, b) => b.data.weight - a.data.weight);
+---
+
+<BaseLayout
+  title="Dylan Magor-Hampel — Product & Build"
+  description="Product thinker with an unusual capacity to learn. Builder of things that ship."
+>
+  <!-- Hero + Build Log -->
+  <section class="section-hero">
+    <div class="hero-grid">
+
+      <!-- Left: Hero copy -->
+      <div>
+        <KickerLabel label="Product · Build · 2026" />
+
+        <h1 class="hero-headline">
+          I am a product manager. I am learning to build the things I decide on.
+        </h1>
+
+        <p class="hero-sub">
+          I build products end-to-end — from the problem framing through to the deployed code.
+          Case studies below show how I think.
+        </p>
+      </div>
+
+      <!-- Right: Build log ticker -->
+      <BuildLogTicker />
+    </div>
+  </section>
+
+  <!-- Selected Work -->
+  <section class="section-work">
+    <h2 class="work-heading">Selected Work</h2>
+    <div class="project-grid">
+      {projects.map(project => (
+        <CaseStudyCard project={project} />
+      ))}
+    </div>
+  </section>
+
+  <!-- About teaser -->
+  <section class="section-about">
+    <KickerLabel label="About" />
+    <p class="about-body">
+      I'm a product manager who got tired of being the person in the room who couldn't read
+      the code. So I learned. This site documents what I've been building as I go.
+    </p>
+    <a href="/about" class="about-link">Read my full bio →</a>
+  </section>
+
+  <!-- Closing quote -->
+  <div class="section-quote">
+    <blockquote class="quote">
+      "The most powerful feature of modern software isn't the code itself, but how invisibly
+      it serves the human intent behind it."
+    </blockquote>
+  </div>
+</BaseLayout>
+
+<style>
+  /* Shared section container */
+  .section-hero,
+  .section-work,
+  .section-about,
+  .section-quote {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-left: var(--space-6);
+    padding-right: var(--space-6);
+  }
+
+  /* Hero */
+  .section-hero {
+    padding-top: var(--space-10);
+    padding-bottom: var(--space-8);
+  }
+
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 3fr 2fr;
+    gap: var(--space-8);
+    align-items: start;
+  }
+
+  .hero-headline {
+    font-family: var(--font-serif);
+    font-size: var(--text-hero);
+    font-weight: 400;
+    line-height: var(--lh-hero);
+    letter-spacing: var(--ls-hero);
+    color: var(--ink);
+    margin-top: var(--space-5);
+    max-width: 14ch;
+  }
+
+  .hero-sub {
+    font-family: var(--font-sans);
+    font-size: var(--text-h4);
+    color: var(--ink-dim);
+    margin-top: var(--space-5);
+    max-width: 44ch;
+    line-height: var(--lh-normal);
+  }
+
+  /* Selected Work */
+  .section-work {
+    padding-top: 0;
+    padding-bottom: var(--space-9);
+  }
+
+  .work-heading {
+    font-family: var(--font-sans);
+    font-size: var(--text-h4);
+    font-weight: 400;
+    color: var(--ink-faint);
+    letter-spacing: var(--ls-caps);
+    text-transform: uppercase;
+    margin-bottom: var(--space-6);
+  }
+
+  .project-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-5);
+  }
+
+  /* About */
+  .section-about {
+    padding-top: var(--space-7);
+    padding-bottom: var(--space-9);
+    border-top: 1px solid var(--border);
+  }
+
+  .about-body {
+    font-family: var(--font-sans);
+    font-size: var(--text-h4);
+    color: var(--ink);
+    margin-top: var(--space-4);
+    max-width: 56ch;
+    line-height: var(--lh-normal);
+  }
+
+  .about-link {
+    display: inline-block;
+    margin-top: var(--space-5);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    color: var(--link);
+    font-weight: 500;
+    text-decoration: none;
+  }
+
+  .about-link:hover {
+    color: var(--royal-11);
+  }
+
+  /* Quote */
+  .section-quote {
+    padding-top: var(--space-7);
+    padding-bottom: var(--space-10);
+    border-top: 1px solid var(--border);
+  }
+
+  .quote {
+    font-family: var(--font-serif);
+    font-size: var(--text-display);
+    font-weight: 400;
+    font-style: italic;
+    color: var(--ink-dim);
+    line-height: var(--lh-snug);
+    letter-spacing: var(--ls-title);
+    max-width: 24ch;
+    margin: 0;
+  }
+
+  /* Mobile */
+  @media (max-width: 768px) {
+    .hero-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .project-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
