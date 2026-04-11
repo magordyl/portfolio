@@ -46,6 +46,158 @@ Session pivoted twice and ended up producing a reusable artefact, a deployed por
 
 **Next:** User iterates on the story map in the live visualiser. Once content is locked, a follow-up session picks up at Phase 4 (UX flows) of the planner V1 `/new-feature` run. Portfolio chunk 4a.3 (imagery standards) continues independently.
 
+### Chat log: story map origin to Cloudflare deploy
+
+Captured verbatim from the session transcript for eventual reference in the writing post. Runs from the first mention of "story map" through the deployment confirmation.
+
+**User — 06:28**
+
+> I would like to do a full redesign, from UX flows to tokens, for planner as well. Because when I originally started working on this project, I hadn't defined the improved design workflow yet. Other answers: Q1 — I want to story map all the remaining features into an iterative release plan and implement them in that order. Not bundled by theme, instead done based on the priorities I set. 2C 3B 4 skip this; I want to prepare a full story map to define release slices. Help me do that. 5C 6A 7 even though the week isn't up, I want to do the migration as part of implementing the redesign I mentioned. 8C
+
+**Claude — 06:29**
+
+> Got it. This significantly changes the shape of the work. Let me confirm what I think we're now doing, then ask round 2.
+>
+> **Revised framing:**
+> - Archetype shift: not "adding features to existing project". This is a full redesign + V1 scope expansion. Phases 3 (tokens) and 5 (visual direction) come back in, not skipped. The Tailwind v4 migration folds into the redesign implementation rather than being a standalone Phase I.
+> - Spec format: traditional spec bullets don't fit what you want. We'll build a Jeff Patton-style story map (horizontal backbone = user activities over time; vertical = stories ranked by priority; cuts across = release slices). The map itself is the spec.
+> - This session's deliverables: (i) story map + release slices, (ii) UX flows for the full redesigned experience with slice markers. Architecture, tokens, visual direction, and implementation plan go to a follow-up session (or sessions).
+> - Phase 0: timezone fix + JWT refresh as a correctness pass before V1 work starts.
+>
+> *(followed by Round 2 questions Q1–Q10 covering redesign ambition, aesthetic direction, primary surface, multi-user scope, etc.)*
+
+**User — 06:39**
+
+> 1C and D / 2E / 3 no / 4a / 5a / 6a, C, D, g / 7 wait till I'm free then snooze it. I want to be able to snooze until a specific time later today eg snooze 1PM / 8B / 9A / 10E
+>
+> make sure the story map is in a format I can easily visualise. I want to be able to amend the release names and move items between releases easily
+
+**Claude — 06:42**
+
+> One quick inconsistency to flag before the draft: Q5=A (fully separate accounts, no shared data) and Q10=E (includes "inviting/sharing with another user") conflict. I'm interpreting this as "other people can sign themselves up, there's no in-app invite or sharing" — dropping the sharing column. Say so if wrong.
+>
+> **Story map format plan:**
+> - Iteration format (this session): vertical markdown — one section per release, stories grouped by backbone column. Easy to rename releases (edit heading), easy to move items (cut/paste bullets), renders fine in VS Code preview.
+> - Final artefact (after content approval): self-contained HTML visualiser with drag-drop editing, 2D grid view, export-to-markdown button. Saved to `planner-app/plans/v1-redesign/story-map.html` as a portfolio-grade deliverable per the CLAUDE.md design-artefact rule.
+>
+> Content first, visual polish after — otherwise we're polishing something we'll throw away.
+>
+> *(followed by a first-draft markdown story map with R0 correctness pass, R1 redesign rebuild, R2 daily loop wins, R3 depth, R4 rhythm, R5 admin)*
+
+**User — 06:45**
+
+> I want you to put this straight into the self-contained html visualiser with md export it'll be easier for me to amend it that way.
+>
+> make sure I can rename the release, and add in 3 spare releases in case I want to slice them more finely. also ensure I can rename the workflow steps (both skeleton and next level down), and include a few spare steps there. finally, include some additional context with each of the feature cards beyond just it's name. I need just a bit more to fully remember each feature that was in the plan and what it was for
+
+**Claude — 06:51**
+
+> Building it now. Creating the directory, then writing the self-contained HTML with drag-drop, inline editing, 3 spare releases, 2 spare skeleton groups with spare sub-steps, descriptions on each card, markdown export, and localStorage persistence.
+
+**User — 07:01**
+
+> You got stuck on the bash command, try again
+
+**Claude — 07:01**
+
+> Directory created. Writing the HTML visualiser now.
+
+**Claude — 07:04**
+
+> Done. The story map visualiser is at `planner-app/plans/v1-redesign/story-map.html`.
+>
+> **What's in it:**
+> - Backbone (skeleton row): Onboard · Capture · Organise · Schedule · Remind · Act · Review · Admin · Spare 1 · Spare 2
+> - Sub-steps (27 total) — including 4 blank spares under the two Spare skeletons
+> - Releases: R0 Correctness pass · R1 The Redesign · R2 Daily Loop Wins · R3 Depth & Control · R4 Rhythm · R5 Polish & Admin · Spare A · Spare B · Spare C
+> - 29 seeded cards with title + one-sentence description each
+> - R1 has a prominent cross-cutting note on the release label (Tailwind v4 migration, new tokens/fonts/type scale, mobile-first PWA shell)
+>
+> **What you can do:**
+> - Drag any card between cells to move it between releases or workflow steps
+> - Click any text (map title, skeleton name, sub-step name, release name, release notes, card title, card description) to edit inline
+> - Hover a cell → `+` button to add a new card in that cell
+> - Hover a card → `×` button to delete
+> - Export Markdown → downloads `planner-v1-story-map.md` as a clean grouped snapshot
+> - Reset → restores the seeded content
+> - localStorage persists everything automatically — your edits survive reloads
+>
+> When you're happy with the content, click Export Markdown and share the file back to me — that becomes the canonical spec for Phase 4 (UX flows).
+
+**User — 07:04**
+
+> how can I access it on my phone remotely?
+
+**Claude — 07:05**
+
+> Three options, cheapest to best, plus one caveat.
+>
+> **Caveat first:** The file uses localStorage to persist edits. That's per-device, per-browser — so edits made on your phone won't appear on desktop (and vice versa). For pure viewing this is fine. For cross-device iteration it's not. I can add cross-device sync if you need it.
+>
+> **Option 1 — Local network (same WiFi, fastest):** `python -m http.server 8000` from the folder, open `http://<laptop-LAN-IP>:8000/story-map.html` on the phone. Free, instant, private. Only works when both devices are on the same Wi-Fi network.
+>
+> **Option 2 — Public URL via Netlify:** `netlify deploy --dir=.` — one-off draft URL, ~10 seconds. Public by default.
+>
+> **Option 3 — Cloudflare Quick Tunnel:** `cloudflared tunnel --url http://localhost:8000` — temporary `trycloudflare.com` URL, dies when you close the terminal.
+>
+> **If you want real cross-device sync:** I can add a "Copy shareable URL" button that base64-encodes the current state into the URL hash (`#state=...`). Open that URL on any device, state loads. No backend, no accounts, no localStorage collision. Say the word and I'll wire it up — 15-minute change.
+
+**User — 07:07**
+
+> add the cross-device sync url, and make sure you do it in a way that I can give you that url back and you know what the state means.
+>
+> can you host it ok CloudFlare workers as part of the portfolio project? it'll need to be there eventually anyway as part of the portfolio
+
+**Claude — 07:10**
+
+> I'll do this in phases: (1) update the HTML with URL sync, (2) write a standalone decoder I can rely on, (3) explore the portfolio structure, (4) wire up deployment.
+>
+> *(Phase 1: added `Copy Share URL` toolbar button, `encodeState` / `decodeState` functions using TextEncoder + btoa + url-safe replacement, updated `loadState` to consume `#state=` on load and `history.replaceState` to clear the hash.)*
+>
+> *(Phase 2: wrote `decode-state.mjs` — standalone Node ESM script accepting URL, raw b64, or `--file <path>` for long URLs exceeding shell arg limits.)*
+>
+> *(Phase 3: explored portfolio structure, confirmed `public/` serves as static assets, chose `public/artefacts/planner-v1-story-map/index.html` as the deployed location.)*
+>
+> *(Phase 4: checked portfolio git state, committed as `002cc0e` with pre-commit hook running `astro check && astro build` — clean pass. Pushed to main. Cloudflare auto-deploy picked it up.)*
+
+**Claude — 07:18**
+
+> Pushed clean to main (`04caaaa..002cc0e`). Cloudflare auto-deploy should complete in ~1–2 minutes.
+>
+> **Your live URL:** `https://dylan-portfolio.magordyl.workers.dev/artefacts/planner-v1-story-map/`
+>
+> **What you now have (in the browser at the live URL):**
+> - `Copy Share URL` → copies a URL with the full state base64-encoded in the hash. Send it to yourself on another device → opens with identical state.
+> - `Export Markdown` → downloads a clean `.md` snapshot
+> - `Reset` → restores the seeded content
+> - Drag-drop cards, inline-edit everything, auto-save to localStorage
+>
+> **How the cross-device flow works:** localStorage is per-device, so raw edits don't sync. When you want to move state to another device, click Copy Share URL and open the pasted URL there. On load, the state is consumed from the hash, written to that device's localStorage, and the hash is cleared — so subsequent refreshes don't re-apply stale state. Continue editing; generate a new Share URL when you want to move state back.
+>
+> **Sharing state back to me:** paste the full `#state=...` URL in a message. I have a standalone decoder at `planner-app/plans/v1-redesign/decode-state.mjs` that accepts the URL directly or reads from a file (for URLs long enough to exceed shell arg limits):
+>
+> ```bash
+> node decode-state.mjs "<url>"
+> node decode-state.mjs --file url.txt
+> ```
+>
+> The encoding is documented inline in the HTML and in the decoder so it's deterministic — no guessing.
+>
+> **Files created/modified:**
+>
+> | Path | Purpose |
+> |---|---|
+> | `planner-app/plans/v1-redesign/story-map.html` | Source of truth (working copy) |
+> | `planner-app/plans/v1-redesign/decode-state.mjs` | Standalone Node decoder for share URLs |
+> | `portfolio/public/artefacts/planner-v1-story-map/index.html` | Deployed copy (committed + pushed as `002cc0e`) |
+>
+> **Flagged:**
+> 1. The deployed copy is public. Anyone with the URL can see the story map content. Fine for this artefact, keep in mind for future ones.
+> 2. Two copies now exist. Working copy and deployed copy can drift. Re-sync on request; no auto-build step wired.
+> 3. Deploy may take 1–2 min. 404 right after push is normal.
+>
+> Once you've iterated the content to a place you're happy with, share the Share URL back and we can kick off Phase 4 (UX flows) from the locked story map.
+
 ---
 
 ## 2026-04-11 — Chunk 4a.1 + 4a.2: voice research, diary audit, and the gap that only showed up at the end
