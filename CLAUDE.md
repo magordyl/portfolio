@@ -42,7 +42,9 @@ Astro uses `@tailwindcss/vite` (Vite plugin), NOT `@astrojs/tailwind`. The `astr
 
 **Chunk 3 complete** — landing page with asymmetric hero split, BuildLogTicker, 2x2 CaseStudyCard grid, About teaser, closing quote. `npm run check` passes clean.
 
-**Chunk 4 next** — Case Study Workshop (critical gate). Voice reference research → template → the-weekly case study.
+**Deployed** — Cloudflare Pages connected to `magordyl/portfolio` (`main` branch). Live at `dylan-portfolio.magordyl.workers.dev`. Every push to `main` auto-deploys.
+
+**Chunk 4 next** — Case Study Workshop (critical gate). Voice reference research (Wes Kao + John Cutler Substack) → Voice & Craft reference doc → template scaffold → the-weekly first draft → iterate → lock.
 
 **Chunks remaining:** 4 (case study workshop — critical gate), 5 (remaining case studies), 6 (secondary pages + deploy polish)
 
