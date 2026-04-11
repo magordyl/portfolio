@@ -1,0 +1,1583 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Planner V1 — Design Explorer v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* ─────────────────────────────────────────────────────────
+     v2 — calm primary + celebration accent
+     The frame is locked; only --accent (primary) and
+     --celebration (high-energy, gamification) change per column.
+     ───────────────────────────────────────────────────────── */
+
+  :root {
+    /* Canvas — warm neutral paper (softened from v1) */
+    --bg:          42 25% 97%;
+    --fg:          30 12% 14%;
+    --muted:       42 18% 93%;
+    --muted-2:     42 14% 88%;
+    --muted-fg:    30  8% 44%;
+    --border:      38 12% 85%;
+    --border-strong: 30 10% 70%;
+
+    /* Page chrome */
+    --page-bg:     30 10% 11%;
+    --page-fg:     42 18% 92%;
+    --page-accent: 42 35% 68%;
+  }
+
+  .frame {
+    --accent:          160 30% 26%;
+    --accent-fg:       0  0% 100%;
+    --accent-soft:     160 30% 94%;
+    --accent-border:   160 22% 78%;
+    --celebration:     38  92% 56%;
+    --celebration-fg:  30 35% 12%;
+    --celebration-soft: 38 90% 94%;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    background: hsl(var(--page-bg));
+    color: hsl(var(--page-fg));
+    font-family: "Inter", -apple-system, system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ─── Page chrome (explainer shell) ─── */
+
+  .page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 48px 32px 80px;
+  }
+
+  .page-header {
+    max-width: 800px;
+    margin-bottom: 48px;
+  }
+
+  .page-kicker {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: hsl(var(--page-accent));
+    margin-bottom: 12px;
+  }
+
+  .page-title {
+    font-family: "Fraunces", serif;
+    font-weight: 500;
+    font-size: 42px;
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    margin: 0 0 16px;
+    color: hsl(42 28% 97%);
+    font-variation-settings: "opsz" 144, "SOFT" 30;
+  }
+
+  .page-lede {
+    font-size: 16px;
+    line-height: 1.55;
+    color: hsl(42 15% 78%);
+    margin: 0 0 10px;
+  }
+
+  .page-lede em {
+    font-family: "Fraunces", serif;
+    font-style: italic;
+    font-variation-settings: "opsz" 14, "SOFT" 80;
+    font-weight: 400;
+    color: hsl(var(--page-accent));
+  }
+
+  .v-pill {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 2px 8px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: hsl(30 20% 12%);
+    background: hsl(var(--page-accent));
+    border-radius: 3px;
+    vertical-align: middle;
+  }
+
+  .iteration-note {
+    margin-top: 16px;
+    padding: 12px 16px;
+    background: hsl(30 10% 15%);
+    border-left: 2px solid hsl(var(--page-accent));
+    border-radius: 4px;
+    font-size: 13px;
+    line-height: 1.55;
+    color: hsl(42 12% 72%);
+  }
+
+  .iteration-note strong { color: hsl(42 22% 88%); }
+
+  /* ─── Specimen ─── */
+
+  .specimen {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 32px;
+    padding: 28px 32px;
+    margin-bottom: 56px;
+    background: hsl(30 10% 15%);
+    border: 1px solid hsl(30 8% 22%);
+    border-radius: 14px;
+  }
+
+  .specimen-label {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: hsl(var(--page-accent));
+    margin-bottom: 6px;
+  }
+
+  .specimen h3 {
+    font-family: "Fraunces", serif;
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 1.15;
+    margin: 0 0 4px;
+    font-variation-settings: "opsz" 72, "SOFT" 50;
+    color: hsl(42 22% 92%);
+  }
+
+  .specimen-meta {
+    font-size: 12px;
+    color: hsl(42 10% 62%);
+    line-height: 1.55;
+  }
+
+  .swatch-row {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 8px;
+  }
+
+  .swatch {
+    aspect-ratio: 1;
+    border-radius: 6px;
+    display: flex;
+    align-items: flex-end;
+    padding: 6px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 9px;
+    color: hsl(30 15% 20% / 0.8);
+    border: 1px solid hsl(30 10% 22%);
+  }
+
+  .swatch.on-dark { color: hsl(42 28% 96% / 0.72); }
+
+  /* ─── Dual-accent key ─── */
+
+  .accent-key {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-top: 16px;
+  }
+
+  .accent-key-item {
+    padding: 10px 12px;
+    border-radius: 6px;
+    border: 1px solid hsl(30 10% 22%);
+  }
+
+  .accent-key-item .label {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: hsl(42 10% 58%);
+    margin-bottom: 4px;
+  }
+
+  .accent-key-item .use {
+    font-size: 12px;
+    line-height: 1.45;
+    color: hsl(42 15% 78%);
+  }
+
+  /* ─── Candidates row ─── */
+
+  .candidates {
+    display: flex;
+    gap: 40px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 64px;
+  }
+
+  .candidate {
+    width: 390px;
+    flex: 0 0 390px;
+  }
+
+  .candidate-label {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: hsl(var(--page-accent));
+    margin-bottom: 8px;
+  }
+
+  .candidate-name {
+    font-family: "Fraunces", serif;
+    font-size: 24px;
+    font-weight: 500;
+    line-height: 1.1;
+    margin: 0 0 6px;
+    color: hsl(42 26% 96%);
+    font-variation-settings: "opsz" 72, "SOFT" 50;
+  }
+
+  .candidate-pair {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .pair-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    color: hsl(42 10% 65%);
+  }
+
+  .pair-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 1px solid hsl(30 10% 22%);
+  }
+
+  .candidate-note {
+    font-size: 13px;
+    line-height: 1.5;
+    color: hsl(42 12% 70%);
+    margin-top: 18px;
+    font-family: "Fraunces", serif;
+    font-style: italic;
+    font-variation-settings: "opsz" 14, "SOFT" 80;
+  }
+
+  /* ─────────────────────────────────────────────────────────
+     MOBILE FRAME
+     ───────────────────────────────────────────────────────── */
+
+  .frame {
+    width: 390px;
+    height: 800px;
+    background: hsl(var(--bg));
+    color: hsl(var(--fg));
+    border-radius: 38px;
+    overflow: hidden;
+    position: relative;
+    font-family: "Inter", sans-serif;
+    font-size: 14px;
+    box-shadow:
+      0 0 0 10px hsl(30 12% 7%),
+      0 0 0 11px hsl(30 12% 28%),
+      0 40px 80px -20px hsl(0 0% 0% / 0.55);
+  }
+
+  .frame .status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 28px 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: hsl(var(--fg));
+  }
+
+  .frame .notch {
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 22px;
+    background: hsl(30 12% 7%);
+    border-radius: 0 0 14px 14px;
+    z-index: 2;
+  }
+
+  .frame-scroll {
+    height: calc(100% - 32px);
+    overflow: hidden;
+    padding: 0 20px 20px;
+  }
+
+  /* ─── Type scale ─── */
+
+  .display {
+    font-family: "Fraunces", serif;
+    font-weight: 500;
+    font-size: 32px;
+    line-height: 1.05;
+    letter-spacing: -0.015em;
+    font-variation-settings: "opsz" 144, "SOFT" 40;
+    color: hsl(var(--fg));
+    margin: 0;
+  }
+
+  .h2 {
+    font-family: "Fraunces", serif;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 1.15;
+    letter-spacing: -0.005em;
+    font-variation-settings: "opsz" 36, "SOFT" 50;
+    margin: 0;
+  }
+
+  .kicker {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: hsl(var(--muted-fg));
+  }
+
+  .mono {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px;
+    letter-spacing: -0.01em;
+  }
+
+  /* ─── App header ─── */
+
+  .app-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 8px 0 14px;
+  }
+
+  .app-date {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    color: hsl(var(--muted-fg));
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  /* ─── Streak row (dual-accent in action) ─── */
+
+  .streak-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    margin-bottom: 16px;
+    background: hsl(var(--celebration-soft));
+    border: 1px solid hsl(var(--celebration) / 0.3);
+    border-radius: 10px;
+  }
+
+  .streak-flame {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: hsl(var(--celebration));
+    color: hsl(var(--celebration-fg));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Fraunces", serif;
+    font-size: 14px;
+    font-weight: 600;
+    font-variation-settings: "opsz" 72;
+    flex-shrink: 0;
+  }
+
+  .streak-body { flex: 1; min-width: 0; }
+
+  .streak-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: hsl(var(--fg));
+    line-height: 1.3;
+  }
+
+  .streak-title strong {
+    color: hsl(var(--celebration) / 1);
+    font-weight: 700;
+  }
+
+  .streak-meta {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    color: hsl(var(--muted-fg));
+    margin-top: 1px;
+  }
+
+  /* ─── Sections ─── */
+
+  .section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 0 8px;
+    border-top: 1px solid hsl(var(--border));
+    margin-top: 4px;
+  }
+
+  .section-head:first-child { border-top: none; margin-top: 0; padding-top: 0; }
+
+  .section-count {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    color: hsl(var(--muted-fg));
+  }
+
+  /* ─── Task row ─── */
+
+  .task {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid hsl(var(--border));
+  }
+
+  .task:last-child { border-bottom: none; }
+
+  .task-check {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 1.5px solid hsl(var(--border-strong));
+    flex-shrink: 0;
+    margin-top: 2px;
+    background: hsl(var(--bg));
+  }
+
+  .task.done .task-check {
+    background: hsl(var(--accent));
+    border-color: hsl(var(--accent));
+    position: relative;
+  }
+
+  .task.done .task-check::after {
+    content: "";
+    position: absolute;
+    inset: 4px 4px 5px 5px;
+    border-bottom: 2px solid hsl(var(--accent-fg));
+    border-right: 2px solid hsl(var(--accent-fg));
+    transform: rotate(40deg) translate(-1px, -3px);
+  }
+
+  .task-body { flex: 1; min-width: 0; }
+
+  .task-title {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.35;
+    color: hsl(var(--fg));
+    margin: 0;
+  }
+
+  .task.done .task-title {
+    color: hsl(var(--muted-fg));
+    text-decoration: line-through;
+    text-decoration-color: hsl(var(--muted-fg) / 0.5);
+  }
+
+  .task-meta {
+    margin-top: 3px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: hsl(var(--muted-fg));
+  }
+
+  .task-time {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    font-weight: 500;
+    color: hsl(var(--fg));
+    flex-shrink: 0;
+    padding-top: 2px;
+  }
+
+  .task.overdue .task-time { color: hsl(var(--accent)); font-weight: 600; }
+
+  .task-badge {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 9px;
+    font-weight: 500;
+    padding: 1px 6px;
+    border-radius: 3px;
+    background: hsl(var(--muted-2));
+    color: hsl(var(--muted-fg));
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .task-badge.accent {
+    background: hsl(var(--accent-soft));
+    color: hsl(var(--accent));
+  }
+
+  .task-badge.streak {
+    background: hsl(var(--celebration-soft));
+    color: hsl(var(--celebration) / 1);
+    border: 1px solid hsl(var(--celebration) / 0.4);
+  }
+
+  /* ─── FAB ─── */
+
+  .fab {
+    position: absolute;
+    bottom: 86px;
+    right: 22px;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: hsl(var(--accent));
+    color: hsl(var(--accent-fg));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Fraunces", serif;
+    font-size: 26px;
+    font-weight: 400;
+    font-variation-settings: "opsz" 144;
+    box-shadow: 0 8px 24px -8px hsl(var(--accent) / 0.7);
+    line-height: 1;
+  }
+
+  /* ─── Tab bar ─── */
+
+  .tab-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 64px;
+    background: hsl(var(--bg));
+    border-top: 1px solid hsl(var(--border));
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0 28px 14px;
+  }
+
+  .tab {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: hsl(var(--muted-fg));
+    text-align: center;
+  }
+
+  .tab.active { color: hsl(var(--accent)); }
+
+  .tab .dot {
+    display: block;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: hsl(var(--accent));
+    margin: 4px auto 0;
+    opacity: 0;
+  }
+
+  .tab.active .dot { opacity: 1; }
+
+  /* ─── Demo row ─── */
+
+  .rule {
+    height: 1px;
+    background: hsl(30 8% 22%);
+    margin: 56px 0 44px;
+  }
+
+  .demo-header {
+    max-width: 760px;
+    margin-bottom: 32px;
+  }
+
+  .demo-header h2 {
+    font-family: "Fraunces", serif;
+    font-weight: 500;
+    font-size: 30px;
+    line-height: 1.1;
+    margin: 0 0 12px;
+    color: hsl(42 28% 97%);
+    font-variation-settings: "opsz" 72, "SOFT" 30;
+  }
+  .demo-header p {
+    font-size: 15px;
+    color: hsl(42 14% 72%);
+    margin: 0;
+    max-width: 680px;
+  }
+
+  .demo-row {
+    display: flex;
+    gap: 40px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  /* ─── Detail view ─── */
+
+  .back {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    color: hsl(var(--muted-fg));
+    padding: 4px 0 16px;
+    letter-spacing: 0.06em;
+  }
+
+  .detail-title {
+    font-family: "Fraunces", serif;
+    font-weight: 500;
+    font-size: 24px;
+    line-height: 1.18;
+    letter-spacing: -0.01em;
+    font-variation-settings: "opsz" 72, "SOFT" 40;
+    margin: 0 0 10px;
+  }
+
+  .detail-meta {
+    display: flex;
+    gap: 14px;
+    padding: 8px 0 16px;
+    border-bottom: 1px solid hsl(var(--border));
+  }
+
+  .detail-meta > div { flex: 1; }
+  .detail-meta .kicker { display: block; margin-bottom: 3px; }
+  .detail-meta .val {
+    font-size: 13px;
+    font-weight: 500;
+    color: hsl(var(--fg));
+  }
+  .detail-meta .val.mono {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px;
+  }
+
+  .streak-callout {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    margin-top: 14px;
+    background: hsl(var(--celebration-soft));
+    border: 1px solid hsl(var(--celebration) / 0.35);
+    border-radius: 10px;
+  }
+
+  .streak-callout .streak-flame { width: 28px; height: 28px; font-size: 15px; }
+  .streak-callout .text {
+    font-size: 12px;
+    line-height: 1.4;
+    color: hsl(var(--fg));
+  }
+  .streak-callout .text strong { color: hsl(var(--celebration) / 1); }
+
+  .thread { padding: 14px 0 8px; }
+
+  .thread-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .msg {
+    display: flex;
+    gap: 10px;
+    padding: 9px 0;
+  }
+
+  .msg-rail {
+    width: 2px;
+    background: hsl(var(--border));
+    flex-shrink: 0;
+    border-radius: 2px;
+  }
+
+  .msg.user .msg-rail { background: hsl(var(--accent) / 0.6); }
+
+  .msg-body { flex: 1; min-width: 0; }
+
+  .msg-from {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: hsl(var(--muted-fg));
+    margin-bottom: 3px;
+  }
+
+  .msg.user .msg-from { color: hsl(var(--accent)); }
+
+  .msg-text {
+    font-family: "Fraunces", serif;
+    font-style: italic;
+    font-size: 14px;
+    line-height: 1.45;
+    color: hsl(var(--fg));
+    font-variation-settings: "opsz" 14, "SOFT" 80;
+  }
+
+  .msg-text.reply {
+    font-style: normal;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13px;
+    letter-spacing: -0.01em;
+    color: hsl(var(--fg));
+  }
+
+  .msg.system-done .msg-text::before {
+    content: "✓ ";
+    color: hsl(var(--accent));
+    font-family: "Inter", sans-serif;
+    font-style: normal;
+    font-weight: 600;
+  }
+
+  .detail-actions {
+    display: flex;
+    gap: 8px;
+    padding: 12px 0 0;
+    border-top: 1px solid hsl(var(--border));
+    margin-top: 12px;
+  }
+
+  .btn {
+    flex: 1;
+    padding: 11px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    font-family: "Inter", sans-serif;
+    text-align: center;
+    border: 1px solid hsl(var(--border-strong));
+    background: hsl(var(--bg));
+    color: hsl(var(--fg));
+    letter-spacing: -0.005em;
+  }
+
+  .btn.primary {
+    background: hsl(var(--accent));
+    color: hsl(var(--accent-fg));
+    border-color: hsl(var(--accent));
+  }
+
+  /* ─── Weekly review ─── */
+
+  .review-step {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+
+  .review-step .kicker { color: hsl(var(--accent)); }
+
+  .step-pills { display: flex; gap: 4px; }
+
+  .step-pill {
+    width: 22px;
+    height: 3px;
+    border-radius: 2px;
+    background: hsl(var(--muted-2));
+  }
+
+  .step-pill.active { background: hsl(var(--accent)); }
+  .step-pill.done { background: hsl(var(--fg) / 0.7); }
+
+  .review-title {
+    font-family: "Fraunces", serif;
+    font-weight: 500;
+    font-size: 24px;
+    line-height: 1.15;
+    font-variation-settings: "opsz" 72, "SOFT" 40;
+    margin: 6px 0 6px;
+  }
+
+  .review-lede {
+    font-size: 13px;
+    color: hsl(var(--muted-fg));
+    line-height: 1.5;
+    margin: 0 0 14px;
+  }
+
+  /* Review streak banner — celebration accent */
+  .review-streak {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 13px;
+    margin-bottom: 16px;
+    background: hsl(var(--celebration-soft));
+    border: 1px solid hsl(var(--celebration) / 0.35);
+    border-radius: 10px;
+  }
+
+  .review-streak .streak-flame { width: 28px; height: 28px; font-size: 14px; }
+
+  .review-streak .text {
+    font-size: 12px;
+    line-height: 1.4;
+    color: hsl(var(--fg));
+  }
+  .review-streak .text strong { color: hsl(var(--celebration) / 1); font-weight: 700; }
+
+  .assign {
+    padding: 13px 0;
+    border-top: 1px solid hsl(var(--border));
+  }
+
+  .assign:first-of-type { border-top: none; padding-top: 6px; }
+
+  .assign-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 9px;
+  }
+
+  .assign-title {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.3;
+  }
+
+  .assign-cadence {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: hsl(var(--muted-fg));
+  }
+
+  .weekdays { display: flex; gap: 4px; }
+
+  .wd {
+    flex: 1;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    font-weight: 500;
+    background: hsl(var(--muted));
+    color: hsl(var(--muted-fg));
+    text-transform: uppercase;
+  }
+
+  .wd.selected {
+    background: hsl(var(--accent));
+    color: hsl(var(--accent-fg));
+  }
+
+  .load-strip {
+    position: absolute;
+    left: 20px;
+    right: 20px;
+    bottom: 78px;
+    padding: 11px 14px;
+    background: hsl(var(--muted));
+    border: 1px solid hsl(var(--border));
+    border-radius: 10px;
+  }
+
+  .load-strip .kicker { display: block; margin-bottom: 6px; }
+
+  .load-bars {
+    display: flex;
+    gap: 4px;
+    align-items: flex-end;
+    height: 24px;
+  }
+
+  .load-bars > div {
+    flex: 1;
+    background: hsl(var(--accent) / 0.3);
+    border-radius: 2px;
+    position: relative;
+  }
+
+  .load-bars > div::after {
+    content: attr(data-day);
+    position: absolute;
+    bottom: -14px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 9px;
+    color: hsl(var(--muted-fg));
+  }
+
+  .review-footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 14px 20px;
+    background: hsl(var(--bg));
+    border-top: 1px solid hsl(var(--border));
+    display: flex;
+    gap: 8px;
+  }
+
+  /* ─── Explainer ─── */
+
+  .explainer {
+    max-width: 860px;
+    margin: 72px auto 0;
+    padding: 32px;
+    background: hsl(30 10% 15%);
+    border: 1px solid hsl(30 8% 22%);
+    border-radius: 14px;
+  }
+
+  .explainer h3 {
+    font-family: "Fraunces", serif;
+    font-weight: 500;
+    font-size: 22px;
+    margin: 0 0 14px;
+    color: hsl(42 28% 97%);
+    font-variation-settings: "opsz" 36, "SOFT" 40;
+  }
+
+  .explainer p {
+    font-size: 14px;
+    line-height: 1.6;
+    color: hsl(42 12% 72%);
+    margin: 0 0 12px;
+  }
+
+  .explainer code {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px;
+    color: hsl(var(--page-accent));
+    background: hsl(30 15% 10%);
+    padding: 2px 6px;
+    border-radius: 3px;
+  }
+
+  .explainer ul { padding-left: 18px; margin: 0 0 12px; }
+  .explainer li { margin-bottom: 4px; font-size: 14px; color: hsl(42 12% 72%); }
+
+  @media (max-width: 900px) {
+    .candidates { flex-direction: column; align-items: center; }
+    .demo-row { flex-direction: column; align-items: center; }
+    .specimen { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<main class="page">
+
+  <header class="page-header">
+    <div class="page-kicker">Planner V1 · Design Explorer <span class="v-pill">v2</span> · 2026-04-12</div>
+    <h1 class="page-title">Calm by default. Bright when it matters.</h1>
+    <p class="page-lede">
+      A rebuild against a tighter brief: <em>calmness and preparedness</em>, not alarm. Three grounded primaries — pine, harbor, slate — each paired with a warm celebration accent that only appears at the dopamine moments (streaks, completion milestones, weekly wins). The frame is still locked: warm-paper canvas, Fraunces × Inter × JetBrains Mono, dense mobile-first, snappy 150–200ms motion. The canvas is slightly softer than v1 so it sits better against cooler primaries.
+    </p>
+    <div class="iteration-note">
+      <strong>What changed from v1 →</strong> dropped the warm-red / bramble candidates (read as warning tones). Introduced a <em>dual-accent</em> system: <strong>primary</strong> handles everyday surfaces (checkmarks, FAB, active tab, selected weekday, primary buttons, SMS user replies); <strong>celebration</strong> handles gamification moments only (streak chips, review wins, milestone callouts). Softened canvas saturation for better pairing with cool primaries.
+    </div>
+  </header>
+
+  <!-- ─── Specimen ─── -->
+  <section class="specimen">
+    <div>
+      <div class="specimen-label">Type system · unchanged from v1</div>
+      <h3>Fraunces · Inter · JetBrains Mono</h3>
+      <div class="specimen-meta">
+        Fraunces display (high opsz), dropped to 14-opsz italic for editorial body (SMS thread messages). Inter for interface body. JetBrains Mono at 10–12px for metadata and command tokens.
+      </div>
+      <div class="accent-key">
+        <div class="accent-key-item">
+          <div class="label">Primary accent</div>
+          <div class="use">Checkmarks · FAB · active tab · selected weekday · primary buttons · SMS user replies</div>
+        </div>
+        <div class="accent-key-item">
+          <div class="label">Celebration accent</div>
+          <div class="use">Streak chips · milestone callouts · weekly review wins · done-state burst (motion only)</div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="specimen-label">Canvas · softened warm paper</div>
+      <div class="swatch-row">
+        <div class="swatch" style="background: hsl(42 25% 97%)">bg</div>
+        <div class="swatch" style="background: hsl(42 18% 94%)">100</div>
+        <div class="swatch" style="background: hsl(42 14% 88%)">200</div>
+        <div class="swatch" style="background: hsl(38 12% 80%)">300</div>
+        <div class="swatch" style="background: hsl(30 10% 62%)">400</div>
+        <div class="swatch on-dark" style="background: hsl(30  9% 42%)">500</div>
+        <div class="swatch on-dark" style="background: hsl(30 10% 26%)">700</div>
+        <div class="swatch on-dark" style="background: hsl(30 12% 14%)">fg</div>
+      </div>
+      <div class="specimen-meta" style="margin-top:12px">
+        42° at light end drifting to 30° at dark end — still warm paper, dialled back from v1's 36°/35% to 42°/25% so the cream reads as <em style="font-family:Fraunces;font-style:italic">fine paper</em> rather than sun-bleached. Sits better against cool green and blue primaries without going clinical.
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Three candidates ─── -->
+  <section class="candidates">
+
+    <!-- ═══════ CANDIDATE A: PINE × AMBER ═══════ -->
+    <div class="candidate">
+      <div class="candidate-label">Option A · grounded green</div>
+      <h2 class="candidate-name">Pine × Amber</h2>
+      <div class="candidate-pair">
+        <div class="pair-chip"><span class="pair-dot" style="background:hsl(160 32% 26%)"></span>hsl(160 32% 26%)</div>
+        <div class="pair-chip"><span class="pair-dot" style="background:hsl(38 92% 56%)"></span>hsl(38 92% 56%)</div>
+      </div>
+
+      <div class="frame" style="
+        --accent: 160 32% 26%;
+        --accent-soft: 160 30% 94%;
+        --accent-border: 160 22% 78%;
+        --celebration: 38 92% 56%;
+        --celebration-fg: 30 35% 12%;
+        --celebration-soft: 38 85% 94%;">
+        <div class="notch"></div>
+        <div class="status-bar"><span>9:41</span><span>•••</span></div>
+        <div class="frame-scroll">
+          <div class="app-header">
+            <h1 class="display">Today</h1>
+            <div class="app-date">Sun · 12 Apr</div>
+          </div>
+
+          <div class="streak-row">
+            <div class="streak-flame">7</div>
+            <div class="streak-body">
+              <div class="streak-title">You're on a <strong>7-day</strong> streak.</div>
+              <div class="streak-meta">Finish today to make it eight.</div>
+            </div>
+          </div>
+
+          <div class="section-head">
+            <h2 class="h2">On today</h2>
+            <div class="section-count">3 / 7 done</div>
+          </div>
+
+          <div class="task done">
+            <div class="task-check"></div>
+            <div class="task-body">
+              <p class="task-title">Morning pages — 3 pages longhand</p>
+              <div class="task-meta"><span class="task-badge">daily</span><span class="task-badge streak">×12</span></div>
+            </div>
+            <div class="task-time">07:00</div>
+          </div>
+          <div class="task done">
+            <div class="task-check"></div>
+            <div class="task-body">
+              <p class="task-title">Stretch — 10 min mobility routine</p>
+              <div class="task-meta"><span class="task-badge">daily</span><span class="task-badge streak">×7</span></div>
+            </div>
+            <div class="task-time">07:30</div>
+          </div>
+          <div class="task">
+            <div class="task-check"></div>
+            <div class="task-body">
+              <p class="task-title">Call the dentist — reschedule cleaning</p>
+              <div class="task-meta"><span class="task-badge accent">overdue</span><span>1 snooze</span></div>
+            </div>
+            <div class="task-time">11:00</div>
+          </div>
+          <div class="task">
+            <div class="task-check"></div>
+            <div class="task-body">
+              <p class="task-title">V1 design review</p>
+              <div class="task-meta"><span class="task-badge">one-off</span></div>
+            </div>
+            <div class="task-time">14:30</div>
+          </div>
+          <div class="task">
+            <div class="task-check"></div>
+            <div class="task-body">
+              <p class="task-title">Weekly review — 4 steps · ~10 min</p>
+              <div class="task-meta"><span class="task-badge">weekly</span></div>
+            </div>
+            <div class="task-time">18:00</div>
+          </div>
+
+          <div class="section-head">
+            <h2 class="h2">This week</h2>
+            <div class="section-count">+11 more</div>
+          </div>
+
+          <div class="task">
+            <div class="task-check"></div>
+            <div class="task-body">
+              <p class="task-title">Run long — 10 km, park loop</p>
+              <div class="task-meta"><span class="task-badge">weekly</span><span class="task-badge streak">×3</span></div>
+            </div>
+            <div class="task-time">Sat</div>
+          </div>
+        </div>
+        <div class="fab">+</div>
+        <div class="tab-bar">
+          <div class="tab active">Today<span class="dot"></span></div>
+          <div class="tab">Week<span class="dot"></span></div>
+          <div class="tab">Review<span class="dot"></span></div>
+          <div class="tab">You<span class="dot"></span></div>
+        </div>
+      </div>
+
+      <p class="candidate-note">Deep pine grounds the day; amber only fires when there's a streak to celebrate. Reads as a botanical planning journal — growth, prepared, never alarming.</p>
+    </div>
+
+    <!-- ═══════ CANDIDATE B: HARBOR × CORAL ═══════ -->
+    <div class="candidate">
+      <div class="candidate-label">Option B · teal-blue bridge</div>
+      <h2 class="candidate-name">Harbor × Coral</h2>
+      <div class="candidate-pair">
+        <div class="pair-chip"><span class="pair-dot" style="background:hsl(198 38% 32%)"></span>hsl(198 38% 32%)</div>
+        <div class="pair-chip"><span class="pair-dot" style="background:hsl(14 88% 62%)"></span>hsl(14 88% 62%)</div>
+      </div>
+
+      <div class="frame" style="
+        --accent: 198 38% 32%;
+        --accent-soft: 198 35% 94%;
+        --accent-border: 198 25% 78%;
+        --celebration: 14 88% 62%;
+        --celebration-fg: 14 50% 18%;
+        --celebration-soft: 14 85% 95%;">
+        <div class="notch"></div>
+        <div class="status-bar"><span>9:41</span><span>•••</span></div>
+        <div class="frame-scroll">
+          <div class="app-header">
+            <h1 class="display">Today</h1>
+            <div class="app-date">Sun · 12 Apr</div>
+          </div>
+
+          <div class="streak-row">
+            <div class="streak-flame">7</div>
+            <div class="streak-body">
+              <div class="streak-title">You're on a <strong>7-day</strong> streak.</div>
+              <div class="streak-meta">Finish today to make it eight.</div>
+            </div>
+          </div>
+
+          <div class="section-head">
+            <h2 class="h2">On today</h2>
+            <div class="section-count">3 / 7 done</div>
+          </div>
+
+          <div class="task done">
+            <div class="task-check"></div>
+            <div class="task-body">
+              <p class="task-title">Morning pages — 3 pages longhand</p>
+              <div class="task-meta"><span class="task-badge">daily</span><span class="task-badge streak">×12</span></div>
+            </div>
+            <div class="task-time">07:00</div>
+          </div>
+          <div class="task done">
+            <div class="task-check"></div>
+            <div class="task-body">
+              <p class="task-title">Stretch — 10 min mobility routine</p>
+              <div class="task-meta"><span class="task-badge">daily</span><span class="task-badge streak">×7</span></div>
+            </div>
+            <div class="task-time">07:30</div>
+          </div>
+          <div class="task">
+            <div class="task-check"></div>
+            <div class="task-body">
+              <p class="task-title">Call the dentist — reschedule cleaning</p>
+              <div class="task-meta"><span class="task-badge accent">overdue</span><span>1 snooze</span></div>
+            </div>
+            <div class="task-time">11:00</div>
+          </div>
+          <div class="task">
+            <div class="task-check"></div>
+            <div class="task-body">
+              <p class="task-title">V1 design review</p>
+              <div class="task-meta"><span class="task-badge">one-off</span></div>
+            </div>
+            <div class="task-time">14:30</div>
+          </div>
+          <div class="task">
+            <div class="task-check"></div>
+            <div class="task-body">
+              <p class="task-title">Weekly review — 4 steps · ~10 min</p>
+              <div class="task-meta"><span class="task-badge">weekly</span></div>
+            </div>
+            <div class="task-time">18:00</div>
+          </div>
+
+          <div class="section-head">
+            <h2 class="h2">This week</h2>
+            <div class="section-count">+11 more</div>
+          </div>
+
+          <div class="task">
+            <div class="task-check"></div>
+            <div class="task-body">
+              <p class="task-title">Run long — 10 km, park loop</p>
+              <div class="task-meta"><span class="task-badge">weekly</span><span class="task-badge streak">×3</span></div>
+            </div>
+            <div class="task-time">Sat</div>
+          </div>
+        </div>
+        <div class="fab">+</div>
+        <div class="tab-bar">
+          <div class="tab active">Today<span class="dot"></span></div>
+          <div class="tab">Week<span class="dot"></span></div>
+          <div class="tab">Review<span class="dot"></span></div>
+          <div class="tab">You<span class="dot"></span></div>
+        </div>
+      </div>
+
+      <p class="candidate-note">Deep teal-blue — the middle ground between green and blue. Reads as still-water calm, coral pops with warm-cool contrast so the dopamine moments really sing. The most versatile of the three.</p>
+    </div>
+
+    <!-- ═══════ CANDIDATE C: SLATE × GOLD ═══════ -->
+    <div class="candidate">
+      <div class="candidate-label">Option C · pure blue</div>
+      <h2 class="candidate-name">Slate × Gold</h2>
+      <div class="candidate-pair">
+        <div class="pair-chip"><span class="pair-dot" style="background:hsl(220 32% 32%)"></span>hsl(220 32% 32%)</div>
+        <div class="pair-chip"><span class="pair-dot" style="background:hsl(44 92% 54%)"></span>hsl(44 92% 54%)</div>
+      </div>
+
+      <div class="frame" style="
+        --accent: 220 32% 32%;
+        --accent-soft: 220 30% 94%;
+        --accent-border: 220 22% 80%;
+        --celebration: 44 92% 54%;
+        --celebration-fg: 30 40% 12%;
+        --celebration-soft: 44 85% 94%;">
+        <div class="notch"></div>
+        <div class="status-bar"><span>9:41</span><span>•••</span></div>
+        <div class="frame-scroll">
+          <div class="app-header">
+            <h1 class="display">Today</h1>
+            <div class="app-date">Sun · 12 Apr</div>
+          </div>
+
+          <div class="streak-row">
+            <div class="streak-flame">7</div>
+            <div class="streak-body">
+              <div class="streak-title">You're on a <strong>7-day</strong> streak.</div>
+              <div class="streak-meta">Finish today to make it eight.</div>
+            </div>
+          </div>
+
+          <div class="section-head">
+            <h2 class="h2">On today</h2>
+            <div class="section-count">3 / 7 done</div>
+          </div>
+
+          <div class="task done">
+            <div class="task-check"></div>
+            <div class="task-body">
+              <p class="task-title">Morning pages — 3 pages longhand</p>
+              <div class="task-meta"><span class="task-badge">daily</span><span class="task-badge streak">×12</span></div>
+            </div>
+            <div class="task-time">07:00</div>
+          </div>
+          <div class="task done">
+            <div class="task-check"></div>
+            <div class="task-body">
+              <p class="task-title">Stretch — 10 min mobility routine</p>
+              <div class="task-meta"><span class="task-badge">daily</span><span class="task-badge streak">×7</span></div>
+            </div>
+            <div class="task-time">07:30</div>
+          </div>
+          <div class="task">
+            <div class="task-check"></div>
+            <div class="task-body">
+              <p class="task-title">Call the dentist — reschedule cleaning</p>
+              <div class="task-meta"><span class="task-badge accent">overdue</span><span>1 snooze</span></div>
+            </div>
+            <div class="task-time">11:00</div>
+          </div>
+          <div class="task">
+            <div class="task-check"></div>
+            <div class="task-body">
+              <p class="task-title">V1 design review</p>
+              <div class="task-meta"><span class="task-badge">one-off</span></div>
+            </div>
+            <div class="task-time">14:30</div>
+          </div>
+          <div class="task">
+            <div class="task-check"></div>
+            <div class="task-body">
+              <p class="task-title">Weekly review — 4 steps · ~10 min</p>
+              <div class="task-meta"><span class="task-badge">weekly</span></div>
+            </div>
+            <div class="task-time">18:00</div>
+          </div>
+
+          <div class="section-head">
+            <h2 class="h2">This week</h2>
+            <div class="section-count">+11 more</div>
+          </div>
+
+          <div class="task">
+            <div class="task-check"></div>
+            <div class="task-body">
+              <p class="task-title">Run long — 10 km, park loop</p>
+              <div class="task-meta"><span class="task-badge">weekly</span><span class="task-badge streak">×3</span></div>
+            </div>
+            <div class="task-time">Sat</div>
+          </div>
+        </div>
+        <div class="fab">+</div>
+        <div class="tab-bar">
+          <div class="tab active">Today<span class="dot"></span></div>
+          <div class="tab">Week<span class="dot"></span></div>
+          <div class="tab">Review<span class="dot"></span></div>
+          <div class="tab">You<span class="dot"></span></div>
+        </div>
+      </div>
+
+      <p class="candidate-note">Muted indigo — the pure blue option. Architect's drafting pencil. Gold celebration is a true complementary pop (180° across the wheel) so achievements feel ceremonial — a medal, not a sticker.</p>
+    </div>
+
+  </section>
+
+  <div class="rule"></div>
+
+  <!-- ─── Demo row ─── -->
+  <header class="demo-header">
+    <div class="page-kicker">In context · two more surfaces</div>
+    <h2>How both accents read across the full flow</h2>
+    <p>
+      The mocks below use <em style="font-family:Fraunces;font-style:italic">Harbor × Coral</em> as a stand-in so you can see the detail view and the weekly review with the dual-accent system in action. The same rules apply regardless of which pair you pick: <strong style="color:hsl(198 38% 70%)">primary does the work</strong>, <strong style="color:hsl(14 88% 72%)">celebration marks the win</strong>.
+    </p>
+  </header>
+
+  <section class="demo-row">
+
+    <!-- TASK DETAIL + SMS THREAD + STREAK CALLOUT -->
+    <div class="candidate">
+      <div class="candidate-label">Surface 2 · task detail</div>
+      <h2 class="candidate-name">SMS thread inline + streak callout</h2>
+
+      <div class="frame" style="
+        --accent: 198 38% 32%;
+        --accent-soft: 198 35% 94%;
+        --accent-border: 198 25% 78%;
+        --celebration: 14 88% 62%;
+        --celebration-fg: 14 50% 18%;
+        --celebration-soft: 14 85% 95%;">
+        <div class="notch"></div>
+        <div class="status-bar"><span>9:41</span><span>•••</span></div>
+        <div class="frame-scroll">
+          <div class="back">← Today</div>
+          <h1 class="detail-title">Morning pages — 3 pages longhand</h1>
+
+          <div class="detail-meta">
+            <div>
+              <span class="kicker">Due</span>
+              <div class="val">Today · 07:00</div>
+            </div>
+            <div>
+              <span class="kicker">Cadence</span>
+              <div class="val">Daily</div>
+            </div>
+            <div>
+              <span class="kicker">Streak</span>
+              <div class="val mono" style="color:hsl(14 88% 52%)">×12</div>
+            </div>
+          </div>
+
+          <div class="streak-callout">
+            <div class="streak-flame">12</div>
+            <div class="text">You've kept this habit <strong>12 days running</strong>. Longest ever is 18 — three weeks of mornings away.</div>
+          </div>
+
+          <div class="thread">
+            <div class="thread-head">
+              <span class="kicker">SMS thread</span>
+              <span class="kicker">3 messages</span>
+            </div>
+
+            <div class="msg">
+              <div class="msg-rail"></div>
+              <div class="msg-body">
+                <div class="msg-from">Reminder sent · 06:55</div>
+                <div class="msg-text">A quiet start — <em>morning pages</em>. Reply <span class="mono">done</span> when you're back from the desk.</div>
+              </div>
+            </div>
+
+            <div class="msg user">
+              <div class="msg-rail"></div>
+              <div class="msg-body">
+                <div class="msg-from">You replied · 07:12</div>
+                <div class="msg-text reply">done</div>
+              </div>
+            </div>
+
+            <div class="msg">
+              <div class="msg-rail"></div>
+              <div class="msg-body">
+                <div class="msg-from">Confirmed · 07:12</div>
+                <div class="msg-text">Day twelve — that's your best streak on this habit so far.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="detail-actions">
+            <div class="btn">Snooze</div>
+            <div class="btn">Skip</div>
+            <div class="btn primary">Mark done</div>
+          </div>
+        </div>
+      </div>
+
+      <p class="candidate-note">The streak callout (celebration accent, warm) sits above the conversation (primary accent, cool). Calm thread, energetic reward — the contrast is the whole point.</p>
+    </div>
+
+    <!-- WEEKLY REVIEW -->
+    <div class="candidate">
+      <div class="candidate-label">Surface 3 · weekly review</div>
+      <h2 class="candidate-name">Step 3 — commit the week</h2>
+
+      <div class="frame" style="
+        --accent: 198 38% 32%;
+        --accent-soft: 198 35% 94%;
+        --accent-border: 198 25% 78%;
+        --celebration: 14 88% 62%;
+        --celebration-fg: 14 50% 18%;
+        --celebration-soft: 14 85% 95%;">
+        <div class="notch"></div>
+        <div class="status-bar"><span>9:41</span><span>•••</span></div>
+        <div class="frame-scroll">
+          <div class="review-step">
+            <span class="kicker">Step 3 of 4</span>
+            <div class="step-pills">
+              <div class="step-pill done"></div>
+              <div class="step-pill done"></div>
+              <div class="step-pill active"></div>
+              <div class="step-pill"></div>
+            </div>
+          </div>
+          <h1 class="review-title">Commit this week's habits to a day.</h1>
+
+          <div class="review-streak">
+            <div class="streak-flame">5</div>
+            <div class="text">Last week, you hit <strong>5 of 6</strong> weekly tasks. Best completion rate in a month.</div>
+          </div>
+
+          <p class="review-lede">Tap a weekday for each weekly task. The load strip below shows how full each day becomes.</p>
+
+          <div class="assign">
+            <div class="assign-head">
+              <div class="assign-title">Run long — 10 km, park loop</div>
+              <div class="assign-cadence">weekly</div>
+            </div>
+            <div class="weekdays">
+              <div class="wd">M</div><div class="wd">T</div><div class="wd">W</div><div class="wd">T</div><div class="wd">F</div><div class="wd selected">S</div><div class="wd">S</div>
+            </div>
+          </div>
+
+          <div class="assign">
+            <div class="assign-head">
+              <div class="assign-title">Meal plan — Sunday cook-up</div>
+              <div class="assign-cadence">weekly</div>
+            </div>
+            <div class="weekdays">
+              <div class="wd">M</div><div class="wd">T</div><div class="wd">W</div><div class="wd">T</div><div class="wd">F</div><div class="wd">S</div><div class="wd selected">S</div>
+            </div>
+          </div>
+
+          <div class="assign">
+            <div class="assign-head">
+              <div class="assign-title">Finance check — reconcile</div>
+              <div class="assign-cadence">weekly</div>
+            </div>
+            <div class="weekdays">
+              <div class="wd">M</div><div class="wd">T</div><div class="wd">W</div><div class="wd">T</div><div class="wd selected">F</div><div class="wd">S</div><div class="wd">S</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="load-strip">
+          <span class="kicker">Load by day</span>
+          <div class="load-bars">
+            <div data-day="M" style="height: 30%"></div>
+            <div data-day="T" style="height: 45%"></div>
+            <div data-day="W" style="height: 25%"></div>
+            <div data-day="T" style="height: 55%"></div>
+            <div data-day="F" style="height: 70%"></div>
+            <div data-day="S" style="height: 80%"></div>
+            <div data-day="S" style="height: 90%"></div>
+          </div>
+        </div>
+
+        <div class="review-footer">
+          <div class="btn">Back</div>
+          <div class="btn primary">Next — briefings</div>
+        </div>
+      </div>
+
+      <p class="candidate-note">The review opens with a celebration callout showing last week's win — a small moment of recognition before the commitment work begins. Everything else is primary (calm) because the review itself is deliberate, not performative.</p>
+    </div>
+
+  </section>
+
+  <!-- ─── Explainer ─── -->
+  <aside class="explainer">
+    <h3>The dual-accent rulebook</h3>
+    <p><strong>Primary accent</strong> — the quiet workhorse. Used on every everyday surface:</p>
+    <ul>
+      <li>Task checkmarks (done state)</li>
+      <li>Floating action button (new task)</li>
+      <li>Active tab bar item + indicator dot</li>
+      <li>Selected weekday in weekly review</li>
+      <li>Primary button fill (Mark done, Next, Save)</li>
+      <li>SMS thread user reply accent rail</li>
+      <li>Overdue task time (signalled by weight + colour, never red)</li>
+    </ul>
+    <p><strong>Celebration accent</strong> — the bright sparing dopamine hit. Only appears when the app is recognising a win:</p>
+    <ul>
+      <li>Streak chips (header banner + per-habit count badges)</li>
+      <li>Weekly review opening callout (last week's completion rate)</li>
+      <li>Task detail streak callout (days running + personal best)</li>
+      <li>Done-state micro-animation (flash of celebration on the check, 180ms, fades to primary)</li>
+      <li>Monthly milestone badges (when they ship)</li>
+    </ul>
+    <p><strong>Rule of thumb:</strong> if you'd describe the moment as "the app noticing you did something meaningful," it uses celebration. Everything else uses primary. The distinction matters — if celebration leaks into everyday UI, the dopamine stops working.</p>
+    <p><strong>Next step</strong> — pick <code>A</code> Pine × Amber, <code>B</code> Harbor × Coral, or <code>C</code> Slate × Gold. Or redirect with what's missing and I'll build v3. Once chosen, the winning pair feeds the <code>design.tokens.ts</code> rewrite inside R1.</p>
+  </aside>
+
+</main>
+
+</body>
+</html>
