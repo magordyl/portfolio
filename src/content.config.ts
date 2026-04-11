@@ -40,4 +40,24 @@ const log = defineCollection({
   }),
 });
 
-export const collections = { projects, writing, log };
+const transcripts = defineCollection({
+  loader: glob({ pattern: '*.json', base: './src/content/transcripts' }),
+  schema: z.object({
+    id: z.string(),
+    title: z.string(),
+    date: z.coerce.date(),
+    project: reference('projects').optional(),
+    context: z.string(),
+    note: z.string().default(''),
+    sourceSessionId: z.string(),
+    turns: z.array(
+      z.object({
+        role: z.enum(['user', 'assistant']),
+        text: z.string(),
+        collapsedTools: z.array(z.string()).optional(),
+      })
+    ).min(2).max(8),
+  }),
+});
+
+export const collections = { projects, writing, log, transcripts };
