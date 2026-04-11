@@ -1,0 +1,1084 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Card deep-dive v2 — mandatory imagery, auto-tint, writing differentiation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Geist+Mono:wght@400;500&family=Geist:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --royal-1:#0a0d1a; --royal-2:#0f1428; --royal-3:#141c3a; --royal-4:#1b2652;
+    --royal-5:#233270; --royal-6:#2b4094; --royal-7:#3350bf; --royal-8:#3B5BDB;
+    --royal-9:#5773e3; --royal-10:#8098ec; --royal-11:#adbcf2; --royal-12:#d8dff9;
+
+    --violet-8:#8C3BDB; --violet-9:#a157e3; --violet-10:#b77cec;
+    --violet-11:#cfa3f2; --violet-12:#e6cff9;
+
+    --ink:#e8ecff; --ink-muted:#a0aac4; --ink-dim:#6b7390;
+
+    --bg:#0a0d1a; --card:#0f1428; --card-hover:#141c3a; --rule:#1b2652;
+
+    --grad-rv: linear-gradient(135deg, var(--royal-8) 0%, var(--violet-8) 100%);
+    --grad-rv-soft: linear-gradient(135deg, rgba(59,91,219,0.12) 0%, rgba(140,59,219,0.12) 100%);
+
+    --font-display:"Fraunces",serif;
+    --font-sans:"Geist",system-ui,sans-serif;
+    --font-mono:"Geist Mono",monospace;
+
+    --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px; --s8:64px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    padding: var(--s8) var(--s5) var(--s8);
+    max-width: 1180px;
+    margin: 0 auto;
+  }
+
+  /* ---------- Doc framing ---------- */
+
+  .doc-head { margin-bottom: var(--s8); }
+  .doc-head .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--royal-10);
+    margin-bottom: var(--s3);
+  }
+  .doc-head h1 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 48px;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    margin-bottom: var(--s4);
+  }
+  .doc-head p {
+    color: var(--ink-muted);
+    font-size: 17px;
+    max-width: 68ch;
+  }
+
+  section {
+    margin-top: var(--s8);
+    padding-top: var(--s6);
+    border-top: 1px solid var(--rule);
+  }
+  section:first-of-type { border-top: none; padding-top: 0; }
+  section > .kicker {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--royal-10);
+    margin-bottom: var(--s2);
+  }
+  section > h2 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 32px;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    margin-bottom: var(--s3);
+  }
+  section > .lede {
+    color: var(--ink-muted);
+    max-width: 68ch;
+    margin-bottom: var(--s6);
+  }
+
+  .note {
+    background: var(--grad-rv-soft);
+    border: 1px solid var(--royal-7);
+    border-radius: 8px;
+    padding: var(--s4) var(--s5);
+    margin-top: var(--s5);
+    font-size: 14px;
+    color: var(--ink);
+  }
+  .note strong { color: var(--royal-11); }
+
+  pre.code {
+    background: var(--royal-2);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    padding: var(--s4) var(--s5);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--ink);
+    overflow-x: auto;
+    margin-top: var(--s4);
+  }
+  pre.code .c { color: var(--ink-dim); }
+  pre.code .k { color: var(--royal-10); }
+  pre.code .s { color: var(--violet-10); }
+
+  /* ---------- Card base (layout D: corner accent) ---------- */
+
+  .cards-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--s5);
+    margin-top: var(--s5);
+  }
+  .cards-row.three { grid-template-columns: repeat(3, 1fr); }
+  .cards-row.one { grid-template-columns: 1fr; max-width: 560px; }
+
+  .card {
+    position: relative;
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    padding: var(--s5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--s3);
+    cursor: pointer;
+    transition: background 140ms ease, border-color 140ms ease, box-shadow 140ms ease, transform 140ms ease;
+    overflow: hidden;
+  }
+  .card:hover {
+    background: var(--card-hover);
+    border-color: var(--royal-8);
+    box-shadow: inset 0 1px 0 rgba(165, 180, 255, 0.18);
+  }
+  .card .kicker {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--royal-10);
+    line-height: 1;
+  }
+  .card.writing .kicker { color: var(--violet-10); }
+
+  .card h3 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 22px;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    margin-top: var(--s1);
+    padding-right: var(--s8); /* leave room for corner accent */
+  }
+  .card h3 a.card-link {
+    color: var(--ink);
+    text-decoration: none;
+    display: inline;
+  }
+  /* whole-card click extension */
+  .card h3 a.card-link::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+  .card h3 a.card-link .arrow {
+    color: var(--royal-10);
+    margin-left: var(--s2);
+    display: inline-block;
+    transition: transform 140ms ease;
+  }
+  .card.writing h3 a.card-link .arrow { color: var(--violet-10); }
+  .card:hover h3 a.card-link .arrow { transform: translateX(3px); }
+
+  .card p.desc {
+    color: var(--ink-muted);
+    font-size: 14px;
+    line-height: 1.55;
+  }
+
+  .card .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s2);
+    list-style: none;
+    margin-top: var(--s3);
+    position: relative;
+    z-index: 2; /* sit above .card-link::after if tags become links later */
+  }
+  .card .tags li {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 3px var(--s2);
+    background: var(--royal-3);
+    color: var(--royal-11);
+    border-radius: 2px;
+    border: 1px solid var(--royal-4);
+  }
+  .card.writing .tags li {
+    background: color-mix(in srgb, var(--violet-8) 18%, var(--card));
+    color: var(--violet-11);
+    border-color: color-mix(in srgb, var(--violet-8) 35%, var(--card));
+  }
+
+  /* ---------- Corner accent (layout D foundation) ---------- */
+
+  .card .corner {
+    position: absolute;
+    top: var(--s4);
+    right: var(--s4);
+    width: 64px;
+    height: 64px;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid var(--royal-7);
+    background: var(--royal-2);
+    z-index: 0;
+  }
+  .card.writing .corner {
+    border-color: color-mix(in srgb, var(--violet-8) 55%, var(--card));
+  }
+
+  /* ===================================================================
+     VISUAL TYPE MOCKS — each type is a CSS-only rendering of the
+     content that would live in the corner accent slot.
+     =================================================================== */
+
+  /* ---- Type 1: screenshot (auto-tinted) ---- */
+  .v-screenshot .photo {
+    position: absolute;
+    inset: 0;
+    /* intentionally off-palette to prove tint works on arbitrary input */
+    background:
+      linear-gradient(135deg, #ff4d8f 0%, #ffe14d 45%, #4dc8ff 100%);
+    filter: saturate(0.75);
+  }
+  .v-screenshot .photo::before {
+    content: "";
+    position: absolute;
+    top: 18%; left: 12%; right: 12%; height: 10%;
+    background: rgba(255,255,255,0.9);
+    border-radius: 2px;
+  }
+  .v-screenshot .photo::after {
+    content: "";
+    position: absolute;
+    bottom: 20%; left: 12%; right: 35%; height: 6%;
+    background: rgba(255,255,255,0.6);
+    border-radius: 2px;
+    box-shadow:
+      0 10px 0 rgba(255,255,255,0.6),
+      0 20px 0 rgba(255,255,255,0.4);
+  }
+  .v-screenshot::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--royal-8);
+    mix-blend-mode: color;
+    opacity: 0.55;
+    pointer-events: none;
+  }
+  .card.writing .v-screenshot::after { background: var(--violet-8); }
+
+  /* ---- Type 2: diagram (palette-locked SVG-style) ---- */
+  .v-diagram {
+    background: var(--royal-2);
+  }
+  .v-diagram::before {
+    content: "";
+    position: absolute;
+    inset: 12px;
+    border: 1px solid var(--royal-9);
+    border-radius: 3px;
+  }
+  .v-diagram::after {
+    content: "";
+    position: absolute;
+    top: 50%; left: 12px; right: 12px;
+    height: 1px;
+    background: var(--royal-10);
+    box-shadow:
+      0 -8px 0 var(--royal-9),
+      0 8px 0 var(--royal-9);
+  }
+  .card.writing .v-diagram::before { border-color: var(--violet-9); }
+  .card.writing .v-diagram::after { background: var(--violet-10); box-shadow: 0 -8px 0 var(--violet-9), 0 8px 0 var(--violet-9); }
+
+  /* ---- Type 3: numeral (Fraunces display with gradient fill) ---- */
+  .v-numeral {
+    display: grid;
+    place-items: center;
+    background: var(--royal-1);
+  }
+  .v-numeral .num {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 42px;
+    line-height: 1;
+    background: var(--grad-rv);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* ---- Type 4: gradient mark (abstract, always palette-correct) ---- */
+  .v-gradmark {
+    background:
+      radial-gradient(circle at 30% 30%, var(--royal-8), transparent 60%),
+      radial-gradient(circle at 75% 75%, var(--violet-8), transparent 55%),
+      var(--royal-2);
+  }
+  .v-gradmark::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(
+      135deg,
+      transparent 0 6px,
+      rgba(255,255,255,0.06) 6px 7px
+    );
+  }
+
+  /* ---- Type 5: icon (lucide-style line stroke) ---- */
+  .v-icon {
+    background: var(--royal-2);
+    display: grid;
+    place-items: center;
+  }
+  .v-icon svg {
+    width: 28px;
+    height: 28px;
+    stroke: var(--royal-10);
+    stroke-width: 1.75;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .card.writing .v-icon svg { stroke: var(--violet-10); }
+
+  /* ---- Type 6: monogram (typographic lockup) ---- */
+  .v-monogram {
+    background: var(--royal-3);
+    display: grid;
+    place-items: center;
+  }
+  .v-monogram .mono {
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: 20px;
+    letter-spacing: -0.02em;
+    color: var(--royal-11);
+  }
+  .card.writing .v-monogram .mono { color: var(--violet-11); }
+
+  /* ===================================================================
+     WRITING DIFFERENTIATION VARIANTS
+     =================================================================== */
+
+  /* Variant A: baseline — nothing structural, only kicker/tag colour */
+  .diff-a .card { /* nothing extra */ }
+
+  /* Variant B: top rule — thin violet line across the top */
+  .diff-b .card.writing::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--violet-8);
+  }
+
+  /* Variant C: corner dot — small violet disc before the kicker */
+  .diff-c .card.writing .kicker::before {
+    content: "";
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--violet-8);
+    margin-right: var(--s2);
+    vertical-align: 1px;
+  }
+
+  /* Variant D: kicker icon — line icon before the kicker text */
+  .diff-d .card.writing .kicker-with-icon {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .diff-d .card.writing .kicker-with-icon svg {
+    width: 12px;
+    height: 12px;
+    stroke: var(--violet-10);
+    stroke-width: 2;
+    fill: none;
+  }
+
+  /* Variant E: corner accent tinted violet (the tint itself does the work) */
+  /* already handled by .card.writing .v-screenshot::after etc. — no extra rule */
+
+  /* ===================================================================
+     FEATURED VARIANT
+     =================================================================== */
+
+  .featured-wrap {
+    position: relative;
+    border-radius: 10px;
+    padding: 2px;
+    background: var(--grad-rv);
+  }
+  .featured-wrap .card {
+    border: none;
+    border-radius: 8px;
+  }
+  .featured-pin {
+    position: absolute;
+    top: -10px;
+    left: var(--s5);
+    background: var(--grad-rv);
+    color: var(--ink);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 4px var(--s2);
+    border-radius: 2px;
+    z-index: 3;
+  }
+
+  /* ===================================================================
+     LOADING STATE
+     =================================================================== */
+
+  .card.loading { cursor: default; }
+  .card.loading:hover {
+    background: var(--card);
+    border-color: var(--rule);
+    box-shadow: none;
+  }
+  .skel {
+    background: linear-gradient(
+      90deg,
+      var(--royal-3) 0%,
+      var(--royal-4) 50%,
+      var(--royal-3) 100%
+    );
+    background-size: 200% 100%;
+    border-radius: 3px;
+    animation: shimmer 1.4s ease-in-out infinite;
+  }
+  .skel-kicker { width: 120px; height: 11px; }
+  .skel-title { width: 85%; height: 22px; margin-top: var(--s1); }
+  .skel-title2 { width: 60%; height: 22px; }
+  .skel-desc { width: 100%; height: 12px; margin-top: var(--s2); }
+  .skel-desc2 { width: 90%; height: 12px; }
+  .skel-desc3 { width: 72%; height: 12px; }
+  .skel-tag { width: 48px; height: 18px; display: inline-block; margin-right: 6px; }
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+  .card.loading .corner { background: var(--royal-3); border-color: var(--royal-4); }
+
+  /* ===================================================================
+     LABELS for demo cards
+     =================================================================== */
+
+  .variant-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    margin-bottom: var(--s3);
+  }
+  .variant-label strong { color: var(--royal-11); }
+
+  .variant-group {
+    margin-top: var(--s6);
+  }
+
+  /* ---- summary table ---- */
+  table.scorecard {
+    width: 100%;
+    margin-top: var(--s5);
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  table.scorecard th,
+  table.scorecard td {
+    text-align: left;
+    padding: var(--s3) var(--s3);
+    border-bottom: 1px solid var(--rule);
+  }
+  table.scorecard th {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--royal-10);
+    font-weight: 500;
+  }
+  table.scorecard td.opt {
+    font-family: var(--font-mono);
+    color: var(--ink);
+  }
+  table.scorecard .yes { color: #7fd8a8; }
+  table.scorecard .no { color: #e87a7a; }
+  table.scorecard .mid { color: #e8c97a; }
+  table.scorecard tr.rec td { background: rgba(59,91,219,0.08); }
+
+  .rec-box {
+    margin-top: var(--s6);
+    padding: var(--s5) var(--s6);
+    background: var(--grad-rv-soft);
+    border: 1px solid var(--royal-7);
+    border-radius: 8px;
+  }
+  .rec-box .rec-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--royal-11);
+    margin-bottom: var(--s2);
+  }
+  .rec-box h3 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 24px;
+    margin-bottom: var(--s3);
+  }
+  .rec-box p { color: var(--ink-muted); font-size: 14px; max-width: 64ch; }
+  .rec-box p + p { margin-top: var(--s3); }
+</style>
+</head>
+<body>
+
+<header class="doc-head">
+  <div class="eyebrow">CARD DEEP-DIVE · V2</div>
+  <h1>Mandatory imagery, auto-tinted, differentiation without stripes</h1>
+  <p>
+    Three changes from v1: imagery is now <strong>mandatory</strong> on every card,
+    tint is <strong>automatic</strong> at the component layer (zero author effort), and the
+    writing-card left stripe is <strong>dropped</strong> in favour of lighter alternatives.
+    Layout D (corner accent) is assumed throughout; the question on this page is no longer
+    <em>which layout</em>, it's <em>how to cohere mandatory imagery</em> and <em>how much register
+    differentiation the cards actually need</em>.
+  </p>
+</header>
+
+<!-- ============================================================ -->
+<section>
+  <div class="kicker">§1</div>
+  <h2>Automatic tint — CSS-only, zero author effort</h2>
+  <p class="lede">
+    The container wraps the image in a slot with <code>overflow: hidden</code> and
+    a <code>::after</code> pseudo-element that sits over the image with
+    <code>mix-blend-mode: color</code>. That blend mode keeps the image's luminance
+    (shadows, highlights, shape) but replaces its hue with the overlay colour.
+    The author drops in <em>any</em> screenshot — the component pulls it into the
+    royal (or violet, for writing) palette automatically.
+  </p>
+
+<pre class="code"><span class="c">/* applied by the component, not the author */</span>
+.img-slot { <span class="k">position</span>: relative; <span class="k">overflow</span>: hidden; }
+.img-slot img { <span class="k">filter</span>: saturate(0.75); }
+.img-slot::after {
+  <span class="k">content</span>: <span class="s">""</span>;
+  <span class="k">position</span>: absolute;
+  <span class="k">inset</span>: 0;
+  <span class="k">background</span>: var(--royal-8);
+  <span class="k">mix-blend-mode</span>: color;
+  <span class="k">opacity</span>: 0.55;
+  <span class="k">pointer-events</span>: none;
+}
+.card.writing .img-slot::after { <span class="k">background</span>: var(--violet-8); }</pre>
+
+  <div class="note">
+    <strong>Proof below:</strong> the screenshot mock inside the first card uses a
+    deliberately <em>off-palette</em> "photo" (magenta → yellow → cyan gradient) to
+    demonstrate that tint automation works on arbitrary input. You should see it
+    rendered as royal-toned — no pink, no yellow. The writing card uses the same
+    off-palette photo tinted violet.
+  </div>
+
+  <div class="cards-row">
+    <article class="card">
+      <div class="corner v-screenshot"><div class="photo"></div></div>
+      <div class="kicker">CASE STUDY · 2026</div>
+      <h3><a class="card-link" href="#">Planner App<span class="arrow">→</span></a></h3>
+      <p class="desc">Migrating a GTD planner from Python/Railway to TypeScript/Cloudflare with a single choke point for every paid send.</p>
+      <ul class="tags"><li>typescript</li><li>cloudflare</li><li>twilio</li></ul>
+    </article>
+    <article class="card writing">
+      <div class="corner v-screenshot"><div class="photo"></div></div>
+      <div class="kicker">WRITING · 2026</div>
+      <h3><a class="card-link" href="#">The four-layer spend guard<span class="arrow">→</span></a></h3>
+      <p class="desc">Killswitch, budget, idempotency, execute — why every paid operation needs all four and what fails when you skip one.</p>
+      <ul class="tags"><li>architecture</li><li>reliability</li></ul>
+    </article>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section>
+  <div class="kicker">§2</div>
+  <h2>Visual type library — six options, one frame</h2>
+  <p class="lede">
+    The frame is constant: 64×64 rounded rectangle, 1px royal-7 border
+    (violet-tinted on writing cards), pinned to the top-right, inset
+    by the card padding. Whatever content fills it, the container never changes.
+    That's the <strong>single strongest consistency lever</strong> — author-varied imagery,
+    system-fixed frame.
+  </p>
+
+  <div class="variant-group">
+    <div class="variant-label">Type 1 — <strong>Screenshot</strong> (auto-tinted, authors drop in raw)</div>
+    <div class="cards-row">
+      <article class="card">
+        <div class="corner v-screenshot"><div class="photo"></div></div>
+        <div class="kicker">CASE STUDY · 2026</div>
+        <h3><a class="card-link" href="#">The Weekly<span class="arrow">→</span></a></h3>
+        <p class="desc">Coles recipe scraper that consolidates ingredients across a week's meals into one trolley.</p>
+        <ul class="tags"><li>react</li><li>vite</li><li>netlify</li></ul>
+      </article>
+      <article class="card writing">
+        <div class="corner v-screenshot"><div class="photo"></div></div>
+        <div class="kicker">WRITING · 2026</div>
+        <h3><a class="card-link" href="#">Screenshots that don't lie<span class="arrow">→</span></a></h3>
+        <p class="desc">Why every portfolio screenshot should be captured at render time, never baked in.</p>
+        <ul class="tags"><li>craft</li><li>tooling</li></ul>
+      </article>
+    </div>
+  </div>
+
+  <div class="variant-group">
+    <div class="variant-label">Type 2 — <strong>Diagram</strong> (palette-locked, SVG or mermaid)</div>
+    <div class="cards-row">
+      <article class="card">
+        <div class="corner v-diagram"></div>
+        <div class="kicker">CASE STUDY · 2026</div>
+        <h3><a class="card-link" href="#">Spend guard architecture<span class="arrow">→</span></a></h3>
+        <p class="desc">Four layers between a button press and a Twilio API call — each catching a different failure mode.</p>
+        <ul class="tags"><li>architecture</li><li>typescript</li></ul>
+      </article>
+      <article class="card writing">
+        <div class="corner v-diagram"></div>
+        <div class="kicker">WRITING · 2026</div>
+        <h3><a class="card-link" href="#">Drawing the lines right<span class="arrow">→</span></a></h3>
+        <p class="desc">When hand-drawn flowcharts beat polished ones, and the tools that get you there fastest.</p>
+        <ul class="tags"><li>diagrams</li><li>mermaid</li></ul>
+      </article>
+    </div>
+  </div>
+
+  <div class="variant-group">
+    <div class="variant-label">Type 3 — <strong>Numeral</strong> (Fraunces display + gradient fill)</div>
+    <div class="cards-row">
+      <article class="card">
+        <div class="corner v-numeral"><div class="num">01</div></div>
+        <div class="kicker">CASE STUDY · 2026</div>
+        <h3><a class="card-link" href="#">Portfolio v1<span class="arrow">→</span></a></h3>
+        <p class="desc">Astro 6, React islands, Tailwind v4 — content-first, design-second, shipping-third.</p>
+        <ul class="tags"><li>astro</li><li>tailwind</li></ul>
+      </article>
+      <article class="card writing">
+        <div class="corner v-numeral"><div class="num">03</div></div>
+        <div class="kicker">WRITING · 2026</div>
+        <h3><a class="card-link" href="#">Three weeks of style guide<span class="arrow">→</span></a></h3>
+        <p class="desc">What I learned re-reading Wes Kao and John Cutler before writing any of my own posts.</p>
+        <ul class="tags"><li>writing</li><li>research</li></ul>
+      </article>
+    </div>
+  </div>
+
+  <div class="variant-group">
+    <div class="variant-label">Type 4 — <strong>Gradient mark</strong> (abstract, CSS-only, always palette-correct)</div>
+    <div class="cards-row">
+      <article class="card">
+        <div class="corner v-gradmark"></div>
+        <div class="kicker">CASE STUDY · 2026</div>
+        <h3><a class="card-link" href="#">Design system retrofit<span class="arrow">→</span></a></h3>
+        <p class="desc">Tokens-first architecture applied across three existing projects without changing what they look like.</p>
+        <ul class="tags"><li>tokens</li><li>refactor</li></ul>
+      </article>
+      <article class="card writing">
+        <div class="corner v-gradmark"></div>
+        <div class="kicker">WRITING · 2026</div>
+        <h3><a class="card-link" href="#">Royal Tonal in twelve steps<span class="arrow">→</span></a></h3>
+        <p class="desc">How to anchor a dark-mode palette on one hex and derive everything else deterministically.</p>
+        <ul class="tags"><li>design</li><li>colour</li></ul>
+      </article>
+    </div>
+  </div>
+
+  <div class="variant-group">
+    <div class="variant-label">Type 5 — <strong>Icon</strong> (lucide-react, line-only, palette stroke)</div>
+    <div class="cards-row">
+      <article class="card">
+        <div class="corner v-icon">
+          <svg viewBox="0 0 24 24"><path d="M20 12V8a2 2 0 0 0-2-2h-3"/><path d="M9 6H6a2 2 0 0 0-2 2v4"/><path d="M4 16v2a2 2 0 0 0 2 2h3"/><path d="M15 20h3a2 2 0 0 0 2-2v-2"/><rect x="8" y="10" width="8" height="6" rx="1"/></svg>
+        </div>
+        <div class="kicker">CASE STUDY · 2026</div>
+        <h3><a class="card-link" href="#">MOB analysis<span class="arrow">→</span></a></h3>
+        <p class="desc">Quarter-by-quarter breakdown of a two-year B2B sales cycle, built from raw Salesforce exports.</p>
+        <ul class="tags"><li>analysis</li><li>sql</li></ul>
+      </article>
+      <article class="card writing">
+        <div class="corner v-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        </div>
+        <div class="kicker">WRITING · 2026</div>
+        <h3><a class="card-link" href="#">Writing as research<span class="arrow">→</span></a></h3>
+        <p class="desc">The posts that forced me to understand what I was actually claiming about the systems I was building.</p>
+        <ul class="tags"><li>craft</li><li>meta</li></ul>
+      </article>
+    </div>
+  </div>
+
+  <div class="variant-group">
+    <div class="variant-label">Type 6 — <strong>Monogram</strong> (typographic lockup, initials or short code)</div>
+    <div class="cards-row">
+      <article class="card">
+        <div class="corner v-monogram"><div class="mono">PLN</div></div>
+        <div class="kicker">CASE STUDY · 2026</div>
+        <h3><a class="card-link" href="#">Planner App<span class="arrow">→</span></a></h3>
+        <p class="desc">Short-code lockup when no diagram or screenshot fits the brief — lightest-weight option.</p>
+        <ul class="tags"><li>typography</li></ul>
+      </article>
+      <article class="card writing">
+        <div class="corner v-monogram"><div class="mono">R/W</div></div>
+        <div class="kicker">WRITING · 2026</div>
+        <h3><a class="card-link" href="#">Read-write reciprocity<span class="arrow">→</span></a></h3>
+        <p class="desc">Every piece of writing that's shipped owes a debt to a piece of reading that didn't.</p>
+        <ul class="tags"><li>notes</li></ul>
+      </article>
+    </div>
+  </div>
+
+  <div class="note">
+    <strong>Consistency mechanics recap:</strong> (1) identical frame across all types,
+    (2) identical border + radius + inset, (3) auto-tint forces palette adherence on
+    screenshots, (4) diagrams and icons use palette tokens as strokes, (5) numerals
+    and gradient marks are palette by construction, (6) all six types share the same
+    hover behaviour. Six visual languages, one system.
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section>
+  <div class="kicker">§3</div>
+  <h2>Writing differentiation — how hard to push the register split</h2>
+  <p class="lede">
+    v1 used a left-edge violet stripe to mark writing cards. That's dropped.
+    Four lighter alternatives below, plus a baseline that does <em>nothing</em>
+    structural and lets kicker-colour + tag-colour carry the whole job.
+    Each variant shows a work card next to a writing card so you can read
+    the register difference directly.
+  </p>
+
+  <div class="variant-group diff-a">
+    <div class="variant-label">Variant A — <strong>Baseline: nothing structural</strong>. Only kicker colour + tag colour differ. Minimal.</div>
+    <div class="cards-row">
+      <article class="card">
+        <div class="corner v-numeral"><div class="num">01</div></div>
+        <div class="kicker">CASE STUDY · 2026</div>
+        <h3><a class="card-link" href="#">Planner App<span class="arrow">→</span></a></h3>
+        <p class="desc">GTD planner migrating from Python/Railway to TypeScript/Cloudflare.</p>
+        <ul class="tags"><li>typescript</li><li>cloudflare</li></ul>
+      </article>
+      <article class="card writing">
+        <div class="corner v-numeral"><div class="num">02</div></div>
+        <div class="kicker">WRITING · 2026</div>
+        <h3><a class="card-link" href="#">The four-layer spend guard<span class="arrow">→</span></a></h3>
+        <p class="desc">Killswitch, budget, idempotency, execute — and what fails when you skip one.</p>
+        <ul class="tags"><li>architecture</li><li>reliability</li></ul>
+      </article>
+    </div>
+  </div>
+
+  <div class="variant-group diff-b">
+    <div class="variant-label">Variant B — <strong>Top rule</strong>. A 2px violet line across the top of writing cards.</div>
+    <div class="cards-row">
+      <article class="card">
+        <div class="corner v-numeral"><div class="num">01</div></div>
+        <div class="kicker">CASE STUDY · 2026</div>
+        <h3><a class="card-link" href="#">Planner App<span class="arrow">→</span></a></h3>
+        <p class="desc">GTD planner migrating from Python/Railway to TypeScript/Cloudflare.</p>
+        <ul class="tags"><li>typescript</li><li>cloudflare</li></ul>
+      </article>
+      <article class="card writing">
+        <div class="corner v-numeral"><div class="num">02</div></div>
+        <div class="kicker">WRITING · 2026</div>
+        <h3><a class="card-link" href="#">The four-layer spend guard<span class="arrow">→</span></a></h3>
+        <p class="desc">Killswitch, budget, idempotency, execute — and what fails when you skip one.</p>
+        <ul class="tags"><li>architecture</li><li>reliability</li></ul>
+      </article>
+    </div>
+  </div>
+
+  <div class="variant-group diff-c">
+    <div class="variant-label">Variant C — <strong>Kicker dot</strong>. A small violet disc before the kicker text on writing cards.</div>
+    <div class="cards-row">
+      <article class="card">
+        <div class="corner v-numeral"><div class="num">01</div></div>
+        <div class="kicker">CASE STUDY · 2026</div>
+        <h3><a class="card-link" href="#">Planner App<span class="arrow">→</span></a></h3>
+        <p class="desc">GTD planner migrating from Python/Railway to TypeScript/Cloudflare.</p>
+        <ul class="tags"><li>typescript</li><li>cloudflare</li></ul>
+      </article>
+      <article class="card writing">
+        <div class="corner v-numeral"><div class="num">02</div></div>
+        <div class="kicker">WRITING · 2026</div>
+        <h3><a class="card-link" href="#">The four-layer spend guard<span class="arrow">→</span></a></h3>
+        <p class="desc">Killswitch, budget, idempotency, execute — and what fails when you skip one.</p>
+        <ul class="tags"><li>architecture</li><li>reliability</li></ul>
+      </article>
+    </div>
+  </div>
+
+  <div class="variant-group diff-d">
+    <div class="variant-label">Variant D — <strong>Kicker icon</strong>. A small line-icon (pencil) before the kicker on writing cards.</div>
+    <div class="cards-row">
+      <article class="card">
+        <div class="corner v-numeral"><div class="num">01</div></div>
+        <div class="kicker">CASE STUDY · 2026</div>
+        <h3><a class="card-link" href="#">Planner App<span class="arrow">→</span></a></h3>
+        <p class="desc">GTD planner migrating from Python/Railway to TypeScript/Cloudflare.</p>
+        <ul class="tags"><li>typescript</li><li>cloudflare</li></ul>
+      </article>
+      <article class="card writing">
+        <div class="corner v-numeral"><div class="num">02</div></div>
+        <div class="kicker">
+          <span class="kicker-with-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            WRITING · 2026
+          </span>
+        </div>
+        <h3><a class="card-link" href="#">The four-layer spend guard<span class="arrow">→</span></a></h3>
+        <p class="desc">Killswitch, budget, idempotency, execute — and what fails when you skip one.</p>
+        <ul class="tags"><li>architecture</li><li>reliability</li></ul>
+      </article>
+    </div>
+  </div>
+
+  <div class="variant-group">
+    <div class="variant-label">Variant E — <strong>Corner accent tinted violet</strong>. The corner image frame itself does the differentiation — writing cards tint the same frame in violet tones. No other change.</div>
+    <div class="cards-row">
+      <article class="card">
+        <div class="corner v-screenshot"><div class="photo"></div></div>
+        <div class="kicker">CASE STUDY · 2026</div>
+        <h3><a class="card-link" href="#">Planner App<span class="arrow">→</span></a></h3>
+        <p class="desc">GTD planner migrating from Python/Railway to TypeScript/Cloudflare.</p>
+        <ul class="tags"><li>typescript</li><li>cloudflare</li></ul>
+      </article>
+      <article class="card writing">
+        <div class="corner v-screenshot"><div class="photo"></div></div>
+        <div class="kicker">WRITING · 2026</div>
+        <h3><a class="card-link" href="#">The four-layer spend guard<span class="arrow">→</span></a></h3>
+        <p class="desc">Killswitch, budget, idempotency, execute — and what fails when you skip one.</p>
+        <ul class="tags"><li>architecture</li><li>reliability</li></ul>
+      </article>
+    </div>
+  </div>
+
+  <table class="scorecard">
+    <thead>
+      <tr>
+        <th style="width:12%">Variant</th>
+        <th>Differentiation signal</th>
+        <th style="width:14%">Noise added</th>
+        <th style="width:16%">Works when mixed in feed</th>
+        <th style="width:14%">Author cost</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="rec">
+        <td class="opt">A · baseline</td>
+        <td>kicker colour + tag colour only</td>
+        <td class="yes">none</td>
+        <td class="yes">yes</td>
+        <td class="yes">zero</td>
+      </tr>
+      <tr>
+        <td class="opt">B · top rule</td>
+        <td>horizontal line + colours</td>
+        <td class="mid">one new element</td>
+        <td class="yes">yes</td>
+        <td class="yes">zero</td>
+      </tr>
+      <tr>
+        <td class="opt">C · kicker dot</td>
+        <td>dot glyph + colours</td>
+        <td class="mid">one glyph</td>
+        <td class="yes">yes</td>
+        <td class="yes">zero</td>
+      </tr>
+      <tr>
+        <td class="opt">D · kicker icon</td>
+        <td>line icon + colours</td>
+        <td class="no">changes kicker rhythm</td>
+        <td class="mid">ok</td>
+        <td class="mid">icon choice per card type</td>
+      </tr>
+      <tr>
+        <td class="opt">E · tinted frame</td>
+        <td>corner accent hue shift</td>
+        <td class="yes">none</td>
+        <td class="yes">yes</td>
+        <td class="yes">zero</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="rec-box">
+    <div class="rec-label">RECOMMENDATION</div>
+    <h3>Variant A (baseline) — let kicker/tag colour + corner tint carry it</h3>
+    <p>
+      You said writing and case-study cards don't need to be super distinctive — tags,
+      kicker pills, and colours already do the work. Variant A agrees: nothing
+      structural, just the two existing colour signals. Because imagery is now
+      mandatory and the corner frame auto-tints by register (royal for work, violet
+      for writing), <strong>Variant E is effectively free on top of A</strong> — the tint is
+      already happening, and it quietly doubles the signal without adding any new
+      element. So the real answer is <strong>A + E together</strong>, which is what the §2
+      mocks above are already rendering.
+    </p>
+    <p>
+      Variants B / C / D are fallbacks if, after seeing real content in the
+      /writing index, the register split doesn't read clearly enough. My prediction:
+      it will. The violet kicker + violet tag + violet-tinted corner accent is
+      already three reinforcing signals on a small surface.
+    </p>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section>
+  <div class="kicker">§4</div>
+  <h2>Featured variant</h2>
+  <p class="lede">
+    One card per index surface can be marked featured: gradient border (via
+    <code>padding + background</code> wrapper), a FEATURED pin at top-left, same inner
+    card otherwise. The featured state amplifies, it doesn't replace.
+  </p>
+
+  <div class="cards-row one">
+    <div class="featured-wrap">
+      <div class="featured-pin">FEATURED</div>
+      <article class="card">
+        <div class="corner v-screenshot"><div class="photo"></div></div>
+        <div class="kicker">CASE STUDY · 2026</div>
+        <h3><a class="card-link" href="#">Planner App — four layers between a button and a Twilio call<span class="arrow">→</span></a></h3>
+        <p class="desc">A rebuild from Python/Railway to TypeScript/Cloudflare that turned convention-based spend discipline into a structural guarantee. Killswitch, budget, idempotency, execute — every paid operation passes through all four.</p>
+        <ul class="tags"><li>typescript</li><li>cloudflare</li><li>twilio</li><li>architecture</li></ul>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section>
+  <div class="kicker">§5</div>
+  <h2>Loading state</h2>
+  <p class="lede">
+    Shimmer skeletons preserve the card's geometry so the layout doesn't jump when
+    content hydrates. The corner accent is a plain tinted square during load.
+  </p>
+
+  <div class="cards-row">
+    <article class="card loading">
+      <div class="corner"></div>
+      <div class="skel skel-kicker"></div>
+      <div class="skel skel-title"></div>
+      <div class="skel skel-title2"></div>
+      <div class="skel skel-desc"></div>
+      <div class="skel skel-desc2"></div>
+      <div class="skel skel-desc3"></div>
+      <div style="margin-top: var(--s3);">
+        <span class="skel skel-tag"></span><span class="skel skel-tag"></span><span class="skel skel-tag"></span>
+      </div>
+    </article>
+    <article class="card loading">
+      <div class="corner"></div>
+      <div class="skel skel-kicker"></div>
+      <div class="skel skel-title"></div>
+      <div class="skel skel-title2"></div>
+      <div class="skel skel-desc"></div>
+      <div class="skel skel-desc2"></div>
+      <div class="skel skel-desc3"></div>
+      <div style="margin-top: var(--s3);">
+        <span class="skel skel-tag"></span><span class="skel skel-tag"></span>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section>
+  <div class="kicker">§6</div>
+  <h2>Whole-card click target</h2>
+  <p class="lede">
+    Every card above is already using the pattern. Visible anchor stays on the
+    heading (so focus ring + screen reader semantics land on the title), and a
+    pseudo-element extends the hit area over the whole card without touching the
+    visual design. Text selection still works because the overlay is transparent
+    and has no background.
+  </p>
+
+<pre class="code"><span class="c">/* semantic anchor stays on the title */</span>
+&lt;h3&gt;&lt;a class=<span class="s">"card-link"</span> href=<span class="s">"..."</span>&gt;Title&lt;/a&gt;&lt;/h3&gt;
+
+<span class="c">/* card container is the click target */</span>
+.card { <span class="k">position</span>: relative; <span class="k">cursor</span>: pointer; }
+.card .card-link::after {
+  <span class="k">content</span>: <span class="s">""</span>;
+  <span class="k">position</span>: absolute;
+  <span class="k">inset</span>: 0;
+  <span class="k">z-index</span>: 1;
+}
+
+<span class="c">/* anything interactive inside the card sits above the overlay */</span>
+.card .tags { <span class="k">position</span>: relative; <span class="k">z-index</span>: 2; }</pre>
+
+  <div class="note">
+    <strong>Accessibility:</strong> focus ring still appears on the title (keyboard users
+    see the correct affordance). Screen readers still announce a single link with the
+    title as the accessible name. Mouse users get the expanded hit target. If tags
+    become real links later, the <code>z-index: 2</code> rule keeps them clickable independently.
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section>
+  <div class="kicker">§7</div>
+  <h2>Decision summary</h2>
+
+  <div class="rec-box">
+    <div class="rec-label">DECISIONS IN THIS DOC</div>
+    <h3>Six locked, two open for your call</h3>
+    <p>
+      <strong>Locked:</strong> mandatory imagery (every card has a corner accent);
+      automatic tint via <code>mix-blend-mode: color</code> (no author effort);
+      six valid visual types (screenshot, diagram, numeral, gradient-mark, icon, monogram);
+      one frame across all types; featured variant as amplification not replacement;
+      whole-card click via <code>::after</code> overlay.
+    </p>
+    <p>
+      <strong>Open:</strong> (1) writing-card differentiation — my pick is
+      <strong>A + E (baseline + tinted corner)</strong>, but you may want B/C/D as a
+      backup if real content doesn't read clearly. (2) Whether to adopt this as the
+      locked card component and move to chunk 4b (content hierarchy), or iterate once
+      more on a v3 with refinements.
+    </p>
+  </div>
+</section>
+
+</body>
+</html>
