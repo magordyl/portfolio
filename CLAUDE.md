@@ -46,7 +46,15 @@ Astro uses `@tailwindcss/vite` (Vite plugin), NOT `@astrojs/tailwind`. The `astr
 
 **Chunk 4 restructured (2026-04-11)** — split into four sub-chunks following a content-first sequence. Session did not start chunk 4 work; it defined the expanded shape of chunk 4 and added two new chunks (5.5 writing posts, 5.6 /about one-off). See `plans/portfolio-implementation.md` for the full updated plan.
 
-**Chunk 4a next** — Foundation: voice + imagery + diary audit (workspace-wide style guide). Produces `.claude/rules/writing-style.md` (workspace repo, not portfolio repo — it governs all Claude-produced writing, not just portfolio), a quick hiring-manager-lens diary audit, imagery & illustration standards, and updated diary capture rules. **Note:** 4a commits go to the workspace repo, not the portfolio repo — first chunk in this plan that does.
+**Chunk 4a in progress** — Foundation: voice + imagery + diary audit (workspace-wide style guide).
+
+- **4a.1 complete** — Voice research committed at `plans/portfolio-voice-research.md`. Covers Wes Kao (7 posts, storytelling focus), John Cutler (6 top posts, illustrations + complex messages + relatability). Dylan's voice deferred to chunk 4d because no user-authored long-form prose is available; 4a will ship with structural guidance locked plus style guard rails only. Final style guide splits into Part 1 (Structural, lockable in 4a) and Part 2 (Style, discovered in 4d). AI tells to avoid list included (em-dashes prohibited as #1 tell).
+- **4a.2 complete** — Diary audit committed at `plans/portfolio-diary-audit.md`. Five exemplar entries called out (mostly workspace diary), four weak ones. Biggest gap: **product thinking** — 48 entries, only one centres a product claim. Structural cause identified: `ideas/` folder has no `DIARY.md`, so research/pivot/shelving decisions leave no trace. **This MUST be fixed in 4a.5** (new task #7, audit doc §"Fifth implication", memory file `project_ideas_diary_gap.md`).
+- **4a.3 next** — Imagery & illustration standards (Cutler-influenced sketch aesthetic, diagram archetypes, sourcing rules).
+- **4a.4 after** — Synthesise voice research + diary audit into `.claude/rules/writing-style.md` (workspace repo). Two-section split: structural + style.
+- **4a.5 last** — Create `ideas/DIARY.md` as new workspace artefact. Update `docs/diary-format.md` and `CLAUDE.md` Idea Pipeline section. Wire capture trigger into `/new-idea` skill. Retroactive first entry covers habit-correlation research arc.
+
+**Note:** 4a.1 and 4a.2 research artefacts commit to the **portfolio repo** (they are portfolio plans). The 4a.4/4a.5 deliverables (writing-style.md, diary capture rule updates, ideas/DIARY.md) commit to the **workspace repo** per original plan.
 
 **Chunks remaining:** 4a (foundation), 4b (case study content hierarchy), 4c (page layout mockups, excludes /about), 4d (the-weekly workshop), 5 (remaining case studies), 5.5 (writing posts brainstorm + 3 drafts), 5.6 (/about one-off), 6 (secondary pages + deploy).
 
