@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Planner V1 — Story Map</title>
+<style>
+:root {
+  --bg: #fafaf9;
+  --surface: #ffffff;
+  --border: #e5e5e5;
+  --text: #1a1a1a;
+  --muted: #737373;
+  --accent: #4f46e5;
+  --skeleton-bg: #eef2f7;
+  --substep-bg: #f4f6fa;
+  --card-shadow: 0 1px 2px rgba(0,0,0,0.06);
+  --drag-over: #eef2ff;
+  --spare: #fafafa;
+
+  --r0: #64748b;
+  --r1: #4f46e5;
+  --r2: #0891b2;
+  --r3: #059669;
+  --r4: #d97706;
+  --r5: #dc2626;
+  --rs: #a1a1aa;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+header {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+header h1 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+  flex: 1;
+}
+
+.toolbar {
+  display: flex;
+  gap: 8px;
+}
+
+.toolbar button {
+  padding: 7px 14px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--text);
+}
+
+.toolbar button:hover { background: var(--skeleton-bg); }
+.toolbar button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+.toolbar button.primary:hover { background: #4338ca; }
+
+.map-scroll {
+  overflow-x: auto;
+  padding: 16px;
+}
+
+.map {
+  display: grid;
+  gap: 2px;
+  min-width: fit-content;
+  align-items: stretch;
+}
+
+.cell-header {
+  padding: 10px 12px;
+  font-weight: 600;
+  font-size: 13px;
+  background: var(--skeleton-bg);
+  border-radius: 4px;
+  text-align: center;
+  color: var(--text);
+}
+
+.cell-header.skeleton-spare { opacity: 0.55; background: var(--spare); font-style: italic; }
+
+.cell-substep {
+  padding: 7px 8px;
+  font-weight: 500;
+  font-size: 11px;
+  color: var(--muted);
+  background: var(--substep-bg);
+  border-radius: 4px;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.cell-substep.skeleton-spare { opacity: 0.55; }
+
+.corner {
+  padding: 10px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+}
+
+.release-label {
+  padding: 12px;
+  background: var(--surface);
+  border-left: 4px solid var(--accent);
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  position: sticky;
+  left: 0;
+  z-index: 5;
+}
+
+.release-label .name {
+  font-weight: 600;
+  font-size: 13px;
+  line-height: 1.3;
+}
+
+.release-label .notes {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.release-label .notes:empty::before {
+  content: "Click to add notes…";
+  color: #d4d4d4;
+}
+
+.release-row-spare .release-label {
+  opacity: 0.55;
+  background: var(--spare);
+  border-left-color: var(--rs);
+}
+
+.release-row-0 .release-label { border-left-color: var(--r0); }
+.release-row-1 .release-label { border-left-color: var(--r1); }
+.release-row-2 .release-label { border-left-color: var(--r2); }
+.release-row-3 .release-label { border-left-color: var(--r3); }
+.release-row-4 .release-label { border-left-color: var(--r4); }
+.release-row-5 .release-label { border-left-color: var(--r5); }
+
+.cell {
+  background: var(--surface);
+  border: 1px dashed var(--border);
+  border-radius: 4px;
+  padding: 5px;
+  min-height: 70px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  position: relative;
+}
+
+.cell.drag-over { background: var(--drag-over); border-color: var(--accent); border-style: solid; }
+
+.cell .add-card {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 18px;
+  height: 18px;
+  border: none;
+  background: rgba(0,0,0,0.06);
+  color: var(--text);
+  border-radius: 50%;
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.1s;
+  padding: 0;
+  font-family: inherit;
+}
+
+.cell:hover .add-card { opacity: 1; }
+.cell .add-card:hover { background: var(--accent); color: #fff; }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 3px;
+  padding: 6px 8px 6px 8px;
+  box-shadow: var(--card-shadow);
+  cursor: grab;
+  font-size: 12px;
+  position: relative;
+}
+
+.card:active { cursor: grabbing; }
+.card.dragging { opacity: 0.4; }
+
+.card h3 {
+  margin: 0 0 2px 0;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.3;
+  padding-right: 14px;
+}
+
+.card p {
+  margin: 0;
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.card p:empty::before {
+  content: "Add description…";
+  color: #d4d4d4;
+}
+
+.card .delete-card {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 0;
+  width: 14px;
+  height: 14px;
+  line-height: 1;
+  opacity: 0;
+  font-family: inherit;
+}
+
+.card:hover .delete-card { opacity: 1; }
+.card .delete-card:hover { color: var(--r5); }
+
+.release-row-0 .card { border-left-color: var(--r0); }
+.release-row-1 .card { border-left-color: var(--r1); }
+.release-row-2 .card { border-left-color: var(--r2); }
+.release-row-3 .card { border-left-color: var(--r3); }
+.release-row-4 .card { border-left-color: var(--r4); }
+.release-row-5 .card { border-left-color: var(--r5); }
+.release-row-spare .card { border-left-color: var(--rs); }
+
+[contenteditable]:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  background: #fff;
+  border-radius: 2px;
+}
+
+.legend {
+  padding: 12px 20px;
+  font-size: 12px;
+  color: var(--muted);
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  line-height: 1.6;
+}
+.legend code {
+  background: var(--skeleton-bg);
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 11px;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1 contenteditable="true" id="title">Planner V1 — Story Map</h1>
+  <div class="toolbar">
+    <button id="share-url" class="primary">Copy Share URL</button>
+    <button id="export-md">Export Markdown</button>
+    <button id="reset">Reset</button>
+  </div>
+</header>
+
+<div class="map-scroll">
+  <div class="map" id="map"></div>
+</div>
+
+<div class="legend">
+  <strong>How to use:</strong>
+  Drag cards between cells to move them between releases or workflow steps. Click any text (title, release name, notes, skeleton activity, sub-step, card title, card description) to edit inline. Hover a cell for a <code>+</code> button to add a new card. Hover a card for a <code>×</code> to delete. Changes save to your browser automatically.
+  <br><br>
+  <strong>Copy Share URL</strong> copies a URL containing the full current state — open it on any device to load the same map (no backend, no account). Paste the URL back in a Claude conversation and the state can be decoded there too. <strong>Export Markdown</strong> downloads a clean markdown snapshot. <strong>Reset</strong> restores the original seeded content. localStorage is per-device — use Share URL to move state between devices.
+</div>
+
+<script>
+const DEFAULT_STATE = {
+  title: "Planner V1 — Story Map",
+  skeletons: [
+    { id: "onboard", name: "Onboard", spare: false, substeps: [
+      { id: "signin", name: "Sign in" },
+      { id: "phone", name: "Phone setup" },
+      { id: "tz", name: "Timezone setup" }
+    ]},
+    { id: "capture", name: "Capture", spare: false, substeps: [
+      { id: "cap-web", name: "Web form" },
+      { id: "cap-quick", name: "Quick capture" },
+      { id: "cap-sms", name: "Via SMS" }
+    ]},
+    { id: "organise", name: "Organise", spare: false, substeps: [
+      { id: "filter-views", name: "Filter views" },
+      { id: "state-filter", name: "State filters" }
+    ]},
+    { id: "schedule", name: "Schedule", spare: false, substeps: [
+      { id: "set-time", name: "Set time" },
+      { id: "edit-task", name: "Edit task" },
+      { id: "repeat", name: "Repeat" }
+    ]},
+    { id: "remind", name: "Remind", spare: false, substeps: [
+      { id: "send-rem", name: "Send reminder" },
+      { id: "send-conf", name: "Send confirmation" }
+    ]},
+    { id: "act", name: "Act", spare: false, substeps: [
+      { id: "act-ui", name: "Action via UI" },
+      { id: "act-sms", name: "Action via SMS" },
+      { id: "act-batch", name: "Batch actions" }
+    ]},
+    { id: "review", name: "Review", spare: false, substeps: [
+      { id: "rev-glance", name: "At-a-glance" },
+      { id: "rev-done", name: "Done feed" },
+      { id: "rev-brief", name: "Briefings" },
+      { id: "rev-weekly", name: "Weekly review" }
+    ]},
+    { id: "admin", name: "Admin", spare: false, substeps: [
+      { id: "adm-view", name: "View settings" },
+      { id: "adm-edit", name: "Edit settings" },
+      { id: "adm-quiet", name: "Quiet hours" }
+    ]},
+    { id: "spare1", name: "Spare 1", spare: true, substeps: [
+      { id: "sp1a", name: "Spare step" },
+      { id: "sp1b", name: "Spare step" }
+    ]},
+    { id: "spare2", name: "Spare 2", spare: true, substeps: [
+      { id: "sp2a", name: "Spare step" },
+      { id: "sp2b", name: "Spare step" }
+    ]}
+  ],
+  releases: [
+    { id: "r0", name: "R0 — Correctness pass", notes: "Correctness debt fixed before any new feature work. Safe to ship quickly.", spare: false },
+    { id: "r1", name: "R1 — The Redesign", notes: "Cross-cutting: Tailwind v4 migration, new design tokens, new fonts, new type scale, mobile-first PWA shell. Rebuild every existing POC surface on the new design system with zero added functionality.", spare: false },
+    { id: "r2", name: "R2 — Daily Loop Wins", notes: "Highest-value changes surfaced from POC usage: quick capture, snooze-until-time-today, today/week at-a-glance landing.", spare: false },
+    { id: "r3", name: "R3 — Depth & Control", notes: "Power-user features: habit repeats, batch actions, multi-task SMS replies, completed history.", spare: false },
+    { id: "r4", name: "R4 — Rhythm", notes: "Ritual and reflection features: morning briefing SMS, end-of-day summary, weekly review flow.", spare: false },
+    { id: "r5", name: "R5 — Polish & Admin", notes: "Admin surfaces, quieter features, self-signup for additional users.", spare: false },
+    { id: "rA", name: "Spare A", notes: "", spare: true },
+    { id: "rB", name: "Spare B", notes: "", spare: true },
+    { id: "rC", name: "Spare C", notes: "", spare: true }
+  ],
+  cards: [
+    { id: "c1", releaseId: "r0", substepId: "set-time", title: "Timezone UTC at boundary",
+      description: "Fix bug where scheduled_time is stored as local and compared against UTC time('now'). Frontend converts to ISO 8601 UTC before POST; backend schema rejects bare HH:MM. Per architecture principle 16." },
+    { id: "c2", releaseId: "r0", substepId: "act-ui", title: "JWT refresh on expiry",
+      description: "Soft re-auth so expired sessions don't drop the user to the login screen mid-flow. Silent refresh via the existing Google OAuth path." },
+
+    { id: "c3", releaseId: "r1", substepId: "signin", title: "Google sign-in + welcome",
+      description: "Existing OAuth flow kept as-is mechanically. New welcome screen with first-run copy, visual direction, and typographic identity from the redesign." },
+    { id: "c4", releaseId: "r1", substepId: "phone", title: "Phone entry + verification",
+      description: "User enters mobile number during onboarding. Twilio verification code proves ownership. Required before reminders can send." },
+    { id: "c5", releaseId: "r1", substepId: "tz", title: "Timezone detect + confirm",
+      description: "Auto-detect via browser, show to user, allow override. Stored per-user. Used for every SMS send-time calculation." },
+    { id: "c6", releaseId: "r1", substepId: "cap-web", title: "Create task (web form)",
+      description: "Primary capture surface, redesigned. Title + scheduled time. Inline validation, mobile-friendly layout on the new tokens." },
+    { id: "c7", releaseId: "r1", substepId: "set-time", title: "Scheduled time picker",
+      description: "Redesigned time input: quick-select (today / tomorrow / custom) plus explicit picker fallback. Converts to UTC ISO before POST." },
+    { id: "c8", releaseId: "r1", substepId: "edit-task", title: "Edit existing task",
+      description: "Edit title and scheduled time after creation. Missing from the POC — today only complete/snooze work. Unlocks 'oops, meant 4pm not 3pm' flow." },
+    { id: "c9", releaseId: "r1", substepId: "send-rem", title: "SMS reminder (existing)",
+      description: "Cron-triggered SMS at scheduled_time. Existing spending-service path unchanged. Copy refreshed to match the new brand voice." },
+    { id: "c10", releaseId: "r1", substepId: "send-conf", title: "Confirmation SMS (existing)",
+      description: "Reply confirmation after done/snooze. Existing path. Copy refreshed." },
+    { id: "c11", releaseId: "r1", substepId: "act-ui", title: "Mark done via UI",
+      description: "Tap-to-done on task list. Redesigned list item affordance — swipe vs button decided in UX flows phase." },
+    { id: "c12", releaseId: "r1", substepId: "act-sms", title: "Done / basic snooze via SMS",
+      description: "Existing parser handles 'done', 'snooze 1h', etc. No parser change — just keep working through the redesign." },
+    { id: "c13", releaseId: "r1", substepId: "adm-view", title: "Basic settings display",
+      description: "Read-only display of phone number + timezone. Full editable settings deferred to R5." },
+
+    { id: "c14", releaseId: "r2", substepId: "cap-quick", title: "Mobile quick capture",
+      description: "PWA install + home-screen shortcut → one-tap sheet to add a task. Minimise taps from phone unlock to task saved. Biggest daily-loop friction point from POC usage." },
+    { id: "c15", releaseId: "r2", substepId: "filter-views", title: "Today / Upcoming / Overdue",
+      description: "Primary inbox replaced by filter-backed views. Not tags — just state/time filters. Addresses 'I lose tasks in the inbox' pain from POC use." },
+    { id: "c16", releaseId: "r2", substepId: "act-sms", title: "Snooze until time today",
+      description: "SMS: 'snooze 1pm' → bump reminder to today 13:00 local. UI equivalent. Solves 'I'm in a meeting, can't act right now' friction. Extends existing snooze parser." },
+    { id: "c17", releaseId: "r2", substepId: "rev-glance", title: "Today + Week dashboard",
+      description: "Landing screen replacing the flat inbox. Today's scheduled tasks + this week's upcoming. Primary 'what am I doing' surface." },
+
+    { id: "c18", releaseId: "r3", substepId: "repeat", title: "Habit-style repeat",
+      description: "Next occurrence created only after the previous one is marked done. No overdue stacking. For habits (exercise, meds, stretching) — not calendar events." },
+    { id: "c19", releaseId: "r3", substepId: "state-filter", title: "Filter by state",
+      description: "Scheduled, completed, archived. Tabs or segment control on the list view. Lets you see beyond the active working set." },
+    { id: "c20", releaseId: "r3", substepId: "act-batch", title: "Bulk actions (web)",
+      description: "Select multiple tasks → bulk done / snooze / defer. Web UI only here — SMS multi-task replies is a separate card." },
+    { id: "c21", releaseId: "r3", substepId: "act-sms", title: "Multi-task SMS replies",
+      description: "'done 1, snooze 2 1h' — LLM parser already supports this but the handler doesn't. Expose it in the reply path." },
+    { id: "c22", releaseId: "r3", substepId: "rev-done", title: "Completed history feed",
+      description: "List of recently-completed tasks with timestamps. Motivation + audit. Surfaces 'what I actually got done' for review rituals." },
+
+    { id: "c23", releaseId: "r4", substepId: "rev-brief", title: "Morning briefing SMS",
+      description: "Daily scheduled SMS with today's tasks as a digest. Probably ~7-8am local, per-user configurable. The 'start the day knowing what's on' loop." },
+    { id: "c24", releaseId: "r4", substepId: "rev-brief", title: "End-of-day summary SMS",
+      description: "Recap at ~9pm local — what got done, what carried over. Closes the daily loop and feeds the next morning's briefing." },
+    { id: "c25", releaseId: "r4", substepId: "rev-weekly", title: "Weekly review flow",
+      description: "Guided triage — completed, overdue, upcoming. GTD-style weekly review. Probably a Sunday SMS link into a dedicated web surface." },
+
+    { id: "c26", releaseId: "r5", substepId: "signin", title: "Self-signup for others",
+      description: "Allow arbitrary Google accounts to create their own planner (no longer owner-only). Fully separate accounts, no shared data — just lets friends/family use their own instance." },
+    { id: "c27", releaseId: "r5", substepId: "cap-sms", title: "SMS 'add:' command",
+      description: "'add: buy milk 5pm tomorrow' creates a task via SMS. LLM parser already supports it — only the webhook route wiring is missing." },
+    { id: "c28", releaseId: "r5", substepId: "adm-edit", title: "Full settings page",
+      description: "Editable phone, timezone, notification preferences. Separate screen from the main app." },
+    { id: "c29", releaseId: "r5", substepId: "adm-quiet", title: "Quiet hours config + enforce",
+      description: "User sets 'no SMS between 22:00 and 07:00 local'. Scheduler skips sends in that window and reschedules to the next valid moment." }
+  ]
+};
+
+const STORAGE_KEY = "planner-v1-story-map";
+
+// ---------------------------------------------------------------------------
+// URL-hash state sync (cross-device)
+// ---------------------------------------------------------------------------
+// State is encoded as url-safe base64 of UTF-8 JSON and placed in the URL
+// hash as "#state=<b64>". This lets the same story map travel across
+// devices without a backend.
+//
+// Encoding pipeline:
+//   state (object) → JSON string → UTF-8 bytes → base64 → url-safe base64
+// Decoding pipeline:
+//   url-safe base64 → base64 (re-pad) → bytes → UTF-8 string → JSON.parse
+//
+// URL-safe base64: `+` → `-`, `/` → `_`, trailing `=` stripped.
+//
+// Load priority: URL hash > localStorage > DEFAULT_STATE. After a hash is
+// consumed, it's cleared from the URL so page refreshes don't re-apply
+// stale state over later edits.
+//
+// A standalone decoder lives at `decode-state.mjs` in this folder — use it
+// to read a shared URL from the command line.
+// ---------------------------------------------------------------------------
+
+function encodeState(s) {
+  const json = JSON.stringify(s);
+  const bytes = new TextEncoder().encode(json);
+  let binary = "";
+  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+function decodeState(b64) {
+  const normal = b64.replace(/-/g, "+").replace(/_/g, "/");
+  const padded = normal + "=".repeat((4 - normal.length % 4) % 4);
+  const binary = atob(padded);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return JSON.parse(new TextDecoder().decode(bytes));
+}
+
+let state = loadState();
+
+function loadState() {
+  if (window.location.hash.startsWith("#state=")) {
+    try {
+      const b64 = window.location.hash.substring(7);
+      const decoded = decodeState(b64);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(decoded));
+      history.replaceState(null, "", window.location.pathname + window.location.search);
+      return decoded;
+    } catch (e) {
+      console.warn("Failed to decode URL state:", e);
+    }
+  }
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) return JSON.parse(stored);
+  } catch (e) {}
+  return structuredClone(DEFAULT_STATE);
+}
+
+function persist() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function uid() {
+  return "c" + Date.now() + Math.floor(Math.random() * 1000);
+}
+
+function render() {
+  const map = document.getElementById("map");
+  map.innerHTML = "";
+
+  const subStepCount = state.skeletons.reduce((sum, sk) => sum + sk.substeps.length, 0);
+  map.style.gridTemplateColumns = `220px repeat(${subStepCount}, 210px)`;
+
+  // Row 1: skeleton activities
+  const corner = document.createElement("div");
+  corner.className = "corner";
+  corner.textContent = "Release ↓  Activity →";
+  map.appendChild(corner);
+
+  state.skeletons.forEach((sk, i) => {
+    const el = document.createElement("div");
+    el.className = "cell-header" + (sk.spare ? " skeleton-spare" : "");
+    el.style.gridColumn = "span " + sk.substeps.length;
+    el.contentEditable = "true";
+    el.textContent = sk.name;
+    el.addEventListener("blur", () => {
+      state.skeletons[i].name = el.textContent.trim();
+      persist();
+    });
+    map.appendChild(el);
+  });
+
+  // Row 2: sub-steps
+  const cornerEmpty = document.createElement("div");
+  cornerEmpty.className = "corner";
+  map.appendChild(cornerEmpty);
+
+  state.skeletons.forEach((sk, i) => {
+    sk.substeps.forEach((ss, j) => {
+      const el = document.createElement("div");
+      el.className = "cell-substep" + (sk.spare ? " skeleton-spare" : "");
+      el.contentEditable = "true";
+      el.textContent = ss.name;
+      el.addEventListener("blur", () => {
+        state.skeletons[i].substeps[j].name = el.textContent.trim();
+        persist();
+      });
+      map.appendChild(el);
+    });
+  });
+
+  // Rows 3+: releases
+  state.releases.forEach((rel, ri) => {
+    const rowClass = rel.spare ? "release-row-spare" : "release-row-" + ri;
+
+    const label = document.createElement("div");
+    label.className = "release-label " + rowClass;
+
+    const nameEl = document.createElement("div");
+    nameEl.className = "name";
+    nameEl.contentEditable = "true";
+    nameEl.textContent = rel.name;
+    nameEl.addEventListener("blur", () => {
+      state.releases[ri].name = nameEl.textContent.trim();
+      persist();
+    });
+
+    const notesEl = document.createElement("div");
+    notesEl.className = "notes";
+    notesEl.contentEditable = "true";
+    notesEl.textContent = rel.notes;
+    notesEl.addEventListener("blur", () => {
+      state.releases[ri].notes = notesEl.textContent.trim();
+      persist();
+    });
+
+    label.appendChild(nameEl);
+    label.appendChild(notesEl);
+    map.appendChild(label);
+
+    state.skeletons.forEach((sk) => {
+      sk.substeps.forEach((ss) => {
+        const cell = document.createElement("div");
+        cell.className = "cell " + rowClass;
+        cell.dataset.releaseId = rel.id;
+        cell.dataset.substepId = ss.id;
+
+        state.cards
+          .filter(c => c.releaseId === rel.id && c.substepId === ss.id)
+          .forEach(c => cell.appendChild(createCardEl(c)));
+
+        const addBtn = document.createElement("button");
+        addBtn.className = "add-card";
+        addBtn.textContent = "+";
+        addBtn.title = "Add card";
+        addBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const newCard = {
+            id: uid(),
+            releaseId: rel.id,
+            substepId: ss.id,
+            title: "New card",
+            description: ""
+          };
+          state.cards.push(newCard);
+          persist();
+          render();
+        });
+        cell.appendChild(addBtn);
+
+        cell.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          cell.classList.add("drag-over");
+        });
+        cell.addEventListener("dragleave", () => cell.classList.remove("drag-over"));
+        cell.addEventListener("drop", (e) => {
+          e.preventDefault();
+          cell.classList.remove("drag-over");
+          const cardId = e.dataTransfer.getData("card-id");
+          const card = state.cards.find(c => c.id === cardId);
+          if (card) {
+            card.releaseId = rel.id;
+            card.substepId = ss.id;
+            persist();
+            render();
+          }
+        });
+
+        map.appendChild(cell);
+      });
+    });
+  });
+}
+
+function createCardEl(card) {
+  const el = document.createElement("div");
+  el.className = "card";
+  el.draggable = true;
+  el.dataset.id = card.id;
+
+  const title = document.createElement("h3");
+  title.contentEditable = "true";
+  title.textContent = card.title;
+  title.addEventListener("blur", () => {
+    card.title = title.textContent.trim();
+    persist();
+  });
+
+  const desc = document.createElement("p");
+  desc.contentEditable = "true";
+  desc.textContent = card.description;
+  desc.addEventListener("blur", () => {
+    card.description = desc.textContent.trim();
+    persist();
+  });
+
+  const del = document.createElement("button");
+  del.className = "delete-card";
+  del.textContent = "×";
+  del.title = "Delete card";
+  del.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (confirm('Delete card "' + card.title + '"?')) {
+      state.cards = state.cards.filter(c => c.id !== card.id);
+      persist();
+      render();
+    }
+  });
+
+  el.appendChild(title);
+  el.appendChild(desc);
+  el.appendChild(del);
+
+  el.addEventListener("dragstart", (e) => {
+    e.dataTransfer.setData("card-id", card.id);
+    e.dataTransfer.effectAllowed = "move";
+    el.classList.add("dragging");
+  });
+  el.addEventListener("dragend", () => el.classList.remove("dragging"));
+
+  // Prevent card drag when editing text inside the card
+  [title, desc].forEach(node => {
+    node.addEventListener("mousedown", () => { el.draggable = false; });
+    node.addEventListener("blur", () => { el.draggable = true; });
+  });
+
+  return el;
+}
+
+function exportMarkdown() {
+  const lines = [];
+  lines.push("# " + state.title);
+  lines.push("");
+  lines.push("_Exported " + new Date().toISOString().split("T")[0] + " from story-map.html_");
+  lines.push("");
+
+  state.releases.forEach(rel => {
+    const cardsInRelease = state.cards.filter(c => c.releaseId === rel.id);
+    if (rel.spare && cardsInRelease.length === 0) return;
+
+    lines.push("## " + rel.name);
+    lines.push("");
+    if (rel.notes) {
+      lines.push("> " + rel.notes);
+      lines.push("");
+    }
+
+    if (cardsInRelease.length === 0) {
+      lines.push("_No cards yet._");
+      lines.push("");
+      return;
+    }
+
+    state.skeletons.forEach(sk => {
+      const cardsInSk = cardsInRelease.filter(c => sk.substeps.some(ss => ss.id === c.substepId));
+      if (cardsInSk.length === 0) return;
+      lines.push("### " + sk.name);
+      lines.push("");
+      sk.substeps.forEach(ss => {
+        const cards = cardsInRelease.filter(c => c.substepId === ss.id);
+        cards.forEach(c => {
+          lines.push("- **" + ss.name + " — " + c.title + "**");
+          if (c.description) lines.push("  " + c.description);
+        });
+      });
+      lines.push("");
+    });
+  });
+
+  const md = lines.join("\n");
+  const blob = new Blob([md], { type: "text/markdown" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "planner-v1-story-map.md";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function copyShareableUrl() {
+  const b64 = encodeState(state);
+  const url = window.location.origin + window.location.pathname + "#state=" + b64;
+  const sizeKb = (url.length / 1024).toFixed(1);
+  const btn = document.getElementById("share-url");
+  const original = btn.textContent;
+
+  const success = () => {
+    btn.textContent = `Copied! (${sizeKb} KB)`;
+    setTimeout(() => { btn.textContent = original; }, 2500);
+  };
+
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(url).then(success).catch(() => prompt("Copy this URL:", url));
+  } else {
+    prompt("Copy this URL:", url);
+  }
+}
+
+document.getElementById("share-url").addEventListener("click", copyShareableUrl);
+document.getElementById("export-md").addEventListener("click", exportMarkdown);
+
+document.getElementById("reset").addEventListener("click", () => {
+  if (confirm("Reset to the original seeded content? All edits will be lost.")) {
+    state = structuredClone(DEFAULT_STATE);
+    persist();
+    document.getElementById("title").textContent = state.title;
+    render();
+  }
+});
+
+document.getElementById("title").addEventListener("blur", () => {
+  state.title = document.getElementById("title").textContent.trim();
+  persist();
+});
+
+document.getElementById("title").textContent = state.title;
+render();
+</script>
+
+</body>
+</html>
