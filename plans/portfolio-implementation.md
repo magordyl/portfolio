@@ -78,6 +78,8 @@ Ten chunks to ship v1 (1–3 complete, then 4a → 4b → 4c → 4d → 5 → 5.
 
 ## Chunk 4a — Foundation: voice, style & imagery (workspace-wide)
 
+**Status (2026-04-12):** 4a.1 complete (`04caaaa`), 4a.2 complete (`04caaaa`), **4a.3 complete** (`plans/portfolio-imagery-standards.md` this session). 4a.4 next — synthesise all three into `.claude/rules/writing-style.md` in the workspace repo.
+
 **Deliverable:** A workspace-wide writing & imagery style guide that governs ALL Claude-produced writing for the user (portfolio, diary entries, future writing posts, any other prose), plus an updated diary capture process so future entries arrive portfolio-ready.
 
 This chunk is the foundation for everything downstream. Style + imagery + diary audit are twin concerns — all three feed the same style guide.

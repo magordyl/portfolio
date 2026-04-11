@@ -38,7 +38,7 @@ Set up a pre-commit hook at `.git/hooks/pre-commit` that runs `npm run check`.
 
 Astro uses `@tailwindcss/vite` (Vite plugin), NOT `@astrojs/tailwind`. The `astro add tailwind` command sets this up automatically. No `tailwind.config.mjs` needed — tokens live as CSS variables in `globals.css`. If you need Tailwind utility classes for token values, add `@theme { --text-hero: 4.5rem; }` blocks inside `globals.css`.
 
-## Current Status (2026-04-11)
+## Current Status (2026-04-12)
 
 **Chunk 3 complete** — landing page with asymmetric hero split, BuildLogTicker, 2x2 CaseStudyCard grid, About teaser, closing quote. `npm run check` passes clean.
 
@@ -50,8 +50,8 @@ Astro uses `@tailwindcss/vite` (Vite plugin), NOT `@astrojs/tailwind`. The `astr
 
 - **4a.1 complete** — Voice research committed at `plans/portfolio-voice-research.md`. Covers Wes Kao (7 posts, storytelling focus), John Cutler (6 top posts, illustrations + complex messages + relatability). Dylan's voice deferred to chunk 4d because no user-authored long-form prose is available; 4a will ship with structural guidance locked plus style guard rails only. Final style guide splits into Part 1 (Structural, lockable in 4a) and Part 2 (Style, discovered in 4d). AI tells to avoid list included (em-dashes prohibited as #1 tell).
 - **4a.2 complete** — Diary audit committed at `plans/portfolio-diary-audit.md`. Five exemplar entries called out (mostly workspace diary), four weak ones. Biggest gap: **product thinking** — 48 entries, only one centres a product claim. Structural cause identified: `ideas/` folder has no `DIARY.md`, so research/pivot/shelving decisions leave no trace. **This MUST be fixed in 4a.5** (new task #7, audit doc §"Fifth implication", memory file `project_ideas_diary_gap.md`).
-- **4a.3 next** — Imagery & illustration standards (Cutler-influenced sketch aesthetic, diagram archetypes, sourcing rules).
-- **4a.4 after** — Synthesise voice research + diary audit into `.claude/rules/writing-style.md` (workspace repo). Two-section split: structural + style.
+- **4a.3 complete** — Imagery & illustration standards committed at `plans/portfolio-imagery-standards.md`. Key decisions: (1) hybrid diagram tooling — Mermaid CLI with `look: handDrawn` for flowcharts, Excalidraw for 2×2/causal loop/network archetypes; (2) Puppeteer capture script + Astro `<Screenshot>` component split for screenshots (frame at render time, never baked in); (3) no figurative illustrations, diagrams + screenshots + embedded real artefacts only; (4) explicit sourcing banlist (no AI-generated imagery, no stock, no Figma-as-real); (5) full frame spec table (gradient, radius, padding, shadow). Ray.so allowed as code-screenshot exception. Capture script and mmdc batch script are **built in chunk 4d**, not now. `<Screenshot>` component is built in 4c.
+- **4a.4 next** — Synthesise voice research + diary audit + imagery standards into `.claude/rules/writing-style.md` (workspace repo). Two-section split: structural + style, plus imagery section compressed from the standards doc.
 - **4a.5 last** — Create `ideas/DIARY.md` as new workspace artefact. Update `docs/diary-format.md` and `CLAUDE.md` Idea Pipeline section. Wire capture trigger into `/new-idea` skill. Retroactive first entry covers habit-correlation research arc.
 
 **Note:** 4a.1 and 4a.2 research artefacts commit to the **portfolio repo** (they are portfolio plans). The 4a.4/4a.5 deliverables (writing-style.md, diary capture rule updates, ideas/DIARY.md) commit to the **workspace repo** per original plan.
