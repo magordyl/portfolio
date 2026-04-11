@@ -77,3 +77,28 @@ Noticed mid-session that portfolio was living inside the workspace monorepo (`cl
 **Cloudflare Pages:** Connected to `magordyl/portfolio` via dashboard Git integration. The Cloudflare UI has drifted from documented screenshots — no framework preset picker, no explicit build output field. Used defaults + Save and Deploy. Build succeeded. Live URL: `dylan-portfolio.magordyl.workers.dev` (note: `.workers.dev` rather than `.pages.dev` — functionally identical for now; revisit if preview URLs become important).
 
 **Key decision — repo per project:** The workspace should only contain workspace tooling (CLAUDE.md rules, design system, plans, diary). Every project that deploys gets its own repo from the start. This is now the established pattern.
+
+---
+
+## 2026-04-11 — Chunk 4 restructured: content-first, foundation expanded
+
+Planning session, no code. Reshaped chunk 4 from a single "case study workshop" chunk into four sub-chunks and added two new chunks further downstream. Nothing shipped to the site; the deliverable is the updated `plans/portfolio-implementation.md`.
+
+**What changed:**
+- **Chunk 4** was previously "research voice → draft template → write the-weekly → lock". Now split into 4a (foundation), 4b (content template), 4c (layout mockups), 4d (writing workshop).
+- **Chunk 4a** expands beyond voice research into a workspace-wide writing & imagery style guide. It incorporates (1) Kao + Cutler voice research, (2) a quick hiring-manager-lens audit of existing diary entries across all projects, (3) imagery & illustration standards (aesthetic, diagram conventions, sourcing rules), (4) synthesis into `.claude/rules/writing-style.md`, (5) retro-update of the diary capture rules so future entries arrive portfolio-ready. The style guide lives in the workspace repo, not portfolio — it governs all Claude-produced writing for me going forward.
+- **Chunk 4b** is a new chunk: case study content hierarchy (sections, word counts, artefact slots) with no layout and no prose. Locks the template shape before any visual design happens.
+- **Chunk 4c** layout mockups get built *against* the content structure from 4b, following the same HTML-explorer approach we used for the landing page. Covers case study, /projects, /writing index + post, /log, /404, /privacy — but NOT /about (moved to its own chunk).
+- **Chunk 4d** is the writing workshop as originally conceived, now constrained by the locked template and layout. Writing only, no design decisions.
+- **New chunk 5.5** — writing posts. Brainstorm + pick 3 + draft + iterate + lock as MDX. Ready to ship the moment chunk 6 builds the /writing routes.
+- **New chunk 5.6** — /about as a one-off, because there's only one /about and it doesn't benefit from templating. Goals analysis → background research interview → content scaffold → HTML mockup → draft → iterate → ship.
+
+**Why content-first:** initial proposal had layout mockups and content hierarchy as a single chunk. User pushed back — "content structure needs to come before layout is selected." Right call. The whole point of separating 4b and 4c is that content constraints dictate layout, not the other way around. It's a discipline thing — left unchecked, it's very tempting to sketch layouts while scoping content. Added this as an explicit risk in the plan.
+
+**Key decision — style guide is workspace-wide, not portfolio-scoped.** When I asked whether the style guide should live in `portfolio/plans/` or `.claude/rules/` at the workspace root, the user picked workspace. Rationale: it governs diary entries, writing posts, case studies, and any other prose Claude produces. Scoping it to portfolio would duplicate concerns later. Consequence: chunk 4a commits to the workspace repo, not the portfolio repo. First chunk in the portfolio plan that does.
+
+**Trade-off acknowledged:** revised v1 timeline is ~3–4 weeks of sessions, up from the original 1–2. Extra scope (imagery standards, diary audit, /about as its own chunk, writing posts as their own chunk) buys a materially higher quality ceiling. The style guide is load-bearing — it governs all future writing, not just the portfolio — so spending 1–2 sessions on it up front is worth the delay to first case study.
+
+**Meta-observation on the planning conversation itself:** this is the second time I've proposed a multi-chunk plan and the user has reshaped it on content-vs-layout grounds. Worth noting as a recurring pattern — when planning creative/content work, default to content-before-design separation rather than interleaving them.
+
+**Next:** Chunk 4a — foundation. Work starts in the workspace repo (writing-style.md + diary rules), finishes with a commit there. Once the style guide is locked, return to the portfolio repo for chunk 4b.

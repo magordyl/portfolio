@@ -44,11 +44,17 @@ Astro uses `@tailwindcss/vite` (Vite plugin), NOT `@astrojs/tailwind`. The `astr
 
 **Deployed** — Cloudflare Pages connected to `magordyl/portfolio` (`main` branch). Live at `dylan-portfolio.magordyl.workers.dev`. Every push to `main` auto-deploys.
 
-**Chunk 4 next** — Case Study Workshop (critical gate). Voice reference research (Wes Kao + John Cutler Substack) → Voice & Craft reference doc → template scaffold → the-weekly first draft → iterate → lock.
+**Chunk 4 restructured (2026-04-11)** — split into four sub-chunks following a content-first sequence. Session did not start chunk 4 work; it defined the expanded shape of chunk 4 and added two new chunks (5.5 writing posts, 5.6 /about one-off). See `plans/portfolio-implementation.md` for the full updated plan.
 
-**Chunks remaining:** 4 (case study workshop — critical gate), 5 (remaining case studies), 6 (secondary pages + deploy polish)
+**Chunk 4a next** — Foundation: voice + imagery + diary audit (workspace-wide style guide). Produces `.claude/rules/writing-style.md` (workspace repo, not portfolio repo — it governs all Claude-produced writing, not just portfolio), a quick hiring-manager-lens diary audit, imagery & illustration standards, and updated diary capture rules. **Note:** 4a commits go to the workspace repo, not the portfolio repo — first chunk in this plan that does.
+
+**Chunks remaining:** 4a (foundation), 4b (case study content hierarchy), 4c (page layout mockups, excludes /about), 4d (the-weekly workshop), 5 (remaining case studies), 5.5 (writing posts brainstorm + 3 drafts), 5.6 (/about one-off), 6 (secondary pages + deploy).
+
+**Key discipline:** content-first. Template scaffold (4b) before layout mockups (4c). Writing (4d) only after both are locked. Resist the temptation to sketch layouts while defining content.
+
+**Revised timeline:** ~3–4 weeks of sessions for v1 (up from 1–2 weeks). Extra scope buys a materially higher quality ceiling — style guide governs all writing going forward, imagery standards prevent inconsistency, diary audit surfaces which signals are missing for hiring-manager audiences.
 
 ## Implementation Plan
 
-Full 6-chunk plan: `plans/portfolio-implementation.md` (this repo's `plans/`).
+Full plan: `plans/portfolio-implementation.md` (chunks 1–3 complete, then 4a → 4b → 4c → 4d → 5 → 5.5 → 5.6 → 6, plus optional chunk 7 design-system retrofit post-launch).
 Current status tracked in `DIARY.md`.
