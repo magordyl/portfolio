@@ -5,7 +5,6 @@
   "context": "",
   "note": "Iterating on the transcript-component plan through Q&A, then a rejection+revision cycle when review-in-UI feedback surfaced. Test fixture for the amended ChatTranscript component.",
   "sourceSessionId": "ff0e4a4a-a695-420d-9cb7-00506686e10e",
-  "_capturedAt": "2026-04-12T00:20:54.619Z",
   "turns": [
     {
       "role": "assistant",
