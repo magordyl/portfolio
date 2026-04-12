@@ -11,19 +11,21 @@ Not a style-guide replacement. The final workspace-wide rules live in `writing-s
 
 ## Aesthetic direction
 
-**One sentence:** Cutler-influenced sketch aesthetic for diagrams, Royal Tonal-framed screenshots of real artefacts, verbatim chat transcripts as a first-class artefact type, no figurative illustration.
+**One sentence:** Clean vector Royal Tonal for diagrams, Royal Tonal-framed screenshots of real artefacts cropped programmatically, verbatim chat transcripts as a first-class artefact type, no figurative illustration.
 
-The portfolio is a product-thinking portfolio, not an illustrated essay collection. Diagrams earn their place by replacing paragraphs, not by decorating them. Screenshots show real things that actually shipped. Chat transcripts show real decision moments from real sessions — unedited, un-paraphrased, captured in-flow. Everything else is absent on purpose.
+The portfolio is a product-thinking portfolio, not an illustrated essay collection. Diagrams earn their place by replacing paragraphs, not by decorating them. Screenshots show real things that actually shipped. Chat transcripts show real decision moments from real sessions, unedited and un-paraphrased, captured in-flow. Everything else is absent on purpose.
+
+**Aesthetic picked:** A2 (clean vector Royal Tonal) from `plans/portfolio-stitch-assets/diagram-aesthetic-explorer-v1.html`. Five aesthetics were previewed (hand-drawn sketch, clean vector, typographic ASCII, Notion-flat, blueprint). A2 was selected because it is the only option that works cleanly across all four archetypes, the editorial voice lives in the prose rather than the drawing, and it removes the tooling dependency on RoughJS and Excalidraw. Trade-off: lower "drew to think" signal than A1, but the prose carries that signal instead.
 
 **Two influences to borrow from, one to ignore:**
 
 | Influence | What we take | What we don't |
 |---|---|---|
-| Cutler (TBM) | Diagram archetypes, placement rule, sketch linework, monochrome palette | TBM numbering, framework-heavy default shape |
-| Maggie Appleton | "Image before interpretive text" rule | Vector polish, saturated palette, figurative illustration (Dylan isn't an illustrator) |
-| Stripe / Linear marketing | (Nothing directly — their polish is a counter-reference) | Gradient-heavy hero imagery, marketing-site glossiness |
+| Cutler (TBM) | Diagram archetypes (4), placement rule (diagram before interpretation), monochrome palette | Sketch linework, TBM numbering, framework-heavy default shape |
+| Maggie Appleton | "Image before interpretive text" rule | Saturated palette, figurative illustration (Dylan isn't an illustrator) |
+| Stripe / Linear marketing | Clean vector discipline | Gradient-heavy hero imagery, marketing-site glossiness |
 
-The tension between Cutler ("I drew this to think") and Maggie ("I drew this to teach") is resolved in favour of Cutler because the portfolio is narrating decisions, not explaining abstract concepts. Cutler's raw sketch signals the thing he drew to think on. Maggie's polished illustration signals the thing she drew to teach from. Dylan's case studies are closer to the former.
+Original framing was Cutler "drew to think" over Maggie "drew to teach," resolved in favour of sketch. The design explorer reopened that decision and pushed back in the other direction: precise strokes carry the four archetypes more reliably, and the "drew to think" signal travels better through voice (Kao assertions, admission shape, lived-in prose) than through wobbly lines. The aesthetic no longer carries the editorial work; the writing does.
 
 ---
 
@@ -55,31 +57,41 @@ Captions describe what the diagram **shows**, never what it **means**. Meaning l
 
 ### Linework and palette
 
-- **Line style:** sketch / hand-drawn, never vector-perfect. The `look: handDrawn` Mermaid setting powered by RoughJS provides this automatically for flowcharts; Excalidraw is hand-drawn by default.
-- **Colour:** monochrome or single primary only. The default is Royal Tonal step 500 (the anchor `#3B5BDB`) on a dark-mode background. Never a rainbow taxonomy — nodes are differentiated by shape or position, not hue. If a second colour is genuinely needed for contrast, use Royal Tonal step 300 (lighter) or step 700 (deeper), never a new hue.
-- **Typography:** Geist (sans body font) for all labels. No handwriting fonts — they read as affected. Label size tracks the body text, never larger.
-- **Fill:** transparent or dark-mode background colour (never white). Nodes use Royal Tonal 900 as fill with 500 as stroke.
+- **Line style:** clean vector, precise strokes, never sketchy or hand-drawn. Same aesthetic across all four archetypes. No wobble, no RoughJS, no Excalidraw hand-drawn mode.
+- **Stroke weight:** 1.5px for node outlines, 1.5px for arrows. Consistent across archetypes so the eye calibrates once.
+- **Node corner radius:** 8px for rectangular nodes. Matches shadcn new-york-v4 default and the portfolio card radius.
+- **Colour:** monochrome or single primary only. The default is Royal Tonal 8 (anchor `#3B5BDB`) stroke on Royal Tonal 12 background. Never a rainbow taxonomy. Nodes differentiate by shape or position, not hue. If a second colour is genuinely needed for contrast, use Royal Tonal 4 (lighter) or Royal Tonal 10 (deeper), never a new hue.
+- **Typography:** Geist (sans body) at 13px, weight 500, for all labels. No handwriting fonts. Label size tracks body text.
+- **Fill:** Royal Tonal 11 (one step above background) for node fills. Arrows and strokes use Royal Tonal 8.
 
-### Diagram tooling — hybrid Mermaid + Excalidraw
+### Diagram tooling — Mermaid default theme + hand-authored SVG
 
-**Flowcharts → Mermaid CLI.** Text-sourced, reproducible, diffable in git. Uses the `look: handDrawn` theme (RoughJS-powered) with a custom `themeCSS` that maps Mermaid's internal variables to Royal Tonal tokens.
+Tooling was rewritten when A2 was locked. The prior plan (Mermaid `handDrawn` + Excalidraw) does not apply: RoughJS adds the wobble we just removed, and Excalidraw is inherently hand-drawn with no clean-vector mode.
+
+**Flowcharts → Mermaid CLI, default theme.** Text-sourced, reproducible, diffable in git. No `look: handDrawn`. Custom `themeVariables` map Mermaid's internal variables onto Royal Tonal tokens.
 
 ```mermaid
 ---
 config:
-  look: handDrawn
   theme: base
   themeVariables:
-    primaryColor: "#1B2547"      # royal-900 — node fill
-    primaryBorderColor: "#3B5BDB" # royal-500 — stroke
-    primaryTextColor: "#E8ECF7"   # royal-50 — label
-    lineColor: "#3B5BDB"
-    secondaryColor: "#0F1530"    # royal-950 — background
+    primaryColor: "#16214F"        # royal-11 — node fill
+    primaryBorderColor: "#3B5BDB"   # royal-8 — stroke
+    primaryTextColor: "#E5E8F2"     # royal-2 — label
+    lineColor: "#3B5BDB"            # royal-8 — edges
+    secondaryColor: "#0F1530"       # royal-12 — background
+    fontFamily: "Geist, sans-serif"
+    fontSize: "13px"
 ---
-flowchart TD
-  A[Problem] --> B{Decision}
-  B -->|chosen| C[Outcome]
-  B -->|rejected| D[Alternative]
+flowchart LR
+  A[Browse recipes] --> B[Pick 3 meals]
+  B --> C[Consolidate]
+  C --> D{Optional garnishes?}
+  D -->|yes| E[Include]
+  D -->|no| F[Skip]
+  E --> G[Review trolley]
+  F --> G
+  G --> H[Checkout]
 ```
 
 Render:
@@ -89,27 +101,27 @@ mmdc -i diagrams-src/the-weekly-consolidation.mmd \
      --backgroundColor transparent
 ```
 
-Source (`.mmd`) lives in `diagrams-src/`, output SVG lives in `src/assets/diagrams/`, both committed. Regeneration is deterministic via the `handDrawn` seed config (seed 1, not 0, to avoid randomisation between runs).
+Source (`.mmd`) lives in `diagrams-src/`, output SVG lives in `src/assets/diagrams/`, both committed.
 
-**2×2 matrices, causal loops, networks → Excalidraw.** Excalidraw's native aesthetic is already hand-drawn. Draw in the Excalidraw web app, export both `.excalidraw` (JSON source) and `.svg`. Both committed. Source file allows future iteration without redrawing.
+**2×2 matrices → Mermaid `quadrantChart`** when the 2×2 is simple data. When the 2×2 needs custom annotations or non-standard axis labels, fall back to hand-authored SVG (below).
 
-Configure Excalidraw to use a custom theme matching Royal Tonal:
-- Background: `#0F1530` (royal-950)
-- Stroke: `#3B5BDB` (royal-500)
-- Fill: `#1B2547` (royal-900)
-- Font: "Normal" option in Excalidraw (closest to Geist visually)
+**Causal loops and networks → hand-authored SVG.** No good text-sourced tool exists for causal loops with a clean vector aesthetic, and avoiding Excalidraw keeps the workflow code-driven. Author these as plain SVG inside an `.svg` file in `diagrams-src/`, sized to fit the prose column, using the same stroke weights, corner radii, and colour tokens as the Mermaid output. Copy the file into `src/assets/diagrams/` or reference it directly.
 
-**Why hybrid:** flowcharts change often during case study iteration and editing text is faster than editing shapes. Non-flowchart diagrams change rarely and the visual-editing benefits of Excalidraw outweigh the text-source advantage. Single-tool approaches all have a forced compromise somewhere.
+Canonical template for hand-authored diagrams lives at `diagrams-src/_template.svg` (built in chunk 4d with the first real case study). New diagrams start by copying the template so the aesthetic stays locked across all archetypes.
+
+**Why this shape:** Mermaid covers the common case (flowcharts, simple 2×2) with a text source and a one-line render command. Hand-authored SVG covers the exotic cases (causal loops, networks) without forcing a GUI tool into the workflow. Both outputs share one set of tokens, so diagrams render consistently regardless of which path produced them.
+
+**Open item:** evaluate [d2](https://d2lang.com/) as a replacement for hand-authored SVG in chunk 4d if causal loops or networks turn out to need more than two instances. d2 is text-sourced, outputs clean vector, and has native support for all four archetypes. Deferred because the extra tool is not worth it for a handful of diagrams.
 
 ### Workflow target
 
 From "I need a diagram" to "polished SVG committed" in under 10 minutes:
 
 1. Decide the archetype (30 seconds).
-2. For flowcharts: write the Mermaid source (3-5 minutes). Run `mmdc` (5 seconds). Review SVG in browser (30 seconds). Iterate or commit.
-3. For other archetypes: open Excalidraw, sketch (5-8 minutes), export SVG + `.excalidraw`, commit.
+2. For flowcharts and simple 2×2: write the Mermaid source (3-5 minutes). Run `mmdc` (5 seconds). Review SVG in browser (30 seconds). Iterate or commit.
+3. For causal loops and networks: copy `diagrams-src/_template.svg`, edit shapes and labels in code (5-8 minutes), save to `src/assets/diagrams/`, commit.
 
-If a diagram is taking longer than 10 minutes, the archetype is probably wrong — try forcing it into a flowchart shape and see if it resolves.
+If a diagram is taking longer than 10 minutes, the archetype is probably wrong. Try forcing it into a flowchart shape and see if it resolves.
 
 ---
 
@@ -165,6 +177,27 @@ Component lives at `src/components/Screenshot.astro`. Built in chunk 4c alongsid
 | Caption position | Below frame, centred | Standard figure pattern |
 
 **Size variants:** `full` (100% of content column) and `half` (two side-by-side). The component accepts a `size` prop; CSS handles the rest.
+
+**Programmatic crop, focus, and zoom.** One raw fullsize screenshot is the source of truth per UI state. Every view of that screenshot (wide shot, cropped hero, zoomed detail, offset callout) is generated at render time from props on the `<Screenshot>` component. Never crop or edit the source file in an image editor. Never commit a cropped or resized derivative alongside the source. One artefact, many views.
+
+Props the component accepts:
+
+| Prop | Type | Purpose |
+|---|---|---|
+| `src` | string | Path to the raw fullsize screenshot (the only source of truth) |
+| `alt` | string | Accessibility text |
+| `caption` | string | Figure caption (Geist Mono, muted) |
+| `size` | `"full"` \| `"half"` | Column width |
+| `crop` | `{ x, y, width, height }` | Visible rectangle, percentages (0–100) of the source dimensions. Defaults to the full image |
+| `focus` | `{ x, y }` | Focal point of a zoom, percentages (0–100). Defaults to the centre of `crop` |
+| `zoom` | number | Scale factor applied around `focus`. `1` = natural size, `2` = 2× zoom, etc. |
+| `aspect` | string | Optional aspect ratio override (`"16/9"`, `"1/1"`, `"4/3"`). Frame clips to this shape; content is scaled per `crop`/`zoom` |
+
+Implementation shape: the component wraps the raw `<img>` in a fixed-aspect frame `div`, applies `object-fit: cover` with `object-position` computed from `focus`, and scales via CSS `transform: scale(zoom)` around the focal point. No pixel manipulation, no canvas, no server-side cropping. The browser does the work deterministically.
+
+**Why programmatic:** manual cropping silently produces derivatives that drift from the source. If the UI changes, every manual crop has to be re-cut and re-committed. With code-driven cropping, the capture script writes one WebP per UI state; every case study decides at render time what part of it to show. Updating a UI means re-running the capture script; the MDX doesn't change.
+
+**Capture-script contract:** the Puppeteer script captures each `{ url, out, viewport }` tuple as a single fullsize WebP. It does not generate multiple crops. Crops are always the renderer's job.
 
 **Edge case — OG / social-share images.** These are loaded outside the site, so they need the frame baked in. Solved by a second Puppeteer pass that screenshots the rendered Astro page's `<Screenshot>` component at 1200×630. Generates pre-framed WebPs into `src/assets/og/`. Deferred to chunk 6 when OG cards are in scope.
 
@@ -240,7 +273,7 @@ Built in chunk 4c.1 alongside the layout mockups. Two display modes, selected vi
 |---|---|---|
 | Width | Prose column (matches body text) | Wider than prose (extends into the right margin on desktop) |
 | Use when | Showing a routine decision or small exchange | Showing the pivotal moment of the case study |
-| Per case study | Up to 2 | Max 1 |
+| Per case study or essay | Up to 2 | Up to 2 |
 | Mobile behaviour | Unchanged | Collapses to prose-column width, same as inline |
 
 Shared frame values:
@@ -306,7 +339,7 @@ Explicit rules for what is and isn't allowed. Violations are editorial failures 
 
 **Banned:**
 - Generic stock photography (Unsplash, Pexels, Getty, anything that isn't of a real thing).
-- AI-generated imagery of any kind — diagrams, illustrations, photographs, code screenshots. The Mermaid `handDrawn` RoughJS effect is allowed because it's deterministic vector output, not generative imagery.
+- AI-generated imagery of any kind: diagrams, illustrations, photographs, code screenshots. No exceptions.
 - Figma/Sketch mockups presented as real screenshots.
 - Competitor product screenshots used without credit or legal clearance.
 - Screenshots with real user data (email addresses, names, PII). Always use fake/test data or blur.
@@ -315,7 +348,7 @@ Explicit rules for what is and isn't allowed. Violations are editorial failures 
 - Raw screenshots of apps Dylan built or is narrating.
 - Raw screenshots of third-party tools when they're the subject of the piece (credit in caption).
 - Photographs Dylan took, only if the photograph is of a real thing (whiteboard sketch, physical artefact, workshop setup).
-- Hand-drawn diagrams (Cutler/Excalidraw) or Mermaid-sourced diagrams per the rules above.
+- Mermaid-sourced or hand-authored SVG diagrams per the rules above.
 - Typographic covers for writing posts.
 
 **Credit format when third-party imagery is used:**
@@ -347,8 +380,9 @@ src/
     transcripts/           # published transcripts (JSON, Zod-validated)
       drafts/              # pending hand-review — not rendered on the site
 diagrams-src/              # source files, committed, NOT referenced at runtime
-  *.mmd                    # Mermaid source for flowcharts
-  *.excalidraw             # Excalidraw JSON for non-flowchart diagrams
+  _template.svg            # canonical hand-authored SVG template (tokens locked)
+  *.mmd                    # Mermaid source for flowcharts and simple 2×2
+  *.svg                    # hand-authored source for causal loops, networks
 scripts/
   capture-screenshots.ts   # Puppeteer capture script (chunk 4d)
   render-diagrams.sh       # mmdc batch script (chunk 4d)
@@ -386,12 +420,20 @@ End-to-end, from "I need an image" to "committed in the portfolio":
 5. Commit both `.mmd` and `.svg`.
 Total: ~10 minutes.
 
-**Diagram (2×2 / causal loop / network):**
+**Diagram (simple 2×2):**
 1. Decide archetype (30s).
-2. Open Excalidraw, sketch against Royal Tonal theme (5-8 min).
-3. Export both `.excalidraw` (source) and `.svg` (output).
-4. Save to `diagrams-src/` and `src/assets/diagrams/`.
-5. Commit both.
+2. Write Mermaid `quadrantChart` source in `diagrams-src/` (3-5 min).
+3. Run `mmdc` (5s).
+4. Review SVG in browser (30s).
+5. Commit both `.mmd` and `.svg`.
+Total: ~10 minutes.
+
+**Diagram (causal loop, network, custom 2×2):**
+1. Decide archetype (30s).
+2. Copy `diagrams-src/_template.svg` to `diagrams-src/<name>.svg` (5s).
+3. Edit shapes, positions, labels directly in the SVG file (5-8 min).
+4. Copy to `src/assets/diagrams/<name>.svg`.
+5. Commit the source SVG under `diagrams-src/` and the referenced copy under `src/assets/diagrams/`.
 Total: ~10 minutes.
 
 **Screenshot (UI):**
@@ -429,7 +471,7 @@ Total: ~5 seconds in-session, ~3 minutes at session-end.
 
 These are real but not blocking:
 
-- **Mermaid `themeCSS` file** — the exact CSS mapping Royal Tonal tokens to Mermaid internal variables. Sketched above but not tested. Built when the first flowchart renders in 4d.
-- **Excalidraw custom theme** — whether Excalidraw supports persistable custom palettes or whether Royal Tonal colours have to be re-entered per drawing. To be tested in 4d.
-- **`.excalidraw` git-diffability** — Excalidraw's JSON format is deterministic in principle, but real-world diffs may be noisy (coordinate drift, seeded randomness). Assess after the first 2-3 non-flowchart diagrams.
-- **OG image generation** — the second Puppeteer pass for social-share preview WebPs. Deferred to chunk 6.
+- **Mermaid `themeVariables` file.** The exact mapping of Royal Tonal tokens to Mermaid internal variables. Sketched above but not tested. Built when the first flowchart renders in 4d.
+- **`_template.svg` canonical template.** The starting point for hand-authored causal loops and networks. Locked tokens: stroke weight, corner radius, colours, font. Authored in 4d with the first real non-flowchart diagram.
+- **d2 evaluation.** If causal loops or networks turn out to need more than two instances, evaluate [d2](https://d2lang.com/) as a replacement for hand-authored SVG. Text-sourced, clean vector output, all four archetypes supported. Deferred because one extra tool is not worth it for a handful of diagrams.
+- **OG image generation.** The second Puppeteer pass for social-share preview WebPs. Deferred to chunk 6.

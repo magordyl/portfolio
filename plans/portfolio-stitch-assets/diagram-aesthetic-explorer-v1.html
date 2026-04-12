@@ -1,0 +1,535 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diagram aesthetic explorer — v1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400&family=Geist:wght@400;500&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --royal-1: #F4F5FB;
+    --royal-2: #E5E8F2;
+    --royal-3: #CFD4E6;
+    --royal-4: #A8B2D4;
+    --royal-5: #6B7BB8;
+    --royal-6: #4D5FA3;
+    --royal-7: #3F4E8C;
+    --royal-8: #3B5BDB;
+    --royal-9: #2B42A3;
+    --royal-10: #1F3072;
+    --royal-11: #16214F;
+    --royal-12: #0F1530;
+    --violet-8: #8C3BDB;
+    --bg: var(--royal-12);
+    --text: var(--royal-2);
+    --muted: var(--royal-4);
+    --font-sans: 'Geist', system-ui, sans-serif;
+    --font-serif: 'Fraunces', Georgia, serif;
+    --font-mono: 'Geist Mono', ui-monospace, monospace;
+    --grad-rv: linear-gradient(135deg, var(--royal-8), var(--violet-8));
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    margin: 0;
+    padding: 0;
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .container {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 80px 40px 160px;
+  }
+  h1 {
+    font-family: var(--font-serif);
+    font-weight: 300;
+    font-size: 64px;
+    line-height: 1.02;
+    letter-spacing: -0.025em;
+    margin: 0 0 16px;
+    font-optical-sizing: auto;
+  }
+  .subtitle {
+    color: var(--muted);
+    font-size: 19px;
+    line-height: 1.5;
+    margin: 0 0 48px;
+    max-width: 720px;
+  }
+  h2 {
+    font-family: var(--font-serif);
+    font-weight: 300;
+    font-size: 36px;
+    margin: 96px 0 8px;
+    letter-spacing: -0.015em;
+    font-optical-sizing: auto;
+  }
+  h2:first-of-type { margin-top: 72px; }
+  h2 .num {
+    color: var(--royal-5);
+    margin-right: 12px;
+    font-size: 22px;
+    vertical-align: 0.15em;
+    letter-spacing: 0;
+  }
+  .section-desc {
+    color: var(--muted);
+    margin: 0 0 32px;
+    max-width: 720px;
+    font-size: 16px;
+  }
+  code {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+    color: var(--royal-3);
+    background: var(--royal-11);
+    padding: 1px 6px;
+    border-radius: 4px;
+  }
+  /* Aesthetic card */
+  .aesthetic {
+    background: var(--royal-11);
+    border: 1px solid var(--royal-10);
+    border-radius: 14px;
+    padding: 36px;
+    margin-bottom: 40px;
+  }
+  .aesthetic-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--royal-10);
+  }
+  .aesthetic-name {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 20px;
+    color: var(--text);
+  }
+  .aesthetic-tag {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--royal-5);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .diagram-area {
+    background: var(--royal-12);
+    border-radius: 8px;
+    padding: 40px 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 220px;
+  }
+  .aesthetic-notes {
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px 32px;
+  }
+  .note {
+    font-size: 14px;
+    color: var(--royal-3);
+    line-height: 1.55;
+  }
+  .note .k {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--royal-5);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 4px;
+  }
+  /* SVG base */
+  .flow { width: 100%; height: auto; max-width: 900px; }
+  /* A1 — Sketch (wobble filter) */
+  .a1 .node { fill: var(--royal-11); stroke: var(--royal-8); stroke-width: 2.5; }
+  .a1 .label { fill: var(--royal-2); font-family: var(--font-sans); font-weight: 500; font-size: 13px; text-anchor: middle; }
+  .a1 .arrow { stroke: var(--royal-8); stroke-width: 2.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  .a1 .arrow-head { fill: var(--royal-8); }
+  /* A2 — Clean vector */
+  .a2 .node { fill: var(--royal-11); stroke: var(--royal-8); stroke-width: 1.5; }
+  .a2 .label { fill: var(--royal-2); font-family: var(--font-sans); font-weight: 500; font-size: 13px; text-anchor: middle; }
+  .a2 .arrow { stroke: var(--royal-8); stroke-width: 1.5; fill: none; }
+  .a2 .arrow-head { fill: var(--royal-8); }
+  /* A3 — Typographic / ASCII */
+  .a3-pre {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 1.4;
+    color: var(--royal-2);
+    white-space: pre;
+    margin: 0;
+  }
+  .a3-pre .accent { color: var(--royal-8); }
+  .a3-pre .muted { color: var(--royal-6); }
+  /* A4 — Notion-flat */
+  .a4 .node { fill: var(--royal-10); stroke: none; }
+  .a4 .label { fill: var(--royal-1); font-family: var(--font-sans); font-weight: 500; font-size: 13px; text-anchor: middle; }
+  .a4 .arrow { stroke: var(--royal-4); stroke-width: 1.5; fill: none; stroke-linecap: round; }
+  .a4 .arrow-head { fill: var(--royal-4); }
+  /* A5 — Blueprint / architectural */
+  .a5-frame { background: var(--royal-12); border: 1px solid var(--royal-10); border-radius: 4px; padding: 24px; }
+  .a5 .grid { stroke: var(--royal-11); stroke-width: 0.5; }
+  .a5 .node { fill: none; stroke: var(--royal-8); stroke-width: 1; }
+  .a5 .label { fill: var(--royal-8); font-family: var(--font-mono); font-weight: 500; font-size: 10px; text-anchor: middle; text-transform: uppercase; letter-spacing: 0.1em; }
+  .a5 .arrow { stroke: var(--royal-8); stroke-width: 1; fill: none; }
+  .a5 .arrow-head { fill: var(--royal-8); }
+  .a5 .dim { stroke: var(--royal-7); stroke-width: 0.5; fill: none; }
+  .a5 .dim-label { fill: var(--royal-6); font-family: var(--font-mono); font-size: 9px; text-anchor: middle; letter-spacing: 0.05em; }
+  /* Rubric box */
+  .rubric {
+    background: var(--royal-11);
+    border: 1px solid var(--royal-10);
+    border-left: 3px solid var(--royal-8);
+    border-radius: 8px;
+    padding: 24px 28px;
+    margin: 40px 0 64px;
+  }
+  .rubric h3 {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 14px;
+    color: var(--royal-5);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin: 0 0 12px;
+  }
+  .rubric ul {
+    margin: 0;
+    padding-left: 20px;
+    color: var(--royal-3);
+    font-size: 15px;
+  }
+  .rubric li { margin-bottom: 6px; }
+  /* Decision panel */
+  .decision {
+    margin-top: 96px;
+    padding: 48px;
+    background: var(--royal-11);
+    border: 1px solid var(--royal-10);
+    border-radius: 14px;
+  }
+  .decision h2 { margin: 0 0 16px; font-size: 32px; }
+  .decision p { color: var(--royal-3); font-size: 16px; }
+  .decision table {
+    width: 100%;
+    margin-top: 24px;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  .decision th, .decision td {
+    text-align: left;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--royal-10);
+    vertical-align: top;
+  }
+  .decision th {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--royal-5);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 500;
+  }
+  .decision td { color: var(--royal-2); }
+  .decision td.pick { color: var(--royal-1); font-weight: 500; }
+  .decision td.ref { font-family: var(--font-mono); color: var(--royal-5); }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <h1>Diagram aesthetic explorer</h1>
+  <p class="subtitle">Five candidate aesthetics for the portfolio's diagram layer. The same sample flow rendered in each. Pick one (or one per archetype) to lock the rule in Part 3 of <code>writing-style.md</code> and §Diagrams of <code>portfolio-imagery-standards.md</code>.</p>
+
+  <div class="rubric">
+    <h3>How to compare</h3>
+    <ul>
+      <li><b>Line quality.</b> Wobbly vs. precise. Wobble signals "drew this to think." Precision signals "drew this to ship."</li>
+      <li><b>Label weight.</b> Should labels feel handwritten, typeset, or console-logged?</li>
+      <li><b>Background.</b> Solid flat vs. ruled grid vs. nothing. Grid adds a technical register; nothing lets the shape breathe.</li>
+      <li><b>Fill strategy.</b> Filled nodes read as containers; outlined nodes read as regions or references.</li>
+      <li><b>Where it breaks.</b> Every aesthetic has an archetype where it doesn't work. Name the break before locking.</li>
+    </ul>
+  </div>
+
+  <h2><span class="num">§1</span>The sample flow</h2>
+  <p class="section-desc">A linear process with five nodes drawn from the-weekly case study: how a user goes from browsing recipes to a consolidated trolley. Same nodes, same positions, across every aesthetic below, so the only variable is visual treatment.</p>
+
+  <!-- ============================================================ A1 Sketch ============================================================ -->
+  <h2><span class="num">A1</span>Hand-drawn sketch</h2>
+  <p class="section-desc">Mermaid <code>look: handDrawn</code> + RoughJS wobble. The aesthetic originally recommended in the standards doc. Cutler's default. Simulated here with an SVG <code>feTurbulence</code> displacement filter.</p>
+  <div class="aesthetic a1">
+    <div class="aesthetic-header">
+      <div class="aesthetic-name">Hand-drawn sketch</div>
+      <div class="aesthetic-tag">Drew to think</div>
+    </div>
+    <div class="diagram-area">
+      <svg class="flow" viewBox="0 0 900 200" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <filter id="wobble1" x="-5%" y="-5%" width="110%" height="110%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.025" numOctaves="2" seed="5"/>
+            <feDisplacementMap in="SourceGraphic" scale="2.5"/>
+          </filter>
+          <marker id="a1-head" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+            <path d="M0,0 L10,5 L0,10 z" class="arrow-head"/>
+          </marker>
+        </defs>
+        <g filter="url(#wobble1)">
+          <rect class="node" x="20" y="70" width="130" height="60" rx="6"/>
+          <text class="label" x="85" y="105">Browse recipes</text>
+          <rect class="node" x="200" y="70" width="130" height="60" rx="6"/>
+          <text class="label" x="265" y="105">Pick 3 meals</text>
+          <rect class="node" x="380" y="70" width="150" height="60" rx="6"/>
+          <text class="label" x="455" y="105">Consolidate</text>
+          <rect class="node" x="580" y="70" width="130" height="60" rx="6"/>
+          <text class="label" x="645" y="105">Review trolley</text>
+          <rect class="node" x="760" y="70" width="120" height="60" rx="6"/>
+          <text class="label" x="820" y="105">Checkout</text>
+          <path class="arrow" d="M150 100 L200 100" marker-end="url(#a1-head)"/>
+          <path class="arrow" d="M330 100 L380 100" marker-end="url(#a1-head)"/>
+          <path class="arrow" d="M530 100 L580 100" marker-end="url(#a1-head)"/>
+          <path class="arrow" d="M710 100 L760 100" marker-end="url(#a1-head)"/>
+        </g>
+      </svg>
+    </div>
+    <div class="aesthetic-notes">
+      <div class="note"><span class="k">How it reads</span>Wobbly strokes, filled containers, labels in Geist sans. Invites the reader into the reasoning.</div>
+      <div class="note"><span class="k">Signal</span>"I drew this to think." Generous, unpolished, conversational. Good for Process and Lessons sections.</div>
+      <div class="note"><span class="k">Break</span>At small sizes (mobile, thumbnail, social preview), wobble obscures labels. Filter cost on complex diagrams can flicker.</div>
+      <div class="note"><span class="k">Archetype fit</span>Strong: flowcharts, causal loops. Medium: networks. Weak: 2×2 (grid lines lose grid-ness when wobbled).</div>
+    </div>
+  </div>
+
+  <!-- ============================================================ A2 Clean vector ============================================================ -->
+  <h2><span class="num">A2</span>Clean vector Royal Tonal</h2>
+  <p class="section-desc">Precise strokes, sharp-but-rounded corners, Royal Tonal monochrome. Mermaid default theme without the hand-drawn look. "Drew to ship."</p>
+  <div class="aesthetic a2">
+    <div class="aesthetic-header">
+      <div class="aesthetic-name">Clean vector Royal Tonal</div>
+      <div class="aesthetic-tag">Drew to ship</div>
+    </div>
+    <div class="diagram-area">
+      <svg class="flow" viewBox="0 0 900 200" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="a2-head" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+            <path d="M0,0 L10,5 L0,10 z" class="arrow-head"/>
+          </marker>
+        </defs>
+        <rect class="node" x="20" y="70" width="130" height="60" rx="8"/>
+        <text class="label" x="85" y="105">Browse recipes</text>
+        <rect class="node" x="200" y="70" width="130" height="60" rx="8"/>
+        <text class="label" x="265" y="105">Pick 3 meals</text>
+        <rect class="node" x="380" y="70" width="150" height="60" rx="8"/>
+        <text class="label" x="455" y="105">Consolidate</text>
+        <rect class="node" x="580" y="70" width="130" height="60" rx="8"/>
+        <text class="label" x="645" y="105">Review trolley</text>
+        <rect class="node" x="760" y="70" width="120" height="60" rx="8"/>
+        <text class="label" x="820" y="105">Checkout</text>
+        <path class="arrow" d="M150 100 L200 100" marker-end="url(#a2-head)"/>
+        <path class="arrow" d="M330 100 L380 100" marker-end="url(#a2-head)"/>
+        <path class="arrow" d="M530 100 L580 100" marker-end="url(#a2-head)"/>
+        <path class="arrow" d="M710 100 L760 100" marker-end="url(#a2-head)"/>
+      </svg>
+    </div>
+    <div class="aesthetic-notes">
+      <div class="note"><span class="k">How it reads</span>Technical, calm, confident. Nothing distracting between label and line.</div>
+      <div class="note"><span class="k">Signal</span>"This is the final shape." Best for Outcome and Architecture sections where conclusions are the story.</div>
+      <div class="note"><span class="k">Break</span>Risks looking like marketing-site flatware if fills or shadows creep in. Needs discipline to stay crisp.</div>
+      <div class="note"><span class="k">Archetype fit</span>Strong: everything, including 2×2 grids and networks. The default safe choice if you pick one aesthetic for all four archetypes.</div>
+    </div>
+  </div>
+
+  <!-- ============================================================ A3 Typographic / ASCII ============================================================ -->
+  <h2><span class="num">A3</span>Typographic (ASCII-inspired)</h2>
+  <p class="section-desc">No drawn shapes. Box-drawing characters in Geist Mono, Royal Tonal 8 for emphasis, Royal Tonal 6 for muted. "Console-log aesthetic." The most distinctively developer-native option.</p>
+  <div class="aesthetic a3">
+    <div class="aesthetic-header">
+      <div class="aesthetic-name">Typographic</div>
+      <div class="aesthetic-tag">Drew with code</div>
+    </div>
+    <div class="diagram-area">
+<pre class="a3-pre">
+  <span class="accent">┌────────────────┐</span>    <span class="accent">┌────────────────┐</span>    <span class="accent">┌────────────────┐</span>    <span class="accent">┌────────────────┐</span>    <span class="accent">┌────────────────┐</span>
+  <span class="accent">│</span> Browse recipes <span class="accent">│</span> ─▶ <span class="accent">│</span>  Pick 3 meals  <span class="accent">│</span> ─▶ <span class="accent">│</span>  Consolidate   <span class="accent">│</span> ─▶ <span class="accent">│</span> Review trolley <span class="accent">│</span> ─▶ <span class="accent">│</span>    Checkout    <span class="accent">│</span>
+  <span class="accent">└────────────────┘</span>    <span class="accent">└────────────────┘</span>    <span class="accent">└────────────────┘</span>    <span class="accent">└────────────────┘</span>    <span class="accent">└────────────────┘</span>
+       <span class="muted">1</span>                   <span class="muted">2</span>                   <span class="muted">3</span>                   <span class="muted">4</span>                   <span class="muted">5</span>
+</pre>
+    </div>
+    <div class="aesthetic-notes">
+      <div class="note"><span class="k">How it reads</span>A rendered terminal dump. The medium signals the subject (code, engineering, build-log).</div>
+      <div class="note"><span class="k">Signal</span>"Drew this the way I draw everything else: in text." Matches the "learning to ship with Claude Code" narrative directly.</div>
+      <div class="note"><span class="k">Break</span>Hard to show decisions and branches. 2×2 and causal loops are almost impossible in pure ASCII without looking like a maze.</div>
+      <div class="note"><span class="k">Archetype fit</span>Strong: linear flowcharts. Weak: 2×2. Very weak: causal loops, networks. Would need a paired aesthetic for other archetypes.</div>
+    </div>
+  </div>
+
+  <!-- ============================================================ A4 Notion-flat ============================================================ -->
+  <h2><span class="num">A4</span>Notion-flat</h2>
+  <p class="section-desc">Soft filled nodes, no outlines, muted arrow strokes. The "doc diagram" aesthetic. Less Cutler, more Notion or Linear docs page.</p>
+  <div class="aesthetic a4">
+    <div class="aesthetic-header">
+      <div class="aesthetic-name">Notion-flat</div>
+      <div class="aesthetic-tag">Drew at rest</div>
+    </div>
+    <div class="diagram-area">
+      <svg class="flow" viewBox="0 0 900 200" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="a4-head" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+            <path d="M0,0 L10,5 L0,10 z" class="arrow-head"/>
+          </marker>
+        </defs>
+        <rect class="node" x="20" y="70" width="130" height="60" rx="12"/>
+        <text class="label" x="85" y="105">Browse recipes</text>
+        <rect class="node" x="200" y="70" width="130" height="60" rx="12"/>
+        <text class="label" x="265" y="105">Pick 3 meals</text>
+        <rect class="node" x="380" y="70" width="150" height="60" rx="12"/>
+        <text class="label" x="455" y="105">Consolidate</text>
+        <rect class="node" x="580" y="70" width="130" height="60" rx="12"/>
+        <text class="label" x="645" y="105">Review trolley</text>
+        <rect class="node" x="760" y="70" width="120" height="60" rx="12"/>
+        <text class="label" x="820" y="105">Checkout</text>
+        <path class="arrow" d="M150 100 L200 100" marker-end="url(#a4-head)"/>
+        <path class="arrow" d="M330 100 L380 100" marker-end="url(#a4-head)"/>
+        <path class="arrow" d="M530 100 L580 100" marker-end="url(#a4-head)"/>
+        <path class="arrow" d="M710 100 L760 100" marker-end="url(#a4-head)"/>
+      </svg>
+    </div>
+    <div class="aesthetic-notes">
+      <div class="note"><span class="k">How it reads</span>Quiet, polite, doc-page calm. Softer than the clean vector option.</div>
+      <div class="note"><span class="k">Signal</span>"I'm here to inform, not to persuade." Closer to docs than to case-study prose.</div>
+      <div class="note"><span class="k">Break</span>Reads as generic. No editorial voice; looks like every SaaS onboarding flow. Risks the "good design obscures poor logic" Kao problem.</div>
+      <div class="note"><span class="k">Archetype fit</span>Strong: flowcharts. Medium: 2×2. Weak: causal loops (no stroke weight to carry loop direction).</div>
+    </div>
+  </div>
+
+  <!-- ============================================================ A5 Blueprint ============================================================ -->
+  <h2><span class="num">A5</span>Blueprint / architectural</h2>
+  <p class="section-desc">Thin royal-8 strokes on royal-12 background, ruled grid, mono all-caps labels, dimension lines and node numbers. The "engineering drawing" register. No fills.</p>
+  <div class="aesthetic a5">
+    <div class="aesthetic-header">
+      <div class="aesthetic-name">Blueprint</div>
+      <div class="aesthetic-tag">Drew in pen</div>
+    </div>
+    <div class="diagram-area">
+      <svg class="flow" viewBox="0 0 900 240" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <pattern id="a5-grid" width="20" height="20" patternUnits="userSpaceOnUse">
+            <path d="M 20 0 L 0 0 0 20" class="grid"/>
+          </pattern>
+          <marker id="a5-head" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+            <path d="M0,0 L8,4 L0,8 z" class="arrow-head"/>
+          </marker>
+        </defs>
+        <rect x="0" y="0" width="900" height="240" fill="url(#a5-grid)"/>
+        <!-- dimension line top -->
+        <line class="dim" x1="20" y1="50" x2="880" y2="50"/>
+        <line class="dim" x1="20" y1="45" x2="20" y2="55"/>
+        <line class="dim" x1="880" y1="45" x2="880" y2="55"/>
+        <text class="dim-label" x="450" y="42">860u · 5 stages</text>
+        <!-- nodes -->
+        <rect class="node" x="20" y="90" width="130" height="60"/>
+        <text class="label" x="85" y="125">Browse</text>
+        <text class="dim-label" x="85" y="168">01</text>
+        <rect class="node" x="200" y="90" width="130" height="60"/>
+        <text class="label" x="265" y="125">Pick 3</text>
+        <text class="dim-label" x="265" y="168">02</text>
+        <rect class="node" x="380" y="90" width="150" height="60"/>
+        <text class="label" x="455" y="125">Consolidate</text>
+        <text class="dim-label" x="455" y="168">03</text>
+        <rect class="node" x="580" y="90" width="130" height="60"/>
+        <text class="label" x="645" y="125">Review</text>
+        <text class="dim-label" x="645" y="168">04</text>
+        <rect class="node" x="760" y="90" width="120" height="60"/>
+        <text class="label" x="820" y="125">Checkout</text>
+        <text class="dim-label" x="820" y="168">05</text>
+        <path class="arrow" d="M150 120 L200 120" marker-end="url(#a5-head)"/>
+        <path class="arrow" d="M330 120 L380 120" marker-end="url(#a5-head)"/>
+        <path class="arrow" d="M530 120 L580 120" marker-end="url(#a5-head)"/>
+        <path class="arrow" d="M710 120 L760 120" marker-end="url(#a5-head)"/>
+        <!-- dimension line bottom -->
+        <line class="dim" x1="20" y1="200" x2="150" y2="200"/>
+        <line class="dim" x1="20" y1="195" x2="20" y2="205"/>
+        <line class="dim" x1="150" y1="195" x2="150" y2="205"/>
+        <text class="dim-label" x="85" y="217">130u</text>
+      </svg>
+    </div>
+    <div class="aesthetic-notes">
+      <div class="note"><span class="k">How it reads</span>Schematic, technical, intentional. Every element is labelled; every dimension is annotated.</div>
+      <div class="note"><span class="k">Signal</span>"This was engineered." Reads as an architectural spec, not a napkin sketch. Rewards close looking.</div>
+      <div class="note"><span class="k">Break</span>Can read as cold or over-formal for Lessons sections. The grid background clashes with dark prose pages if not contained.</div>
+      <div class="note"><span class="k">Archetype fit</span>Strong: architecture diagrams, systems. Medium: flowcharts (a bit formal for them). Weak: causal loops (loops fight the ruled grid).</div>
+    </div>
+  </div>
+
+  <!-- ============================================================ Decision ============================================================ -->
+  <div class="decision">
+    <h2>Decision panel</h2>
+    <p>Options in order of increasing editorial voice. None of these are locked yet. The writing-style rule currently reads "pending design explorer preview" and points here.</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Option</th>
+          <th>Best at</th>
+          <th>Works for all 4 archetypes?</th>
+          <th>Editorial voice</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="pick">A1 Sketch</td>
+          <td>Process, Lessons</td>
+          <td>Mostly (2×2 is shaky)</td>
+          <td>High — "drew to think"</td>
+        </tr>
+        <tr>
+          <td class="pick">A2 Clean vector</td>
+          <td>Architecture, Outcome</td>
+          <td>Yes — the default safe choice</td>
+          <td>Low — "drew to ship"</td>
+        </tr>
+        <tr>
+          <td class="pick">A3 Typographic</td>
+          <td>Linear flows, build logs</td>
+          <td>No — needs a paired aesthetic</td>
+          <td>High and very specific — "drew with code"</td>
+        </tr>
+        <tr>
+          <td class="pick">A4 Notion-flat</td>
+          <td>Doc-style info diagrams</td>
+          <td>Mostly</td>
+          <td>Low — "drew at rest"</td>
+        </tr>
+        <tr>
+          <td class="pick">A5 Blueprint</td>
+          <td>Architecture, systems</td>
+          <td>No — causal loops fight the grid</td>
+          <td>Medium — "drew in pen"</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p style="margin-top:24px"><b>Three ways to lock this:</b></p>
+    <ol style="color: var(--royal-3); font-size: 15px; line-height: 1.7;">
+      <li><b>Single aesthetic for all archetypes.</b> Simplest rule. A2 is the only option that fits this cleanly. Low risk, low voice.</li>
+      <li><b>Paired aesthetic: default + accent.</b> Pick one for most diagrams and reserve another for a specific register. Example: A1 as default + A3 for terminal/build sequences only.</li>
+      <li><b>Per-archetype mapping.</b> Pick the strongest option for each of the four archetypes. Highest voice, most discipline required. Example: A1 for flowcharts, A2 for 2×2, A1 for causal loops, A5 for architecture diagrams.</li>
+    </ol>
+    <p style="margin-top:16px; color: var(--royal-3);"><b>My read:</b> option 2 with A1 as default + A3 reserved for sequences that are literally about code or build steps. A1 carries the editorial voice; A3 earns its place by matching the subject. Skip A4 and A5 until there is a specific architecture diagram that demands them.</p>
+  </div>
+
+</div>
+</body>
+</html>
