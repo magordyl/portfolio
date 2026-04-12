@@ -1,5 +1,21 @@
 # Development Diary
 
+## 2026-04-12 — Chunk 4c.1: Diagram, ChatTranscript, CaseStudyLayout
+
+Three components and the project page route shipped in one session. The interesting part was what came before the code: using Stitch to generate a layout mockup first, which gave us a spatial skeleton to build against rather than designing in code.
+
+**Stitch for layout ideation.** The existing Stitch portfolio project had no screens. Rather than updating its design system to match the real Royal Tonal tokens (which would have been slower and more precise than needed), we used the approximate dark-mode "Midnight Essayist" system as a proxy — close enough in tone and geometry to validate spatial decisions without blocking on token fidelity. The output confirmed the structural shape: 680px prose column, section labels as mono kickers, breakout transcript extending into the right margin, diagrams before their interpreting prose. The specific decisions locked before a line of code was written: Bot icon for Claude, vertical stacked icon/label header, v1 layout as the base.
+
+**`<Diagram>` component.** The spec was fully locked from 4b: 490px min-width scroll container, mobile bleed via negative margins, "scroll →" hint on narrow viewports. Straightforward to build. One deliberate choice: the scroll hint is always visible on mobile rather than using a CSS container query — simpler, and correct because the diagram minimum is always wider than a 390px screen.
+
+**`<ChatTranscript>` component.** The vertical stacked layout puts a 24px icon circle + label in a 40px left gutter, with turn text filling the remainder. Bot and User icons are inline SVG (lucide paths), no JS dependency. The collapse logic follows the `kind` field: `plan`, `skill`, and `research` turns collapse behind a native `<details>/<summary>`, user turns and `verbatim`/`headline` turns always show in full. The chevron rotates via CSS `[open]` selector — zero JS, full keyboard a11y. Breakout mode is a `-120px` right margin that collapses to zero below 900px.
+
+**`CaseStudyLayout.astro`.** The layout renders the hero section from frontmatter (number badge, serif title, TL;DR, metadata bar, tags, live link, hero image placeholder). The body is a 680px prose column where h2 elements are styled as mono section kickers — uppercase, letter-spaced, Royal Tonal 11 — matching the Stitch mockup's section label treatment. The layout also injects `.body :global()` rules for prose typography, diagram/transcript spacing, and the screenshot grid utility.
+
+**What ships next.** The preview harness (`render-transcript.mjs` + `preview-transcript.mjs`) is step 4 — Sonnet work, scripting and HTML templating. Then 4d: write the-weekly case study against the locked layout.
+
+---
+
 ## 2026-04-12 — Chunk 4a closed: capture workflows for writing topics and transcript bookmarks
 
 The last two foundation sub-chunks shipped together. The session's real contribution is infrastructure that makes portfolio content accumulate passively from normal work sessions rather than requiring dedicated "content creation" time.
