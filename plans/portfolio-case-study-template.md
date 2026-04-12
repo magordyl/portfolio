@@ -106,7 +106,7 @@ The order is per-project. A project with a strong migration story might lead wit
 
 **Word budget:** Full 80-150w. Lightweight 60-100w.
 
-**Visual centrepiece:** Architecture diagram (required when this section is included). Clean vector Royal Tonal, matching the A2 locked aesthetic. Four archetypes apply (typically flowchart or network for architecture). Placed before the paragraph that interprets it (rule 6).
+**Visual centrepiece:** Architecture diagram (required when this section is included). Mermaid flowchart with `classDef` for node tiers, rendered via `mmdc` to SVG. Clean vector Royal Tonal, matching the A2 locked aesthetic. Placed before the paragraph that interprets it (rule 6).
 
 **Style guide alignment:**
 - **Technical judgement lives here**, foregrounded rather than buried under a "Challenges" subheading (diary audit gap #3)

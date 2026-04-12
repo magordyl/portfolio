@@ -40,73 +40,35 @@ Astro uses `@tailwindcss/vite` (Vite plugin), NOT `@astrojs/tailwind`. The `astr
 
 ## Current Status (2026-04-12)
 
-**This session (2026-04-12) — writing seeds captured, transcript promoted, shell fix.**
+**Last session (2026-04-12) — Mermaid validated for all diagram types including architecture.**
 
-- **Writing brainstorm entries captured** — entry #2 "How my workflow has evolved since I started using Claude Code" (four-post series: engineering, portfolio maintenance, design, idea capture) committed as `e5808f4`. Entry #3 "Custom Claude Code skills as a personal operating system" added by user between sessions (`a60173a`).
-- **Transcript `plan-iteration-example` promoted** — commit `a3dd316`. The schema bug from the prior session (tool-only turns rejected as empty text) was already fixed by amendments 2+3 (`5086003`). 4a.6.6 first-use gate is now satisfied.
-- **Shell configuration fixed (workspace repo)** — the `shellPath` setting in `~/.claude/settings.json` (added 2026-04-11) was invalid and silently ignored by Claude Code. Replaced with `CLAUDE_CODE_USE_POWERSHELL_TOOL=1` env var, which enables a dedicated PowerShell tool alongside the Bash tool. CLAUDE.md shell section rewritten accordingly.
+- **Chunk 4b complete** (commit `5f9260c`). Project content template locked at `plans/portfolio-case-study-template.md`. Key decisions: "Projects"/"Writing" naming, flexible middle zone (1-3 sections from Decisions/Architecture/Design pool), word budgets as soft guides.
+- **Architecture diagrams use Mermaid**, not hand-authored SVG. Tested in `plans/portfolio-stitch-assets/mermaid-diagram-samples-{v1,v2}.html`. `classDef` handles three-tier node treatment (owned/highlighted/external). Sentence-case labels (CSS override on Mermaid's default uppercase). Subgraph labels stay uppercase by convention.
+- **All diagram types share one mobile strategy:** `.diagram-inner` with `min-width: 490px`, `.diagram-card` with `overflow-x: auto`, "scroll →" hint when overflowing. Font size stays at 13px — never shrinks on mobile. The `<Diagram>` Astro component (built in 4c.1) enforces this for all diagram types.
+- **Architecture diagram colour standards** (from template): owned = royal-4/royal-8, highlighted = royal-5/royal-9 (2px), external = transparent/royal-7 dashed. Royal Tonal only (no Violet Signal in architecture diagrams).
+- **Hand-authored SVG explorers** (`architecture-diagram-explorer-{v1,v2}.html`) preserved for the iteration trail but Mermaid is the production path.
 
-**Chunk 4a amendments planned (2026-04-12, prior session)** — `plans/portfolio-chunk-4a-amendments.md` details four amendments that all land in chunk 4a before 4b starts:
+**Planned middle zone per project (from template):**
 
-1. **Transcript sender identity** — lucide icons (Dylan + Claude) alongside text labels in `<ChatTranscript>`. Two candidate icon pairs (User+Sparkles vs User+Bot) and two header layouts (H1 horizontal compact vs H2 vertical stacked) built in 4c.1 design explorer via a `--variant` flag on the preview harness.
-2. **Collapsible sections** — new optional `kind` field on each turn (`verbatim|headline|plan|skill|research`) drives native `<details>/<summary>` render (zero JS, no framework). Classifier pass added to `bookmark-transcript.mjs`. Dylan's turns never collapse.
-3. **Review renders in the UI component** — new `scripts/render-transcript.mjs` (shared render helper) + `scripts/preview-transcript.mjs` (browser preview harness). `promote-transcript.mjs` amended to open a browser preview instead of printing a text listing. `<ChatTranscript>.astro` imports the same render helper (parity gated by a test). Generalisable principle saved as memory `feedback_review_in_ui_component.md`.
-4. **New sub-chunk 4a.7 — Writing topic capture workflow** — `/writing-topic` skill at workspace level, `scripts/writing-topic.mjs` accepts freeform text and auto-derives slug/title/source-project/session-context/transcript-link. `portfolio/plans/writing-topics/` folder with per-topic files + INDEX.md. `/bookmark` relocates to workspace level too (fixes the cross-project gap from 4a.6.4).
+| Project | Depth | Middle sections | Rationale |
+|---------|-------|----------------|-----------|
+| The Weekly (#1) | Full | Design, Architecture, Decisions | Strong design iteration trail |
+| Planner POC (#2) | Full | Architecture, Decisions | Migration + spending guard |
+| Workspace Audit (#3) | Lightweight | Decisions | Tooling/process project |
+| This Portfolio (#4) | Lightweight | Design | Meta: design system is the story |
+| Planner V1 (#5) | Full | Architecture, Design, Decisions | Complex system + new frontend |
 
-**Test fixture captured (this session):** `src/content/transcripts/drafts/plan-iteration-example.json` — 7 turns of this planning conversation, to be used for rendering/preview once the amendments ship. Keep as draft until the classifier + component exist.
+**Chunk 4a amendments still pending** — `plans/portfolio-chunk-4a-amendments.md` details four amendments. Execution order: amendments 2+3 (schema extension, classifier, render helper, preview harness, promote rewrite) as one commit; then 4a.7 (writing topics + bookmark relocation) as a second commit. Amendment 1 (icon variants) needs no code until 4c.1. **4a.5 also pending** (workspace: ideas/DIARY.md).
 
-**Files the amendments touch:**
-- Edit: `src/content.config.ts`, `scripts/bookmark-transcript.mjs`, `scripts/promote-transcript.mjs`, `plans/portfolio-imagery-standards.md`, `plans/portfolio-implementation.md`
-- New: `scripts/render-transcript.mjs`, `scripts/preview-transcript.mjs`, `scripts/writing-topic.mjs`, `scripts/session-utils.mjs`, `src/components/ChatTranscript.astro` (in 4c.1), `plans/writing-topics/` folder
-- Workspace-level: new `/bookmark` and `/writing-topic` skills under `<workspace>/.claude/skills/`; `/session-end` Step 0.5 extended
-- Delete after migration: `portfolio/plans/portfolio-writing-brainstorm.md`, `portfolio/.claude/skills/bookmark/`
+**Next priorities (session order):**
+1. **4a amendments 2+3** — schema + render pipeline (one commit)
+2. **4a.5 + 4a.7** — diary + writing-topic capture (two commits, can combine in one session)
+3. **4c.1** — case study page layout explorer + `<ChatTranscript>` + `<Diagram>` components (requires 4b locked + 4a amendments shipped)
+4. **4d** — write the-weekly case study against locked template + layout
 
-**Execution order:** amendments 2b (schema) + 2c (classifier) + 3a (render helper) + 3b (preview harness) + 3c (promote rewrite) should land as one commit — they're coupled. Amendment 4a.7 can follow as a separate commit. Amendment 1 (icon variants) needs no code until 4c.1.
+**Deployed** — Cloudflare Pages, `magordyl/portfolio` (`main` branch). Live at `dylan-portfolio.magordyl.workers.dev`.
 
-**4a.6 complete (2026-04-12)** — Transcript capture workflow shipped. Commit `f61060f`.
-- `scripts/bookmark-transcript.mjs` — reads active session JSONL, filters real turns, collapses tool calls, redacts paths/emails/tokens, writes to `src/content/transcripts/drafts/<slug>.json`
-- `scripts/promote-transcript.mjs` — re-runs redaction, structural validation (2–8 turns), prints draft, promotes to `src/content/transcripts/<slug>.json`
-- `.claude/skills/bookmark/SKILL.md` — `/bookmark` skill wired in portfolio repo (**will relocate to workspace** per amendment 4a.7.4)
-- `src/content.config.ts` — `transcripts` Zod collection added (`*.json` pattern, `drafts/` excluded by non-recursive match) — **will be extended** per amendment 2b
-- Workspace `/session-end` skill updated with Step 0.5 (pending draft review)
-- **First-use gate (4a.6.6) still open** — can be satisfied by promoting `plan-iteration-example` once the amended promote flow ships
-
-**Backfill commit (2026-04-12)** — `557febc` added `card-deep-dive-v5.html`, `v6.html`, `v7.html` and `plans/portfolio-stitch-assets/transcripts/design-explorer-skill-origin.md` (placeholder transcript draft, pending 4a.6 infrastructure — now shipped).
-
-**Next priorities:**
-- **Chunk 4a amendments** — execute `plans/portfolio-chunk-4a-amendments.md`. Most urgent: amendments 2 + 3 (schema extension, classifier, render helper, preview harness, promote rewrite) as one commit; then 4a.7 (writing topics + bookmark relocation) as a second commit. **Amendment 2c classifier must also fix the tool-only-turn schema bug surfaced this session** — merge tool-only turns into the preceding prose turn, or amend schema to accept them.
-- **4a.5** (workspace repo) — create `ideas/DIARY.md`, update `docs/diary-format.md`, wire `/new-idea` skill
-
-**After amendments + 4a.5:** run the 4a.6.6 first-use gate by promoting `plan-iteration-example` end-to-end through the amended preview-based review flow. Then start 4b.
-
-**Card deep-dive v3 + v4 shipped (2026-04-12, prior session)** — `plans/portfolio-stitch-assets/card-deep-dive-v3.html` and `v4.html` (commit `54f3aa5`). v3 pins **Layout A (top 160px strip)** as the fixed card spec and renders all six v2 visual types at strip scale, then explores six options for fitting a mobile screenshot (~1:2.16) into a ~2.6:1 strip (M1 top slice, M2 contained, M3 tilted bleed, M4 dual cascade, M5 meta split, M6 UI detail zoom). v3 also changes the numeral colour rule from the signature gradient to card register colour (royal for work, violet for writing) so a 2×2 grid doesn't collapse into visual soup. v4 refines v3 on user feedback: **(1)** unified sizing shell for centred marks (numeral 120px / icon 88px / monogram 72px) so they render at sibling weights; **(2)** deeper text marks — moved from `royal-10`/`violet-10` to `royal-8`/`violet-8`, the exact anchor shades of the original gradient; **(3)** monogram moves from Geist Mono to Fraunces to match numeral family; **(4)** screenshot auto-tint deepened from opacity 0.55 to 0.9 so the blend locks fully to card colour with no gradient bleed-through; **(5)** new §3b combined mobile section — recommends using M5 and M6 together with rule "max one M5 per grid (anchor card), M6 for the rest." v1, v2, v3 preserved as iteration trail. **Pending user review of v4** — if decisions lock, proceed to chunk 4b (case study content hierarchy). Two open questions still in v4: (a) does gradient-mark stay in the type pool or drop to a reserved slot for featured + palette-as-subject posts; (b) do M5/M6 become explicit `image.kind` sub-types in the Card props API or live as capture-time decisions in the `<Screenshot>` helper component (my lean: keep API simple, compose in the helper).
-
-**Backfill commit (2026-04-12, this session)** — commit `05098d9` brought seven accumulated artefacts from prior sessions into version control: `accent-palette-explorer-v1.html` through `v5.html` (iteration trail of gestalt critique and audit fixes), `card-deep-dive-v1.html` (first pass scoping six card layout options, recommending layout D corner accent), and the expanded `portfolio-design-tokens.md` (violet signal 5-step scale, signature gradient tokens, WCAG 2.1 AA audit notes). Prior sessions produced these but never pushed them.
-
-**Chunk 3 complete** — landing page with asymmetric hero split, BuildLogTicker, 2x2 CaseStudyCard grid, About teaser, closing quote. `npm run check` passes clean.
-
-**Deployed** — Cloudflare Pages connected to `magordyl/portfolio` (`main` branch). Live at `dylan-portfolio.magordyl.workers.dev`. Every push to `main` auto-deploys.
-
-**Chunk 4 restructured (2026-04-11)** — split into four sub-chunks following a content-first sequence. Session did not start chunk 4 work; it defined the expanded shape of chunk 4 and added two new chunks (5.5 writing posts, 5.6 /about one-off). See `plans/portfolio-implementation.md` for the full updated plan.
-
-**Chunk 4a in progress** — Foundation: voice + imagery + diary audit (workspace-wide style guide).
-
-- **4a.1 complete** — Voice research committed at `plans/portfolio-voice-research.md`. Covers Wes Kao (7 posts, storytelling focus), John Cutler (6 top posts, illustrations + complex messages + relatability). Dylan's voice deferred to chunk 4d because no user-authored long-form prose is available; 4a will ship with structural guidance locked plus style guard rails only. Final style guide splits into Part 1 (Structural, lockable in 4a) and Part 2 (Style, discovered in 4d). AI tells to avoid list included (em-dashes prohibited as #1 tell).
-- **4a.2 complete** — Diary audit committed at `plans/portfolio-diary-audit.md`. Five exemplar entries called out (mostly workspace diary), four weak ones. Biggest gap: **product thinking** — 48 entries, only one centres a product claim. Structural cause identified: `ideas/` folder has no `DIARY.md`, so research/pivot/shelving decisions leave no trace. **This MUST be fixed in 4a.5** (new task #7, audit doc §"Fifth implication", memory file `project_ideas_diary_gap.md`).
-- **4a.3 complete** — Imagery & illustration standards committed at `plans/portfolio-imagery-standards.md`. Key decisions: (1) hybrid diagram tooling — Mermaid CLI with `look: handDrawn` for flowcharts, Excalidraw for 2×2/causal loop/network archetypes; (2) Puppeteer capture script + Astro `<Screenshot>` component split for screenshots (frame at render time, never baked in); (3) no figurative illustrations, diagrams + screenshots + embedded real artefacts only; (4) explicit sourcing banlist (no AI-generated imagery, no stock, no Figma-as-real); (5) full frame spec table (gradient, radius, padding, shadow). Ray.so allowed as code-screenshot exception. Capture script and mmdc batch script are **built in chunk 4d**, not now. `<Screenshot>` component is built in 4c.
-- **4a.4 complete (this session)** — `.claude/rules/writing-style.md` shipped in workspace repo. Three parts: structural rules (locked), style guardrails (prohibitions only, positive voice rules deferred to 4d), imagery + transcript standards compressed from the standards doc. Kao assertion framework incorporated as rule 5. A2 clean-vector Royal Tonal locked as diagram aesthetic via `plans/portfolio-stitch-assets/diagram-aesthetic-explorer-v1.html` + tooling rewrite in `portfolio-imagery-standards.md`.
-- **4a.5** — Create `ideas/DIARY.md` as new workspace artefact. Update `docs/diary-format.md` and `CLAUDE.md` Idea Pipeline section. Wire capture trigger into `/new-idea` skill. Retroactive first entry covers habit-correlation research arc.
-- **4a.6 complete** — Transcript capture workflow shipped (commit `f61060f`). `/bookmark` skill, `scripts/bookmark-transcript.mjs`, `scripts/promote-transcript.mjs`, `transcripts` Zod collection, `/session-end` Step 0.5. **First-use gate still open** — bookmark + promote one real transcript before 4b.
-
-**Transcripts are now a first-class artefact type (2026-04-12, this session).** Same tier as diagrams and screenshots. Full frame spec, placement rule (Process/Lessons only — never Hero/Problem/Outcome), verbatim-only rule (no edits, reorders, combinations), 2–8 turn range, 50-word budget cost per embed, automated redaction pass + mandatory hand-review before promotion. Rationale: the portfolio's narrative is largely "learning to ship with Claude Code" and verbatim transcripts are the strongest available product-thinking signal — real reasoning can't be fabricated without reading fabricated. All amendments live in `plans/portfolio-imagery-standards.md` (new "Chat transcripts" section, ~90 lines), `plans/portfolio-implementation.md` (new 4a.6 chunk, amended 4b template with transcript slot + word budget rule, amended 4c.1 with `<ChatTranscript>` requirement + sample-transcript gate in design explorers), and `DIARY.md` entry leading the file.
-
-**Note:** 4a.1, 4a.2, 4a.3, 4a.6 artefacts commit to the **portfolio repo** (they are portfolio plans/tooling). The 4a.4/4a.5 deliverables (writing-style.md, diary capture rule updates, ideas/DIARY.md) commit to the **workspace repo** per original plan.
-
-**Chunks remaining:** 4a (foundation — 4a.5 left + 4a amendments), 4b (case study content hierarchy), 4c (page layout mockups, excludes /about), 4d (the-weekly workshop), 5 (remaining case studies), 5.5 (writing posts brainstorm + 3 drafts), 5.6 (/about one-off), 6 (secondary pages + deploy).
-
-**Key discipline:** content-first. Template scaffold (4b) before layout mockups (4c). Writing (4d) only after both are locked. Resist the temptation to sketch layouts while defining content.
-
-**Revised timeline:** ~3–4 weeks of sessions for v1 (up from 1–2 weeks). Extra scope buys a materially higher quality ceiling — style guide governs all writing going forward, imagery standards prevent inconsistency, diary audit surfaces which signals are missing for hiring-manager audiences.
+**Chunks remaining:** 4a (4a.5 + amendments), 4c, 4d, 5, 5.5, 5.6, 6.
 
 ## Implementation Plan
 

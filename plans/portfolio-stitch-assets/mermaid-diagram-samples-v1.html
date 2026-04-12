@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mermaid Diagram Samples — Royal Tonal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  @font-face {
+    font-family: 'Geist';
+    src: local('Geist');
+    font-weight: 100 900;
+  }
+
+  :root {
+    --royal-1:  #0E0F1C;
+    --royal-2:  #121428;
+    --royal-3:  #181B36;
+    --royal-4:  #1E2346;
+    --royal-5:  #252C58;
+    --royal-6:  #2D366C;
+    --royal-7:  #364280;
+    --royal-8:  #3B5BDB;
+    --royal-9:  #4D6DE8;
+    --royal-10: #6C85FF;
+    --royal-11: #A5B4FF;
+    --royal-12: #D5DCFA;
+    --ink:       #E6E2D9;
+    --ink-dim:   #9C968A;
+    --ink-faint: #5E584F;
+    --bg:        var(--royal-2);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--royal-1);
+    color: var(--ink);
+    font-family: 'Geist', -apple-system, system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page-header {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 48px 32px 24px;
+    border-bottom: 1px solid var(--royal-5);
+  }
+  .page-header h1 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 32px;
+    font-weight: 400;
+    color: var(--royal-12);
+    margin-bottom: 8px;
+  }
+  .page-header p {
+    color: var(--ink-dim);
+    font-size: 14px;
+    max-width: 640px;
+  }
+
+  .section {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 48px 32px;
+    border-bottom: 1px solid var(--royal-3);
+  }
+  .section:last-child { border-bottom: none; }
+
+  .section h2 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 24px;
+    font-weight: 400;
+    color: var(--royal-12);
+    margin-bottom: 8px;
+  }
+  .section h3 {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--royal-11);
+    margin: 32px 0 8px;
+  }
+  .section-desc {
+    color: var(--ink-dim);
+    font-size: 14px;
+    margin-bottom: 24px;
+    max-width: 640px;
+  }
+
+  .diagram-card {
+    background: var(--royal-2);
+    border: 1px solid var(--royal-5);
+    border-radius: 8px;
+    padding: 32px;
+    margin: 24px 0;
+    overflow-x: auto;
+  }
+  .diagram-card .mermaid {
+    display: flex;
+    justify-content: center;
+  }
+
+  .diagram-caption {
+    font-family: 'Geist Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-dim);
+    margin-top: 12px;
+    text-align: center;
+  }
+
+  .comparison {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin: 24px 0;
+  }
+  @media (max-width: 768px) {
+    .comparison { grid-template-columns: 1fr; }
+  }
+
+  .comparison .diagram-card { margin: 0; }
+
+  .label {
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px;
+    color: var(--royal-11);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    margin-bottom: 12px;
+  }
+
+  .notes {
+    background: var(--royal-3);
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin: 24px 0;
+    font-size: 14px;
+    color: var(--ink-dim);
+    line-height: 1.6;
+  }
+  .notes strong { color: var(--ink); }
+  .notes code {
+    font-family: 'Geist Mono', monospace;
+    font-size: 12px;
+    background: var(--royal-4);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--royal-11);
+  }
+  .notes ul {
+    margin: 8px 0 0 20px;
+  }
+  .notes li {
+    margin: 4px 0;
+  }
+
+  /* Force Mermaid SVG to use our background */
+  .mermaid svg {
+    max-width: 100%;
+  }
+
+  /* Override Mermaid's default text colour for edge labels */
+  .mermaid .edgeLabel {
+    color: var(--royal-11) !important;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>Mermaid Diagram Samples</h1>
+  <p>Testing all planned Mermaid diagram types against Royal Tonal tokens. Architecture diagram (new), flowchart (existing standard), and 2x2 quadrant chart. Each renders via Mermaid JS with custom <code>themeVariables</code>.</p>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 1: Architecture Diagram — Planner V1 -->
+<!-- ============================================================ -->
+
+<div class="section">
+  <h2>1. Architecture Diagram — Planner V1</h2>
+  <p class="section-desc">The architecture diagram that was previously hand-authored SVG, now as Mermaid flowchart. Uses <code>classDef</code> for three-tier node treatment: owned (royal-4 fill, royal-8 stroke), highlighted (royal-5 fill, royal-9 stroke, 2px), external (transparent fill, royal-7 dashed).</p>
+
+  <div class="diagram-card">
+    <pre class="mermaid">
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "primaryColor": "#1E2346",
+    "primaryBorderColor": "#3B5BDB",
+    "primaryTextColor": "#E6E2D9",
+    "lineColor": "#3B5BDB",
+    "secondaryColor": "#121428",
+    "tertiaryColor": "#181B36",
+    "fontFamily": "Geist, -apple-system, system-ui, sans-serif",
+    "fontSize": "13px",
+    "clusterBkg": "transparent",
+    "clusterBorder": "#252C58",
+    "edgeLabelBackground": "#121428"
+  }
+}}%%
+flowchart TD
+  browser["Browser\n(React SPA)"]
+
+  subgraph worker ["CLOUDFLARE WORKER"]
+    direction LR
+    auth["Auth"]
+    tasks["Tasks"]
+    reviews["Reviews"]
+    sms["SMS"]
+    notify["Notify"]
+  end
+
+  db[("D1\n(SQLite)")]
+  gateway["Vendor Gateway\nkillswitch → budget → dedup → send"]
+
+  cron(["Cron Trigger"])
+  google["Google OAuth"]
+  twilio["Twilio"]
+  haiku["Claude Haiku"]
+
+  browser --> worker
+  cron --> notify
+
+  auth & tasks & reviews & sms & notify --> db
+  sms --> gateway
+  notify --> gateway
+
+  auth -.-> google
+  gateway -.-> twilio
+  gateway -.-> haiku
+
+  classDef owned fill:#1E2346,stroke:#3B5BDB,stroke-width:1.5px,color:#E6E2D9,rx:8,ry:8
+  classDef highlighted fill:#252C58,stroke:#4D6DE8,stroke-width:2px,color:#E6E2D9,rx:8,ry:8
+  classDef external fill:none,stroke:#364280,stroke-width:1.5px,stroke-dasharray:6 4,color:#E6E2D9,rx:8,ry:8
+  classDef trigger fill:none,stroke:#364280,stroke-width:1.5px,stroke-dasharray:6 4,color:#E6E2D9
+
+  class browser,auth,tasks,reviews,sms,notify,db owned
+  class gateway highlighted
+  class google,twilio,haiku external
+  class cron trigger
+    </pre>
+    <div class="diagram-caption">Planner V1 system architecture. The Vendor Gateway (bright stroke) is the single path to all paid APIs.</div>
+  </div>
+
+  <div class="notes">
+    <strong>What works:</strong>
+    <ul>
+      <li><code>classDef</code> handles the three-tier node treatment cleanly</li>
+      <li>Subgraph creates the "Cloudflare Worker" grouping box</li>
+      <li>Database cylinder shape via <code>[(text)]</code></li>
+      <li>Stadium/pill shape for Cron via <code>([text])</code></li>
+      <li>Dashed arrows (<code>-.-></code>) for external calls</li>
+      <li>Multi-line labels with <code>\n</code> for sub-labels (same font size)</li>
+    </ul>
+    <strong>Limitations vs hand-authored SVG:</strong>
+    <ul>
+      <li>Sub-label on Vendor Gateway renders at the same font size (no smaller emphasis text)</li>
+      <li>Arrow routing is automatic — less precise than hand-placed paths</li>
+      <li>Subgraph label styling is limited (Mermaid controls positioning)</li>
+      <li><code>stroke-dasharray</code> on nodes may need escaping in some renderers</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 2: Flowchart — The Weekly Consolidation -->
+<!-- ============================================================ -->
+
+<div class="section">
+  <h2>2. Flowchart — The Weekly Consolidation</h2>
+  <p class="section-desc">The existing standard from <code>portfolio-imagery-standards.md</code>. Simple left-to-right data flow. This is the baseline Mermaid diagram type that was already planned.</p>
+
+  <div class="diagram-card">
+    <pre class="mermaid">
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "primaryColor": "#1E2346",
+    "primaryBorderColor": "#3B5BDB",
+    "primaryTextColor": "#E6E2D9",
+    "lineColor": "#3B5BDB",
+    "secondaryColor": "#121428",
+    "tertiaryColor": "#181B36",
+    "fontFamily": "Geist, -apple-system, system-ui, sans-serif",
+    "fontSize": "13px",
+    "edgeLabelBackground": "#121428"
+  }
+}}%%
+flowchart LR
+  A["Browse recipes"] --> B["Pick 3 meals"]
+  B --> C["Consolidate"]
+  C --> D{"Optional\ngarnishes?"}
+  D -->|yes| E["Include"]
+  D -->|no| F["Skip"]
+  E --> G["Review trolley"]
+  F --> G
+  G --> H["Checkout"]
+
+  classDef default fill:#1E2346,stroke:#3B5BDB,stroke-width:1.5px,color:#E6E2D9,rx:8,ry:8
+    </pre>
+    <div class="diagram-caption">The Weekly: recipe selection to checkout flow.</div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 3: Quadrant Chart — 2x2 Matrix -->
+<!-- ============================================================ -->
+
+<div class="section">
+  <h2>3. Quadrant Chart — 2x2 Matrix</h2>
+  <p class="section-desc">The <code>quadrantChart</code> diagram type for simple 2x2 matrices. Example: prioritisation matrix for Planner V1 features. Limited theming — Mermaid quadrant charts have their own colour variables.</p>
+
+  <div class="diagram-card">
+    <pre class="mermaid">
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "quadrant1Fill": "#252C58",
+    "quadrant2Fill": "#1E2346",
+    "quadrant3Fill": "#181B36",
+    "quadrant4Fill": "#1E2346",
+    "quadrant1TextFill": "#D5DCFA",
+    "quadrant2TextFill": "#A5B4FF",
+    "quadrant3TextFill": "#A5B4FF",
+    "quadrant4TextFill": "#A5B4FF",
+    "quadrantPointFill": "#4D6DE8",
+    "quadrantPointTextFill": "#E6E2D9",
+    "quadrantXAxisTextFill": "#A5B4FF",
+    "quadrantYAxisTextFill": "#A5B4FF",
+    "quadrantTitleFill": "#D5DCFA",
+    "quadrantInternalBorderStrokeFill": "#364280",
+    "quadrantExternalBorderStrokeFill": "#364280",
+    "fontFamily": "Geist, -apple-system, system-ui, sans-serif",
+    "fontSize": "13px"
+  }
+}}%%
+quadrantChart
+    title Planner V1 Feature Prioritisation
+    x-axis Low effort --> High effort
+    y-axis Low impact --> High impact
+    quadrant-1 Ship first
+    quadrant-2 Plan carefully
+    quadrant-3 Deprioritise
+    quadrant-4 Quick wins
+    SMS reminders: [0.7, 0.9]
+    Weekly review: [0.5, 0.8]
+    Vendor Gateway: [0.8, 0.95]
+    Google OAuth: [0.6, 0.7]
+    Budget caps: [0.3, 0.85]
+    Task CRUD: [0.2, 0.6]
+    Dark mode: [0.15, 0.2]
+    Export CSV: [0.4, 0.3]
+    </pre>
+    <div class="diagram-caption">Planner V1 feature prioritisation. Top-right quadrant = ship first.</div>
+  </div>
+
+  <div class="notes">
+    <strong>Quadrant chart notes:</strong>
+    <ul>
+      <li>Theming uses dedicated <code>quadrant*</code> variables, not the standard node variables</li>
+      <li>Point labels are automatic — no manual positioning needed</li>
+      <li>Limited layout control: can't adjust point label size independently</li>
+      <li>Background colour of the chart itself comes from the quadrant fill variables</li>
+      <li>Good for simple data; for custom annotations or non-standard axes, fall back to hand-authored SVG</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 4: Comparison — Architecture at Different Widths -->
+<!-- ============================================================ -->
+
+<div class="section">
+  <h2>4. Mobile Legibility Check</h2>
+  <p class="section-desc">The architecture diagram rendered inside containers at desktop (720px) and mobile (390px) widths, simulating the case study body column. Tests whether Mermaid's auto-layout handles narrow containers gracefully.</p>
+
+  <div class="comparison">
+    <div>
+      <div class="label">Desktop — 720px body</div>
+      <div class="diagram-card" style="max-width: 720px;">
+        <pre class="mermaid">
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "primaryColor": "#1E2346",
+    "primaryBorderColor": "#3B5BDB",
+    "primaryTextColor": "#E6E2D9",
+    "lineColor": "#3B5BDB",
+    "secondaryColor": "#121428",
+    "tertiaryColor": "#181B36",
+    "fontFamily": "Geist, -apple-system, system-ui, sans-serif",
+    "fontSize": "13px",
+    "clusterBkg": "transparent",
+    "clusterBorder": "#252C58",
+    "edgeLabelBackground": "#121428"
+  }
+}}%%
+flowchart TD
+  browser["Browser (React SPA)"]
+
+  subgraph worker ["CLOUDFLARE WORKER"]
+    direction LR
+    auth["Auth"]
+    tasks["Tasks"]
+    reviews["Reviews"]
+    sms["SMS"]
+    notify["Notify"]
+  end
+
+  db[("D1 (SQLite)")]
+  gateway["Vendor Gateway\nkillswitch → budget → dedup → send"]
+
+  cron(["Cron Trigger"])
+  google["Google OAuth"]
+  twilio["Twilio"]
+  haiku["Claude Haiku"]
+
+  browser --> worker
+  cron --> notify
+
+  auth & tasks & reviews & sms & notify --> db
+  sms --> gateway
+  notify --> gateway
+
+  auth -.-> google
+  gateway -.-> twilio
+  gateway -.-> haiku
+
+  classDef owned fill:#1E2346,stroke:#3B5BDB,stroke-width:1.5px,color:#E6E2D9
+  classDef highlighted fill:#252C58,stroke:#4D6DE8,stroke-width:2px,color:#E6E2D9
+  classDef external fill:none,stroke:#364280,stroke-width:1.5px,stroke-dasharray:6 4,color:#E6E2D9
+  classDef trigger fill:none,stroke:#364280,stroke-width:1.5px,stroke-dasharray:6 4,color:#E6E2D9
+
+  class browser,auth,tasks,reviews,sms,notify,db owned
+  class gateway highlighted
+  class google,twilio,haiku external
+  class cron trigger
+        </pre>
+      </div>
+    </div>
+    <div>
+      <div class="label">Mobile — 390px screen</div>
+      <div class="diagram-card" style="max-width: 390px; min-width: 390px;">
+        <pre class="mermaid">
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "primaryColor": "#1E2346",
+    "primaryBorderColor": "#3B5BDB",
+    "primaryTextColor": "#E6E2D9",
+    "lineColor": "#3B5BDB",
+    "secondaryColor": "#121428",
+    "tertiaryColor": "#181B36",
+    "fontFamily": "Geist, -apple-system, system-ui, sans-serif",
+    "fontSize": "12px",
+    "clusterBkg": "transparent",
+    "clusterBorder": "#252C58",
+    "edgeLabelBackground": "#121428"
+  }
+}}%%
+flowchart TD
+  browser["Browser (React SPA)"]
+
+  subgraph worker ["CLOUDFLARE WORKER"]
+    direction LR
+    auth["Auth"]
+    tasks["Tasks"]
+    reviews["Reviews"]
+    sms["SMS"]
+    notify["Notify"]
+  end
+
+  db[("D1 (SQLite)")]
+  gateway["Vendor Gateway\nkillswitch → budget → dedup → send"]
+
+  cron(["Cron Trigger"])
+  google["Google OAuth"]
+  twilio["Twilio"]
+  haiku["Claude Haiku"]
+
+  browser --> worker
+  cron --> notify
+
+  auth & tasks & reviews & sms & notify --> db
+  sms --> gateway
+  notify --> gateway
+
+  auth -.-> google
+  gateway -.-> twilio
+  gateway -.-> haiku
+
+  classDef owned fill:#1E2346,stroke:#3B5BDB,stroke-width:1.5px,color:#E6E2D9
+  classDef highlighted fill:#252C58,stroke:#4D6DE8,stroke-width:2px,color:#E6E2D9
+  classDef external fill:none,stroke:#364280,stroke-width:1.5px,stroke-dasharray:6 4,color:#E6E2D9
+  classDef trigger fill:none,stroke:#364280,stroke-width:1.5px,stroke-dasharray:6 4,color:#E6E2D9
+
+  class browser,auth,tasks,reviews,sms,notify,db owned
+  class gateway highlighted
+  class google,twilio,haiku external
+  class cron trigger
+        </pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 5: Side-by-side with hand-authored SVG -->
+<!-- ============================================================ -->
+
+<div class="section">
+  <h2>5. Comparison — Mermaid vs Hand-Authored SVG</h2>
+  <p class="section-desc">The same Planner V1 architecture rendered via Mermaid (auto-layout) and via the hand-authored SVG from the v2 explorer. For evaluating whether the auto-layout is good enough.</p>
+
+  <div class="comparison">
+    <div>
+      <div class="label">Mermaid (auto-layout)</div>
+      <div class="diagram-card">
+        <pre class="mermaid">
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "primaryColor": "#1E2346",
+    "primaryBorderColor": "#3B5BDB",
+    "primaryTextColor": "#E6E2D9",
+    "lineColor": "#3B5BDB",
+    "secondaryColor": "#121428",
+    "tertiaryColor": "#181B36",
+    "fontFamily": "Geist, -apple-system, system-ui, sans-serif",
+    "fontSize": "13px",
+    "clusterBkg": "transparent",
+    "clusterBorder": "#252C58",
+    "edgeLabelBackground": "#121428"
+  }
+}}%%
+flowchart TD
+  browser["Browser (React SPA)"]
+
+  subgraph worker ["CLOUDFLARE WORKER"]
+    direction LR
+    auth["Auth"]
+    tasks["Tasks"]
+    reviews["Reviews"]
+    sms["SMS"]
+    notify["Notify"]
+  end
+
+  db[("D1 (SQLite)")]
+  gateway["Vendor Gateway\nkillswitch → budget → dedup → send"]
+
+  cron(["Cron Trigger"])
+  google["Google OAuth"]
+  twilio["Twilio"]
+  haiku["Claude Haiku"]
+
+  browser --> worker
+  cron --> notify
+
+  auth & tasks & reviews & sms & notify --> db
+  sms --> gateway
+  notify --> gateway
+
+  auth -.-> google
+  gateway -.-> twilio
+  gateway -.-> haiku
+
+  classDef owned fill:#1E2346,stroke:#3B5BDB,stroke-width:1.5px,color:#E6E2D9
+  classDef highlighted fill:#252C58,stroke:#4D6DE8,stroke-width:2px,color:#E6E2D9
+  classDef external fill:none,stroke:#364280,stroke-width:1.5px,stroke-dasharray:6 4,color:#E6E2D9
+  classDef trigger fill:none,stroke:#364280,stroke-width:1.5px,stroke-dasharray:6 4,color:#E6E2D9
+
+  class browser,auth,tasks,reviews,sms,notify,db owned
+  class gateway highlighted
+  class google,twilio,haiku external
+  class cron trigger
+        </pre>
+      </div>
+    </div>
+    <div>
+      <div class="label">Hand-authored SVG (from v2 explorer)</div>
+      <div class="diagram-card">
+        <svg viewBox="0 0 600 400" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: auto;">
+          <rect width="600" height="400" fill="#121428" rx="8"/>
+
+          <!-- Browser -->
+          <rect x="228" y="20" width="144" height="44" rx="8" fill="#1E2346" stroke="#3B5BDB" stroke-width="1.5"/>
+          <text x="300" y="47" text-anchor="middle" fill="#E6E2D9" font-family="Geist, sans-serif" font-size="13" font-weight="500">Browser</text>
+
+          <!-- Arrow: Browser → Worker group -->
+          <line x1="300" y1="64" x2="300" y2="96" stroke="#3B5BDB" stroke-width="1.5" marker-end="url(#arrowV2)"/>
+
+          <!-- Worker group box -->
+          <rect x="40" y="96" width="520" height="80" rx="8" fill="none" stroke="#252C58" stroke-width="1" stroke-dasharray="6,4"/>
+          <text x="52" y="112" fill="#A5B4FF" font-family="Geist, sans-serif" font-size="10" font-weight="500" letter-spacing="0.14em">CLOUDFLARE WORKER</text>
+
+          <!-- Worker modules -->
+          <rect x="56" y="124" width="72" height="38" rx="8" fill="#1E2346" stroke="#3B5BDB" stroke-width="1.5"/>
+          <text x="92" y="148" text-anchor="middle" fill="#E6E2D9" font-family="Geist, sans-serif" font-size="12" font-weight="500">Auth</text>
+
+          <rect x="144" y="124" width="100" height="38" rx="8" fill="#1E2346" stroke="#3B5BDB" stroke-width="1.5"/>
+          <text x="194" y="148" text-anchor="middle" fill="#E6E2D9" font-family="Geist, sans-serif" font-size="12" font-weight="500">Tasks</text>
+
+          <rect x="260" y="124" width="100" height="38" rx="8" fill="#1E2346" stroke="#3B5BDB" stroke-width="1.5"/>
+          <text x="310" y="148" text-anchor="middle" fill="#E6E2D9" font-family="Geist, sans-serif" font-size="12" font-weight="500">Reviews</text>
+
+          <rect x="376" y="124" width="72" height="38" rx="8" fill="#1E2346" stroke="#3B5BDB" stroke-width="1.5"/>
+          <text x="412" y="148" text-anchor="middle" fill="#E6E2D9" font-family="Geist, sans-serif" font-size="12" font-weight="500">SMS</text>
+
+          <rect x="464" y="124" width="80" height="38" rx="8" fill="#1E2346" stroke="#3B5BDB" stroke-width="1.5"/>
+          <text x="504" y="148" text-anchor="middle" fill="#E6E2D9" font-family="Geist, sans-serif" font-size="12" font-weight="500">Notify</text>
+
+          <!-- D1 Database -->
+          <rect x="56" y="220" width="140" height="48" rx="8" fill="#1E2346" stroke="#3B5BDB" stroke-width="1.5"/>
+          <text x="126" y="249" text-anchor="middle" fill="#E6E2D9" font-family="Geist, sans-serif" font-size="13" font-weight="500">D1 (SQLite)</text>
+          <ellipse cx="126" cy="222" rx="70" ry="5" fill="none" stroke="#3B5BDB" stroke-width="1.5"/>
+
+          <!-- Vendor Gateway (highlighted) -->
+          <rect x="340" y="216" width="140" height="56" rx="8" fill="#252C58" stroke="#4D6DE8" stroke-width="2"/>
+          <text x="410" y="237" text-anchor="middle" fill="#E6E2D9" font-family="Geist, sans-serif" font-size="13" font-weight="500">Vendor Gateway</text>
+          <text x="410" y="257" text-anchor="middle" fill="#A5B4FF" font-family="Geist Mono, monospace" font-size="10">killswitch → budget → dedup → send</text>
+
+          <!-- Arrows: modules → DB -->
+          <line x1="126" y1="162" x2="126" y2="220" stroke="#3B5BDB" stroke-width="1.5" marker-end="url(#arrowV2)"/>
+
+          <!-- Arrows: SMS → Gateway, Notify → Gateway -->
+          <path d="M412,162 L412,216" stroke="#3B5BDB" stroke-width="1.5" fill="none" marker-end="url(#arrowV2)"/>
+          <path d="M504,162 L504,200 L480,216" stroke="#3B5BDB" stroke-width="1.5" fill="none" marker-end="url(#arrowV2)"/>
+
+          <!-- Cron trigger -->
+          <rect x="500" y="82" width="48" height="26" rx="13" fill="none" stroke="#364280" stroke-width="1.5" stroke-dasharray="6,4"/>
+          <text x="524" y="98" text-anchor="middle" fill="#E6E2D9" font-family="Geist, sans-serif" font-size="10" font-weight="500">Cron</text>
+          <path d="M524,108 L524,124" stroke="#364280" stroke-width="1.5" stroke-dasharray="6,4" fill="none" marker-end="url(#arrowDashV2)"/>
+
+          <!-- External services (bottom row) -->
+          <rect x="20" y="330" width="130" height="40" rx="8" fill="none" stroke="#364280" stroke-width="1.5" stroke-dasharray="6,4"/>
+          <text x="84" y="353" text-anchor="middle" fill="#E6E2D9" font-family="Geist, sans-serif" font-size="12" font-weight="500">Google OAuth</text>
+
+          <rect x="235" y="330" width="130" height="40" rx="8" fill="none" stroke="#364280" stroke-width="1.5" stroke-dasharray="6,4"/>
+          <text x="300" y="353" text-anchor="middle" fill="#E6E2D9" font-family="Geist, sans-serif" font-size="12" font-weight="500">Twilio</text>
+
+          <rect x="450" y="330" width="130" height="40" rx="8" fill="none" stroke="#364280" stroke-width="1.5" stroke-dasharray="6,4"/>
+          <text x="516" y="353" text-anchor="middle" fill="#E6E2D9" font-family="Geist, sans-serif" font-size="12" font-weight="500">Claude Haiku</text>
+
+          <!-- Dashed arrows to externals -->
+          <path d="M92,162 L84,330" stroke="#364280" stroke-width="1.5" stroke-dasharray="6,4" fill="none" marker-end="url(#arrowDashV2)"/>
+          <path d="M380,272 L300,330" stroke="#364280" stroke-width="1.5" stroke-dasharray="6,4" fill="none" marker-end="url(#arrowDashV2)"/>
+          <path d="M440,272 L516,330" stroke="#364280" stroke-width="1.5" stroke-dasharray="6,4" fill="none" marker-end="url(#arrowDashV2)"/>
+
+          <!-- Arrow markers -->
+          <defs>
+            <marker id="arrowV2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+              <path d="M0,0 L8,3 L0,6" fill="none" stroke="#3B5BDB" stroke-width="1"/>
+            </marker>
+            <marker id="arrowDashV2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+              <path d="M0,0 L8,3 L0,6" fill="none" stroke="#364280" stroke-width="1"/>
+            </marker>
+          </defs>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="notes">
+    <strong>Key differences to evaluate:</strong>
+    <ul>
+      <li><strong>Layout density:</strong> Mermaid spaces nodes generously; hand-authored SVG is more compact</li>
+      <li><strong>Sub-labels:</strong> Hand-authored SVG has a smaller Geist Mono line under "Vendor Gateway"; Mermaid renders both lines at the same size</li>
+      <li><strong>Arrow routing:</strong> Hand-authored SVG uses precise paths with right-angle bends; Mermaid uses its auto-router</li>
+      <li><strong>Grouping label:</strong> Hand-authored SVG places "CLOUDFLARE WORKER" as uppercase with letter-spacing; Mermaid uses its default subgraph label style</li>
+      <li><strong>Database shape:</strong> Hand-authored SVG has a custom ellipse cap; Mermaid uses its native cylinder</li>
+    </ul>
+  </div>
+</div>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+
+  mermaid.initialize({
+    startOnLoad: true,
+    securityLevel: 'loose',
+    theme: 'base',
+    flowchart: {
+      htmlLabels: true,
+      curve: 'basis',
+      padding: 16,
+      nodeSpacing: 30,
+      rankSpacing: 50,
+      useMaxWidth: true,
+    },
+    themeVariables: {
+      darkMode: true,
+      background: '#121428',
+    }
+  });
+</script>
+
+</body>
+</html>

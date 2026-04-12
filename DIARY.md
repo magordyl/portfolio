@@ -1,5 +1,17 @@
 # Development Diary
 
+## 2026-04-12 — Mermaid validated for architecture diagrams
+
+Explored whether Mermaid could replace hand-authored SVG for architecture diagrams. The answer is yes. Built two iterations of a sample file (`mermaid-diagram-samples-{v1,v2}.html`) testing all three planned diagram types: architecture (new), flowchart (existing), and quadrant chart (existing).
+
+**`classDef` handles the three-tier node treatment.** Owned nodes (royal-4 fill, royal-8 stroke), highlighted nodes (royal-5, royal-9, 2px), and external nodes (transparent, royal-7 dashed) are all achievable with Mermaid's `classDef` + `class` syntax. The one limitation is sub-labels: the Vendor Gateway's smaller emphasis text renders at the same font size as the main label. Acceptable trade-off for a single toolchain across all diagram types.
+
+**v1 had two problems.** All labels rendered in uppercase (Mermaid's default CSS applies `text-transform: uppercase` to node labels), and diagrams were unreadably small on mobile. v2 fixed both: a CSS override (`text-transform: none !important`) on Mermaid's label classes restored sentence case, and a scroll container (`min-width: 490px` inner, `overflow-x: auto` outer, "scroll →" hint) keeps text at 13px on all screen sizes. The mobile strategy is now unified across all diagram types — the `<Diagram>` component (4c.1) will implement this once.
+
+**Key decision: Mermaid is the production path for architecture diagrams.** Hand-authored SVG explorers preserved for the iteration trail but not the build workflow. This means all four diagram archetypes now use the same toolchain: Mermaid source in `diagrams-src/`, `mmdc` render to SVG, committed output in `src/assets/diagrams/`. One set of `themeVariables`, one render script, one CSS strategy.
+
+---
+
 ## 2026-04-12 — Chunk 4b locked: content template + architecture diagram standards
 
 Shipped the project content template (`plans/portfolio-case-study-template.md`) and two architecture diagram explorers (`5f9260c`). This is the content hierarchy that 4c (layout) and 4d (writing) both build against. Content structure dictates layout, not the reverse.
