@@ -78,7 +78,7 @@ Ten chunks to ship v1 (1–3 complete, then 4a → 4b → 4c → 4d → 5 → 5.
 
 ## Chunk 4a — Foundation: voice, style & imagery (workspace-wide)
 
-**Status (2026-04-12):** 4a.1 complete (`04caaaa`), 4a.2 complete (`04caaaa`), **4a.3 complete** (`plans/portfolio-imagery-standards.md` this session). 4a.4 next — synthesise all three into `.claude/rules/writing-style.md` in the workspace repo.
+**Status (2026-04-12):** All sub-chunks complete. 4a.1-4a.4 (voice, audit, imagery, style guide), 4a.5 (`ideas/DIARY.md` + capture rules), 4a.6 (transcript workflow + amendments 2+3), 4a.7 (writing-topic capture + `/bookmark` relocation). Chunk 4a is closed.
 
 **Deliverable:** A workspace-wide writing & imagery style guide that governs ALL Claude-produced writing for the user (portfolio, diary entries, future writing posts, any other prose), plus an updated diary capture process so future entries arrive portfolio-ready.
 
@@ -414,13 +414,15 @@ Second draft. Iterate until both template and case study feel right. **Hard stop
 
 **Deliverable:** 2–3 writing posts, fully drafted, locked, ready to ship (the /writing routes themselves are built in chunk 6).
 
-### Step 5.5.1 — Brainstorm
+### Step 5.5.1 — Review captured topics + brainstorm
 
-Generate a candidate list of 8–12 writing post ideas drawing from:
+Start from existing writing topics in `plans/writing-topics/` (migrated from the old `portfolio-writing-brainstorm.md` in chunk 4a.7). Review each topic's thesis and status, then brainstorm additional candidates drawing from:
 - Decisions made across workspace projects that have broader lessons
 - Patterns noticed across the diary audit
 - Commentary on things in the user's field (product thinking, engineering management, AI-assisted building)
 - Posts that complement the case studies (not duplicate them — case studies are "what I built", writing is "what I think")
+
+New topics captured via the `/writing-topic` skill between now and chunk 5.5 will also be in `plans/writing-topics/`.
 
 ### Step 5.5.2 — Pick 3
 

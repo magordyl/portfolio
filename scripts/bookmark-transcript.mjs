@@ -13,12 +13,15 @@
  *   --extend         Append to existing draft instead of overwriting
  */
 
-import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, statSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
 import { join, dirname } from 'path';
-import { homedir } from 'os';
 import { fileURLToPath } from 'url';
 import { parseArgs } from 'util';
 import { mergeToolOnlyTurns, classifyAll } from './turn-classifier.mjs';
+import {
+  findActiveSession, parseSessionEvents, isRealUserTurn,
+  extractUserText, redact, getSessionId,
+} from './session-utils.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = join(__dirname, '..');
@@ -66,80 +69,19 @@ if (existsSync(publishedPath)) {
   process.exit(1);
 }
 
-// ── Locate active session JSONL ──────────────────────────────────────────────
+// ── Locate active session + parse ───────────────────────────────────────────
 
-const projectsDir = join(homedir(), '.claude', 'projects', 'C--Users-User-Documents-Claude-code');
-
-if (!existsSync(projectsDir)) {
-  console.error(`Error: Claude projects directory not found:\n  ${projectsDir}`);
+let mostRecent;
+try {
+  mostRecent = findActiveSession();
+} catch (err) {
+  console.error(`Error: ${err.message}`);
   process.exit(1);
 }
 
-const jsonlFiles = readdirSync(projectsDir)
-  .filter(f => f.endsWith('.jsonl'))
-  .map(f => {
-    const fullPath = join(projectsDir, f);
-    return { name: f, path: fullPath, mtime: statSync(fullPath).mtimeMs };
-  })
-  .sort((a, b) => b.mtime - a.mtime);
+const events = parseSessionEvents(mostRecent.path);
 
-if (jsonlFiles.length === 0) {
-  console.error('Error: no session JSONL files found.');
-  process.exit(1);
-}
-
-const mostRecent = jsonlFiles[0];
-const msSinceModified = Date.now() - mostRecent.mtime;
-const FIVE_MINUTES = 5 * 60 * 1000;
-
-if (msSinceModified > FIVE_MINUTES) {
-  const mins = Math.round(msSinceModified / 60000);
-  console.error(`Error: most recent session file was last modified ${mins} minute(s) ago.`);
-  console.error(`  File: ${mostRecent.name}`);
-  console.error('Bookmarking a stale session is almost always a mistake. Are you in the right terminal?');
-  process.exit(1);
-}
-
-// ── Parse JSONL ──────────────────────────────────────────────────────────────
-
-const rawLines = readFileSync(mostRecent.path, 'utf8').split('\n').filter(Boolean);
-const events = [];
-for (let i = 0; i < rawLines.length; i++) {
-  try {
-    events.push(JSON.parse(rawLines[i]));
-  } catch {
-    console.warn(`Warning: skipped malformed JSON on line ${i + 1}`);
-  }
-}
-
-// ── Helpers ──────────────────────────────────────────────────────────────────
-
-function isRealUserTurn(ev) {
-  if (ev.type !== 'user') return false;
-  if (ev.isMeta === true) return false;
-
-  const content = ev.message?.content;
-  if (!content) return false;
-
-  if (typeof content === 'string') {
-    // Filter out injected system messages
-    const trimmed = content.trim();
-    if (
-      trimmed.startsWith('<command-name>') ||
-      trimmed.startsWith('<local-command-stdout>') ||
-      trimmed.startsWith('<local-command-caveat>') ||
-      trimmed.startsWith('<system-reminder>')
-    ) return false;
-    return trimmed.length > 0;
-  }
-
-  if (Array.isArray(content)) {
-    // Must have at least one non-empty text block (not just tool_results)
-    return content.some(b => b.type === 'text' && b.text?.trim().length > 0);
-  }
-
-  return false;
-}
+// ── Helpers (bookmark-specific) ─────────────────────────────────────────────
 
 function isAssistantTurn(ev) {
   return ev.type === 'assistant' && Array.isArray(ev.message?.content);
@@ -159,19 +101,6 @@ function labelToolUse(name, input = {}) {
   }
 }
 
-function extractUserText(ev) {
-  const content = ev.message?.content;
-  if (typeof content === 'string') return content.trim();
-  if (Array.isArray(content)) {
-    return content
-      .filter(b => b.type === 'text')
-      .map(b => b.text)
-      .join('\n')
-      .trim();
-  }
-  return '';
-}
-
 function extractAssistantContent(ev) {
   const content = ev.message?.content;
   if (!Array.isArray(content)) return { text: '', collapsedTools: [] };
@@ -185,24 +114,9 @@ function extractAssistantContent(ev) {
     } else if (block.type === 'tool_use') {
       collapsedTools.push(labelToolUse(block.name, block.input));
     }
-    // Skip 'thinking' blocks
   }
 
   return { text: textParts.join('\n\n'), collapsedTools };
-}
-
-function redact(text) {
-  // Windows absolute paths → ~/...
-  text = text.replace(/C:\\Users\\User\\([^\s"'<>]+)/g,   (_, r) => '~/' + r.replace(/\\/g, '/'));
-  text = text.replace(/C:\/Users\/User\/([^\s"'<>]+)/g,   '~/$1');
-  text = text.replace(/\/c\/Users\/User\/([^\s"'<>]+)/g,  '~/$1');
-  // Email addresses
-  text = text.replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, '[redacted-email]');
-  // Common token prefixes
-  text = text.replace(/sk-[a-zA-Z0-9_-]{20,}/g,              '[REDACTED]');
-  text = text.replace(/gh[ps]_[a-zA-Z0-9]{20,}/g,            '[REDACTED]');
-  text = text.replace(/Bearer\s+[a-zA-Z0-9._-]{20,}/g,       'Bearer [REDACTED]');
-  return text;
 }
 
 // ── Build turn list ──────────────────────────────────────────────────────────
@@ -258,7 +172,7 @@ const newTurns = classifyAll(mergeToolOnlyTurns(rawTurns));
 
 // ── Build / merge draft ──────────────────────────────────────────────────────
 
-const sessionId = events.find(ev => ev.sessionId)?.sessionId || 'unknown';
+const sessionId = getSessionId(events);
 const now = new Date().toISOString();
 
 let draft;

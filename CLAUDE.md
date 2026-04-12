@@ -58,17 +58,15 @@ Astro uses `@tailwindcss/vite` (Vite plugin), NOT `@astrojs/tailwind`. The `astr
 | This Portfolio (#4) | Lightweight | Design | Meta: design system is the story |
 | Planner V1 (#5) | Full | Architecture, Design, Decisions | Complex system + new frontend |
 
-**Chunk 4a amendments still pending** — `plans/portfolio-chunk-4a-amendments.md` details four amendments. Execution order: amendments 2+3 (schema extension, classifier, render helper, preview harness, promote rewrite) as one commit; then 4a.7 (writing topics + bookmark relocation) as a second commit. Amendment 1 (icon variants) needs no code until 4c.1. **4a.5 also pending** (workspace: ideas/DIARY.md).
+**Chunk 4a complete** — all sub-chunks shipped (4a.1-4a.7). Amendment 1 (icon variants) deferred to 4c.1 design explorer. Writing topics migrated from `portfolio-writing-brainstorm.md` to `plans/writing-topics/` (per-topic files + INDEX). `/bookmark` relocated to workspace level. Session utils extracted to `scripts/session-utils.mjs`.
 
 **Next priorities (session order):**
-1. **4a amendments 2+3** — schema + render pipeline (one commit)
-2. **4a.5 + 4a.7** — diary + writing-topic capture (two commits, can combine in one session)
-3. **4c.1** — case study page layout explorer + `<ChatTranscript>` + `<Diagram>` components (requires 4b locked + 4a amendments shipped)
-4. **4d** — write the-weekly case study against locked template + layout
+1. **4c.1** — case study page layout explorer + `<ChatTranscript>` + `<Diagram>` components
+2. **4d** — write the-weekly case study against locked template + layout
 
 **Deployed** — Cloudflare Pages, `magordyl/portfolio` (`main` branch). Live at `dylan-portfolio.magordyl.workers.dev`.
 
-**Chunks remaining:** 4a (4a.5 + amendments), 4c, 4d, 5, 5.5, 5.6, 6.
+**Chunks remaining:** 4c, 4d, 5, 5.5, 5.6, 6.
 
 ## Implementation Plan
 
