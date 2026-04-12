@@ -40,21 +40,39 @@ Astro uses `@tailwindcss/vite` (Vite plugin), NOT `@astrojs/tailwind`. The `astr
 
 ## Current Status (2026-04-12)
 
+**Chunk 4a amendments planned (2026-04-12, this session)** — `plans/portfolio-chunk-4a-amendments.md` details four amendments that all land in chunk 4a before 4b starts:
+
+1. **Transcript sender identity** — lucide icons (Dylan + Claude) alongside text labels in `<ChatTranscript>`. Two candidate icon pairs (User+Sparkles vs User+Bot) and two header layouts (H1 horizontal compact vs H2 vertical stacked) built in 4c.1 design explorer via a `--variant` flag on the preview harness.
+2. **Collapsible sections** — new optional `kind` field on each turn (`verbatim|headline|plan|skill|research`) drives native `<details>/<summary>` render (zero JS, no framework). Classifier pass added to `bookmark-transcript.mjs`. Dylan's turns never collapse.
+3. **Review renders in the UI component** — new `scripts/render-transcript.mjs` (shared render helper) + `scripts/preview-transcript.mjs` (browser preview harness). `promote-transcript.mjs` amended to open a browser preview instead of printing a text listing. `<ChatTranscript>.astro` imports the same render helper (parity gated by a test). Generalisable principle saved as memory `feedback_review_in_ui_component.md`.
+4. **New sub-chunk 4a.7 — Writing topic capture workflow** — `/writing-topic` skill at workspace level, `scripts/writing-topic.mjs` accepts freeform text and auto-derives slug/title/source-project/session-context/transcript-link. `portfolio/plans/writing-topics/` folder with per-topic files + INDEX.md. `/bookmark` relocates to workspace level too (fixes the cross-project gap from 4a.6.4).
+
+**Test fixture captured (this session):** `src/content/transcripts/drafts/plan-iteration-example.json` — 7 turns of this planning conversation, to be used for rendering/preview once the amendments ship. Keep as draft until the classifier + component exist.
+
+**Files the amendments touch:**
+- Edit: `src/content.config.ts`, `scripts/bookmark-transcript.mjs`, `scripts/promote-transcript.mjs`, `plans/portfolio-imagery-standards.md`, `plans/portfolio-implementation.md`
+- New: `scripts/render-transcript.mjs`, `scripts/preview-transcript.mjs`, `scripts/writing-topic.mjs`, `scripts/session-utils.mjs`, `src/components/ChatTranscript.astro` (in 4c.1), `plans/writing-topics/` folder
+- Workspace-level: new `/bookmark` and `/writing-topic` skills under `<workspace>/.claude/skills/`; `/session-end` Step 0.5 extended
+- Delete after migration: `portfolio/plans/portfolio-writing-brainstorm.md`, `portfolio/.claude/skills/bookmark/`
+
+**Execution order:** amendments 2b (schema) + 2c (classifier) + 3a (render helper) + 3b (preview harness) + 3c (promote rewrite) should land as one commit — they're coupled. Amendment 4a.7 can follow as a separate commit. Amendment 1 (icon variants) needs no code until 4c.1.
+
 **4a.6 complete (2026-04-12)** — Transcript capture workflow shipped. Commit `f61060f`.
 - `scripts/bookmark-transcript.mjs` — reads active session JSONL, filters real turns, collapses tool calls, redacts paths/emails/tokens, writes to `src/content/transcripts/drafts/<slug>.json`
 - `scripts/promote-transcript.mjs` — re-runs redaction, structural validation (2–8 turns), prints draft, promotes to `src/content/transcripts/<slug>.json`
-- `.claude/skills/bookmark/SKILL.md` — `/bookmark` skill wired in portfolio repo
-- `src/content.config.ts` — `transcripts` Zod collection added (`*.json` pattern, `drafts/` excluded by non-recursive match)
+- `.claude/skills/bookmark/SKILL.md` — `/bookmark` skill wired in portfolio repo (**will relocate to workspace** per amendment 4a.7.4)
+- `src/content.config.ts` — `transcripts` Zod collection added (`*.json` pattern, `drafts/` excluded by non-recursive match) — **will be extended** per amendment 2b
 - Workspace `/session-end` skill updated with Step 0.5 (pending draft review)
-- **First-use gate (4a.6.6) still open** — must bookmark + promote one real transcript before 4b starts
+- **First-use gate (4a.6.6) still open** — can be satisfied by promoting `plan-iteration-example` once the amended promote flow ships
 
 **Backfill commit (2026-04-12)** — `557febc` added `card-deep-dive-v5.html`, `v6.html`, `v7.html` and `plans/portfolio-stitch-assets/transcripts/design-explorer-skill-origin.md` (placeholder transcript draft, pending 4a.6 infrastructure — now shipped).
 
-**Next: 4a.4 + 4a.5** (workspace repo deliverables, not portfolio repo):
-- 4a.4 — Synthesise voice/imagery/diary research into `.claude/rules/writing-style.md`
-- 4a.5 — Create `ideas/DIARY.md`, update `docs/diary-format.md`, wire `/new-idea` skill
+**Next priorities:**
+- **Chunk 4a amendments** — execute `plans/portfolio-chunk-4a-amendments.md`. Most urgent: amendments 2 + 3 (schema extension, classifier, render helper, preview harness, promote rewrite) as one commit; then 4a.7 (writing topics + bookmark relocation) as a second commit.
+- **4a.4** (workspace repo) — synthesise voice/imagery/diary research into `.claude/rules/writing-style.md`
+- **4a.5** (workspace repo) — create `ideas/DIARY.md`, update `docs/diary-format.md`, wire `/new-idea` skill
 
-**After 4a.4/4a.5:** run the 4a.6.6 first-use gate (`/bookmark` one real moment, promote end-to-end), then start 4b.
+**After amendments + 4a.4/4a.5:** run the 4a.6.6 first-use gate by promoting `plan-iteration-example` end-to-end through the amended preview-based review flow. Then start 4b.
 
 **Card deep-dive v3 + v4 shipped (2026-04-12, prior session)** — `plans/portfolio-stitch-assets/card-deep-dive-v3.html` and `v4.html` (commit `54f3aa5`). v3 pins **Layout A (top 160px strip)** as the fixed card spec and renders all six v2 visual types at strip scale, then explores six options for fitting a mobile screenshot (~1:2.16) into a ~2.6:1 strip (M1 top slice, M2 contained, M3 tilted bleed, M4 dual cascade, M5 meta split, M6 UI detail zoom). v3 also changes the numeral colour rule from the signature gradient to card register colour (royal for work, violet for writing) so a 2×2 grid doesn't collapse into visual soup. v4 refines v3 on user feedback: **(1)** unified sizing shell for centred marks (numeral 120px / icon 88px / monogram 72px) so they render at sibling weights; **(2)** deeper text marks — moved from `royal-10`/`violet-10` to `royal-8`/`violet-8`, the exact anchor shades of the original gradient; **(3)** monogram moves from Geist Mono to Fraunces to match numeral family; **(4)** screenshot auto-tint deepened from opacity 0.55 to 0.9 so the blend locks fully to card colour with no gradient bleed-through; **(5)** new §3b combined mobile section — recommends using M5 and M6 together with rule "max one M5 per grid (anchor card), M6 for the rest." v1, v2, v3 preserved as iteration trail. **Pending user review of v4** — if decisions lock, proceed to chunk 4b (case study content hierarchy). Two open questions still in v4: (a) does gradient-mark stay in the type pool or drop to a reserved slot for featured + palette-as-subject posts; (b) do M5/M6 become explicit `image.kind` sub-types in the Card props API or live as capture-time decisions in the `<Screenshot>` helper component (my lean: keep API simple, compose in the helper).
 

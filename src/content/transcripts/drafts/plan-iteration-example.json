@@ -1,0 +1,48 @@
+{
+  "id": "plan-iteration-example",
+  "title": "Plan iteration example",
+  "date": "2026-04-12",
+  "context": "",
+  "note": "Iterating on the transcript-component plan through Q&A, then a rejection+revision cycle when review-in-UI feedback surfaced. Test fixture for the amended ChatTranscript component.",
+  "sourceSessionId": "ff0e4a4a-a695-420d-9cb7-00506686e10e",
+  "_capturedAt": "2026-04-12T00:20:54.619Z",
+  "turns": [
+    {
+      "role": "assistant",
+      "text": "Now rewriting the plan to reflect shipped 4a.6 + reusable preview script."
+    },
+    {
+      "role": "assistant",
+      "text": "",
+      "collapsedTools": [
+        "[Write ~/.claude/plans/polished-wandering-widget.md]"
+      ]
+    },
+    {
+      "role": "assistant",
+      "text": "Plan updated. Key changes from the previous draft:\n\n- **Reframed as amendments to shipped 4a.6**, not greenfield — schema, bookmark script, promote script, and `/bookmark` skill already exist and are being edited/relocated.\n- **New `scripts/render-transcript.mjs` shared helper** — single source of truth for transcript HTML + CSS, imported by both the preview harness and the future `<ChatTranscript>.astro` component. Render parity is guaranteed by a test gate.\n- **New `scripts/preview-transcript.mjs` CLI** — wraps `renderTranscript` in a standalone HTML page, opens in browser, supports `--variant a-h1|a-h2|b-h1|b-h2` for comparing the four icon-pair × header-layout combinations cheaply. `--batch` renders all drafts on one page for session-end review.\n- **Promote review is now a browser preview**, not a terminal listing — `promote-transcript.mjs` shells out to the preview harness, the user reviews in-browser, then p/e/r/c from the terminal.\n- **Design artefact path** — previews land at `plans/portfolio-stitch-assets/transcripts/preview-*.html`, committable and survives sessions.\n- **Memory saved** — `feedback_review_in_ui_component.md` captures the general principle."
+    },
+    {
+      "role": "assistant",
+      "text": "",
+      "collapsedTools": [
+        "[ExitPlanMode]"
+      ]
+    },
+    {
+      "role": "assistant",
+      "text": "Plan approved. The plan file is at `~/.claude/plans/polished-wandering-widget.md`. Ready to start implementation when you give the word — want me to begin with a specific amendment (1/2/3/4), or work through them in order?"
+    },
+    {
+      "role": "user",
+      "text": "bookmark this conversation as an example of iterating on a plan. I will use this as the example to test the amended transcript component, once implemented."
+    },
+    {
+      "role": "assistant",
+      "text": "",
+      "collapsedTools": [
+        "[Read ~/Documents/Claude code\\portfolio\\scripts\\bookmark-transcript.mjs]"
+      ]
+    }
+  ]
+}
