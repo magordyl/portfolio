@@ -40,13 +40,25 @@ Astro uses `@tailwindcss/vite` (Vite plugin), NOT `@astrojs/tailwind`. The `astr
 
 ## Current Status (2026-04-12)
 
-**Last session (2026-04-12) — Chunk 4a closed: writing-topic workflow, session-utils extraction, /bookmark relocation.**
+**Last session (2026-04-12) — Chunk 4c.1 complete: components + layout + ChatTranscript fix.**
 
-- **Chunk 4b complete** (commit `5f9260c`). Project content template locked at `plans/portfolio-case-study-template.md`. Key decisions: "Projects"/"Writing" naming, flexible middle zone (1-3 sections from Decisions/Architecture/Design pool), word budgets as soft guides.
-- **Architecture diagrams use Mermaid**, not hand-authored SVG. Tested in `plans/portfolio-stitch-assets/mermaid-diagram-samples-{v1,v2}.html`. `classDef` handles three-tier node treatment (owned/highlighted/external). Sentence-case labels (CSS override on Mermaid's default uppercase). Subgraph labels stay uppercase by convention.
-- **All diagram types share one mobile strategy:** `.diagram-inner` with `min-width: 490px`, `.diagram-card` with `overflow-x: auto`, "scroll →" hint when overflowing. Font size stays at 13px — never shrinks on mobile. The `<Diagram>` Astro component (built in 4c.1) enforces this for all diagram types.
-- **Architecture diagram colour standards** (from template): owned = royal-4/royal-8, highlighted = royal-5/royal-9 (2px), external = transparent/royal-7 dashed. Royal Tonal only (no Violet Signal in architecture diagrams).
-- **Hand-authored SVG explorers** (`architecture-diagram-explorer-{v1,v2}.html`) preserved for the iteration trail but Mermaid is the production path.
+**Commits this session:**
+- `1f952da` — Diagram, ChatTranscript, CaseStudyLayout, project page routes
+- `edc9f20` — diary entry for 4c.1
+- `0ce66f6` — untracked scripts + draft transcript committed
+- `96e1153` — ChatTranscript fix: nested expanders within turns, bolder chevron
+
+**Chunk 4c.1 complete.** Three components and the page route shipped:
+- **`Diagram.astro`** — 490px min-width scroll container, mobile bleed via negative margins, "scroll →" hint on mobile
+- **`ChatTranscript.astro`** — inline + breakout modes, vertical stacked Bot/User icons (24px circle gutter), three render modes (verbatim, collapsed plan/skill/research, headline with per-heading collapse), native `<details>` with 16px chevron-down SVG, markdown rendering, zero JS
+- **`CaseStudyLayout.astro`** — 680px prose column, hero from frontmatter (number badge, serif title, TL;DR, metadata bar, tags, live link, hero image placeholder), h2 styled as uppercase mono section kickers, breakout margin support, screenshot grid utility
+- **`pages/projects/[slug].astro`** — static routes for all 5 projects, MDX rendered with ChatTranscript + Diagram as injected components
+
+**Design decisions locked this session:**
+- **Bot** icon for Claude (not Sparkles)
+- **Vertical stacked** header layout (icon + label in 40px left gutter)
+- **Stitch v1** layout as structural base (spacing tightened to token scale)
+- Stitch ideation artefact preserved at `plans/portfolio-assets/stitch-case-study-v1{-screenshot.png,.html}`
 
 **Planned middle zone per project (from template):**
 
@@ -58,15 +70,15 @@ Astro uses `@tailwindcss/vite` (Vite plugin), NOT `@astrojs/tailwind`. The `astr
 | This Portfolio (#4) | Lightweight | Design | Meta: design system is the story |
 | Planner V1 (#5) | Full | Architecture, Design, Decisions | Complex system + new frontend |
 
-**Chunk 4a complete** — all sub-chunks shipped (4a.1-4a.7). Amendment 1 (icon variants) deferred to 4c.1 design explorer. Writing topics migrated from `portfolio-writing-brainstorm.md` to `plans/writing-topics/` (per-topic files + INDEX). `/bookmark` relocated to workspace level. Session utils extracted to `scripts/session-utils.mjs`.
+**Preview harness** (`scripts/render-transcript.mjs` + `scripts/preview-transcript.mjs`) already existed from prior session. Verified working with `--slug plan-iteration-example --variant b-h2 --open`. All four variants render; `b-h2` is the locked default.
 
 **Next priorities (session order):**
-1. **4c.1** — case study page layout explorer + `<ChatTranscript>` + `<Diagram>` components
-2. **4d** — write the-weekly case study against locked template + layout
+1. **4d** — write the-weekly case study against locked template + layout (Opus recommended)
+2. **4c.2-4c.5** — remaining page layout explorers (/projects index, /writing, /log, /404+/privacy)
 
 **Deployed** — Cloudflare Pages, `magordyl/portfolio` (`main` branch). Live at `dylan-portfolio.magordyl.workers.dev`.
 
-**Chunks remaining:** 4c, 4d, 5, 5.5, 5.6, 6.
+**Chunks remaining:** 4c.2-4c.5, 4d, 5, 5.5, 5.6, 6.
 
 ## Implementation Plan
 

@@ -12,7 +12,9 @@ Three components and the project page route shipped in one session. The interest
 
 **`CaseStudyLayout.astro`.** The layout renders the hero section from frontmatter (number badge, serif title, TL;DR, metadata bar, tags, live link, hero image placeholder). The body is a 680px prose column where h2 elements are styled as mono section kickers — uppercase, letter-spaced, Royal Tonal 11 — matching the Stitch mockup's section label treatment. The layout also injects `.body :global()` rules for prose typography, diagram/transcript spacing, and the screenshot grid utility.
 
-**What ships next.** The preview harness (`render-transcript.mjs` + `preview-transcript.mjs`) is step 4 — Sonnet work, scripting and HTML templating. Then 4d: write the-weekly case study against the locked layout.
+**ChatTranscript fix after review.** The first version had two problems. First, the `<details>` element wrapped entire turns as collapsible blocks — the gutter (icon + label) disappeared when collapsed. The fix was structural: expanders nest *within* a single turn's body, not around the turn. The gutter always stays visible. Three render modes now: verbatim (text renders directly), collapsed (plan/skill/research get a summary bar with body in `<details>`), and headline (each `##`/`###` heading stays visible, section bodies individually collapsible via their own `<details>`). This matches how `render-transcript.mjs` already handles it — the Astro component was lagging behind the render helper. Second, the chevron was a `›` pseudo-element in `--text-sm` at `--royal-11` — too subtle against the royal-3 background. Replaced with a 16px lucide `chevron-down` SVG at `stroke-width: 2.5` in `--royal-10`. The text-to-SVG jump and the bolder stroke make it unmissable.
+
+**What ships next.** 4d: write the-weekly case study against the locked template and layout. Opus recommended for the writing work.
 
 ---
 
