@@ -1,5 +1,13 @@
 # Development Diary
 
+## 2026-04-12 — Writing seeds captured, transcript promoted, 4a.6.6 gate closed
+
+Captured two writing brainstorm entries: a four-post series on how the workflow has evolved since starting Claude Code (engineering, portfolio maintenance, design, idea capture) and a standalone post on custom skills as a personal operating system. Both are seeds in `plans/portfolio-writing-brainstorm.md`, not to be drafted until chunk 5.5.
+
+Promoted `plan-iteration-example` transcript from drafts to published (`a3dd316`). The schema bug that blocked promotion last session (tool-only assistant turns rejected as "empty text") was already fixed by the amendments 2+3 commit (`5086003`). This closes the 4a.6.6 first-use gate.
+
+---
+
 ## 2026-04-12 — Chunk 4a.4 complete: writing-style.md shipped, A2 diagram aesthetic locked
 
 The workspace-wide writing style guide (`.claude/rules/writing-style.md`) shipped as a three-part document: structural rules locked, style guardrails as prohibitions only, imagery and transcript standards compressed from the portfolio's `portfolio-imagery-standards.md`. The guide governs all long-form prose in this workspace — case studies, writing posts, diary entries, research docs — and because it lives in `.claude/rules/` it is auto-loaded into every session. Chunk 4a.4 is now complete; 4a.5 (ideas diary) is the last foundation sub-chunk.
