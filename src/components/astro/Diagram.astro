@@ -1,0 +1,81 @@
+---
+interface Props {
+  src: string;
+  alt?: string;
+  caption?: string;
+}
+
+const { src, alt = '', caption } = Astro.props;
+---
+
+<figure class="diagram">
+  <p class="diagram-scroll-hint" aria-hidden="true">scroll →</p>
+  <div class="diagram-outer">
+    <div class="diagram-inner">
+      <img src={src} alt={alt} class="diagram-img" />
+    </div>
+  </div>
+  {caption && <figcaption class="diagram-caption">{caption}</figcaption>}
+</figure>
+
+<style>
+  .diagram {
+    margin: 0;
+  }
+
+  /* Scroll hint: only visible on mobile where diagram may overflow */
+  .diagram-scroll-hint {
+    display: none;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-faint);
+    text-align: right;
+    margin: 0 0 var(--space-2) 0;
+  }
+
+  @media (max-width: 639px) {
+    .diagram-scroll-hint {
+      display: block;
+    }
+  }
+
+  /* Mobile: bleed to full container width by cancelling card padding */
+  .diagram-outer {
+    overflow-x: auto;
+    margin-left: calc(-1 * var(--space-5));
+    margin-right: calc(-1 * var(--space-5));
+  }
+
+  @media (min-width: 640px) {
+    .diagram-outer {
+      margin-left: 0;
+      margin-right: 0;
+    }
+  }
+
+  /* Hard floor: min 490px so 11px SVG text never drops below 9px rendered */
+  .diagram-inner {
+    min-width: 490px;
+    padding: 0 var(--space-5);
+  }
+
+  @media (min-width: 640px) {
+    .diagram-inner {
+      padding: 0;
+    }
+  }
+
+  .diagram-img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .diagram-caption {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--ink-faint);
+    margin: var(--space-3) 0 0;
+    line-height: var(--lh-normal);
+  }
+</style>

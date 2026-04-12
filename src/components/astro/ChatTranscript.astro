@@ -1,0 +1,252 @@
+---
+import { getEntry } from 'astro:content';
+
+interface Props {
+  id: string;
+  mode?: 'inline' | 'breakout';
+}
+
+const { id, mode = 'inline' } = Astro.props;
+
+const entry = await getEntry('transcripts', id);
+if (!entry) throw new Error(`ChatTranscript: no transcript found with id "${id}"`);
+
+const { title, note, turns } = entry.data;
+
+// Collapse logic:
+// - user turns: never collapse
+// - kind 'verbatim' | 'headline' | undefined: never collapse
+// - kind 'plan' | 'skill' | 'research': collapse by default
+function shouldCollapse(turn: (typeof turns)[number]): boolean {
+  if (turn.role === 'user') return false;
+  if (!turn.kind || turn.kind === 'verbatim' || turn.kind === 'headline') return false;
+  return true;
+}
+---
+
+<aside class:list={['transcript', `transcript--${mode}`]} aria-label={`Chat transcript: ${title}`}>
+  {note && <p class="transcript-note">{note}</p>}
+
+  <ol class="transcript-turns">
+    {turns.map((turn) => {
+      const isUser = turn.role === 'user';
+      const collapse = shouldCollapse(turn);
+
+      return (
+        <li class:list={['turn', isUser ? 'turn--user' : 'turn--claude']}>
+          <div class="turn-gutter">
+            <div class="turn-icon" aria-hidden="true">
+              {isUser ? (
+                <!-- User icon (lucide User) -->
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+              ) : (
+                <!-- Bot icon (lucide Bot) -->
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 8V4H8"/>
+                  <rect width="16" height="12" x="4" y="8" rx="2"/>
+                  <path d="M2 14h2"/>
+                  <path d="M20 14h2"/>
+                  <path d="M15 13v2"/>
+                  <path d="M9 13v2"/>
+                </svg>
+              )}
+            </div>
+            <span class="turn-label">{isUser ? 'Dylan' : 'Claude'}</span>
+          </div>
+
+          <div class="turn-body">
+            {turn.collapsedTools && turn.collapsedTools.length > 0 && (
+              <ul class="turn-tools" aria-label="Tool calls">
+                {turn.collapsedTools.map(tool => (
+                  <li class="turn-tool">{tool}</li>
+                ))}
+              </ul>
+            )}
+
+            {collapse ? (
+              <details class="turn-details">
+                <summary class="turn-summary">
+                  {turn.summary ?? 'Show full reply →'}
+                </summary>
+                <div class="turn-text" set:html={turn.text.replace(/\n/g, '<br>')} />
+              </details>
+            ) : (
+              <div class="turn-text" set:html={turn.text.replace(/\n/g, '<br>')} />
+            )}
+          </div>
+        </li>
+      );
+    })}
+  </ol>
+
+  <p class="transcript-count">— {turns.length} turn{turns.length === 1 ? '' : 's'} —</p>
+</aside>
+
+<style>
+  .transcript {
+    background: var(--royal-3);
+    border: 1px solid var(--royal-5);
+    border-radius: var(--radius);
+    padding: var(--space-5);
+    font-size: var(--text-sm);
+  }
+
+  /* Breakout: extend 120px past prose column on the right */
+  .transcript--breakout {
+    margin-right: -120px;
+  }
+
+  @media (max-width: 900px) {
+    .transcript--breakout {
+      margin-right: 0;
+    }
+  }
+
+  /* Editorial note above the turns */
+  .transcript-note {
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    font-style: italic;
+    color: var(--ink-dim);
+    margin: 0 0 var(--space-4);
+    line-height: var(--lh-normal);
+  }
+
+  .transcript-turns {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+  }
+
+  /* Turn: left gutter + body */
+  .turn {
+    display: grid;
+    grid-template-columns: 40px 1fr;
+    gap: var(--space-3);
+    align-items: start;
+  }
+
+  /* Gutter: icon circle + label stacked vertically */
+  .turn-gutter {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-1);
+    padding-top: 2px;
+  }
+
+  .turn-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--royal-4);
+    border: 1px solid var(--royal-6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .turn--user .turn-icon {
+    color: var(--royal-11);
+  }
+
+  .turn--claude .turn-icon {
+    color: var(--royal-10);
+  }
+
+  .turn-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--ink-faint);
+    letter-spacing: 0.04em;
+    text-transform: lowercase;
+    line-height: 1;
+  }
+
+  /* Body: tool calls + text */
+  .turn-body {
+    min-width: 0;
+  }
+
+  .turn-tools {
+    list-style: none;
+    margin: 0 0 var(--space-2);
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .turn-tool {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--ink-faint);
+    background: var(--royal-2);
+    border-radius: var(--radius-sm);
+    padding: 2px var(--space-2);
+    display: inline-block;
+  }
+
+  .turn-text {
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    color: var(--ink);
+    line-height: var(--lh-loose);
+  }
+
+  /* Collapse: native <details>/<summary>, CSS-only chevron */
+  .turn-details {
+    /* No extra wrapper styles needed */
+  }
+
+  .turn-summary {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--royal-11);
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) 0;
+    user-select: none;
+  }
+
+  .turn-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  /* Chevron via pseudo-element */
+  .turn-summary::before {
+    content: '›';
+    display: inline-block;
+    transition: transform 0.15s ease;
+    font-size: var(--text-sm);
+    line-height: 1;
+  }
+
+  .turn-details[open] .turn-summary::before {
+    transform: rotate(90deg);
+  }
+
+  .turn-details[open] .turn-text {
+    margin-top: var(--space-3);
+  }
+
+  /* Turn count footer */
+  .transcript-count {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--ink-faint);
+    text-align: center;
+    margin: var(--space-4) 0 0;
+    letter-spacing: 0.08em;
+  }
+</style>

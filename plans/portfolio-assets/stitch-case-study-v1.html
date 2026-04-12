@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=Public+Sans:wght@300;400;600&amp;family=Space+Grotesk:wght@300;500;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-fixed": "#dde1ff",
+                        "surface-container": "#1b1f2f",
+                        "primary-fixed": "#dde1ff",
+                        "surface-container-lowest": "#090d1d",
+                        "primary-container": "#3b5bdb",
+                        "error": "#ffb4ab",
+                        "surface": "#0f1223",
+                        "inverse-on-surface": "#2c3041",
+                        "outline": "#8e90a0",
+                        "tertiary": "#ffb691",
+                        "inverse-primary": "#3052d2",
+                        "on-secondary-fixed-variant": "#394475",
+                        "tertiary-container": "#ac4900",
+                        "secondary": "#b9c4fd",
+                        "on-error-container": "#ffdad6",
+                        "on-primary-fixed-variant": "#0736ba",
+                        "surface-bright": "#35384a",
+                        "on-background": "#dfe1f8",
+                        "on-surface": "#dfe1f8",
+                        "secondary-container": "#394475",
+                        "on-error": "#690005",
+                        "on-tertiary-fixed": "#341100",
+                        "primary": "#b8c3ff",
+                        "on-primary-container": "#e2e5ff",
+                        "primary-fixed-dim": "#b8c3ff",
+                        "outline-variant": "#444654",
+                        "on-secondary-fixed": "#0a1747",
+                        "surface-dim": "#0f1223",
+                        "on-tertiary-container": "#ffe0d2",
+                        "on-tertiary": "#552000",
+                        "secondary-fixed-dim": "#b9c4fd",
+                        "surface-variant": "#303446",
+                        "error-container": "#93000a",
+                        "surface-tint": "#b8c3ff",
+                        "on-primary": "#002388",
+                        "on-secondary": "#222d5d",
+                        "on-tertiary-fixed-variant": "#793100",
+                        "on-secondary-container": "#a8b2eb",
+                        "tertiary-fixed": "#ffdbcb",
+                        "surface-container-highest": "#303446",
+                        "surface-container-high": "#25293a",
+                        "surface-container-low": "#171b2b",
+                        "inverse-surface": "#dfe1f8",
+                        "background": "#0f1223",
+                        "tertiary-fixed-dim": "#ffb691",
+                        "on-surface-variant": "#c4c5d6",
+                        "on-primary-fixed": "#001355"
+                    },
+                    "borderRadius": {
+                        "none": "0px",
+                        "DEFAULT": "0px",
+                        "lg": "0px",
+                        "xl": "0px",
+                        "full": "0px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Newsreader", "serif"],
+                        "body": ["Public Sans", "sans-serif"],
+                        "label": ["Space Grotesk", "monospace"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { background-color: #0f1223; color: #dfe1f8; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .prose-column { max-width: 680px; margin-left: auto; margin-right: auto; }
+        .breakout-right { margin-right: -120px; }
+        @media (max-width: 1024px) { .breakout-right { margin-right: 0; } }
+    </style>
+</head>
+<body class="font-body selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar -->
+<header class="bg-[#0f1223] dark:bg-[#0f1223] flex justify-between items-center w-full px-8 py-6 max-w-[1000px] mx-auto docked full-width top-0">
+<div class="text-xl font-serif italic text-white dark:text-white Newsreader">The Midnight Essayist</div>
+<nav class="hidden md:flex gap-8 items-center">
+<a class="text-slate-500 dark:text-slate-400 font-sans Public Sans hover:text-white transition-colors duration-300" href="#">Essays</a>
+<a class="text-slate-500 dark:text-slate-400 font-sans Public Sans hover:text-white transition-colors duration-300" href="#">Archives</a>
+<a class="text-slate-500 dark:text-slate-400 font-sans Public Sans hover:text-white transition-colors duration-300" href="#">About</a>
+</nav>
+<div class="flex items-center gap-4 text-[#3B5BDB] dark:text-[#3B5BDB]">
+<span class="material-symbols-outlined">menu</span>
+</div>
+</header>
+<main class="w-full px-8">
+<!-- Hero Section -->
+<section class="mt-24 mb-40 max-w-[1000px] mx-auto">
+<div class="flex flex-col gap-6">
+<span class="font-label text-xs uppercase tracking-widest text-outline">#01 (mono)</span>
+<h1 class="font-headline text-7xl md:text-8xl tracking-tighter text-on-surface">The Weekly</h1>
+<div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-start mt-4">
+<div class="md:col-span-8">
+<p class="font-body text-xl leading-relaxed text-on-surface-variant italic">
+                            TL;DR: An automated system for generating lean, high-protein meal plans based on cyclical ingredient logistics.
+                        </p>
+</div>
+<div class="md:col-span-4 flex flex-col gap-4">
+<div class="flex flex-wrap gap-2">
+<span class="font-label text-[10px] px-2 py-1 bg-surface-container-high text-primary border border-outline-variant/20">NEXT.JS</span>
+<span class="font-label text-[10px] px-2 py-1 bg-surface-container-high text-primary border border-outline-variant/20">POSTGRES</span>
+<span class="font-label text-[10px] px-2 py-1 bg-surface-container-high text-primary border border-outline-variant/20">TAILWIND</span>
+</div>
+<a class="font-label text-xs text-primary-container hover:underline flex items-center gap-2" href="#">
+                            LIVE SITE <span class="material-symbols-outlined text-sm">north_east</span>
+</a>
+</div>
+</div>
+<div class="mt-12 aspect-video bg-surface-container-lowest border border-[#2a304a] relative group overflow-hidden">
+<img class="w-full h-full object-cover opacity-60 grayscale group-hover:grayscale-0 transition-all duration-700" data-alt="Clean minimalist dashboard interface on a dark screen with technical charts and structured data tables in deep blue tones" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDgNn-Z2SM61EVmqwbH7k8IursIiQqotPLoeM9ATgSxyCVnNyv94ZHv6jFJpMRnFILMW_0npw8yXfQpjmTbva6dURV02wCq0HBeEnr2mgoc3h-VIrZC35Io1ngpy_2UM5RSOMIj5r9B97szdBUr0Wrc8HUn-UqwMYE5JYK7zlLriUhqnzuDPipQaqiC9-sXwWncXPa79zwUbvuJC1kaCSAAP7XrDtCXM2ItC2qTVO-MjA6rT74CQDNbqOn4VyzU08Vsd4tjEyKLHJ78"/>
+<div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+<span class="font-label text-[10px] tracking-[0.3em] uppercase text-outline/40">Technical Overview Screenshot</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Problem Section -->
+<section class="mb-40 prose-column">
+<span class="font-label text-xs uppercase tracking-widest text-outline block mb-8">PROBLEM</span>
+<div class="font-body text-lg leading-[1.7] text-on-surface-variant">
+                Modern meal planning often collapses under the weight of decision fatigue and logistical waste. Most systems prioritize variety over sustainability, leading to orphaned ingredients and escalating costs. "The Weekly" was built to reverse this entropy by treating groceries as immutable state in a recurring cycle.
+            </div>
+</section>
+<!-- Design Section -->
+<section class="mb-40">
+<div class="prose-column mb-12">
+<span class="font-label text-xs uppercase tracking-widest text-outline block mb-8">DESIGN</span>
+<p class="font-body text-lg leading-[1.7] text-on-surface-variant">
+                    The interface follows a brutalist hierarchy, stripping away imagery to focus entirely on nutritional typography and quantity-driven logistics.
+                </p>
+</div>
+<div class="max-w-[1000px] mx-auto aspect-[21/9] bg-[#141830] flex items-center justify-center border border-outline-variant/10">
+<div class="text-center">
+<span class="material-symbols-outlined text-4xl text-outline/20 block mb-2">web_asset</span>
+<span class="font-label text-[10px] tracking-widest text-outline/50 uppercase">Design Explorer Embed Placeholder</span>
+</div>
+</div>
+<div class="prose-column mt-4 text-right">
+<span class="font-label text-[10px] text-outline uppercase tracking-tighter">Fig 02. Interactive component breakdown for the daily macro-grid.</span>
+</div>
+</section>
+<!-- Architecture Section -->
+<section class="mb-40">
+<div class="max-w-[1000px] mx-auto mb-16 aspect-[16/5] bg-surface-container-lowest border border-outline-variant/10 flex items-center justify-center">
+<div class="text-center">
+<span class="material-symbols-outlined text-3xl text-outline/20 block mb-2">schema</span>
+<span class="font-label text-[10px] tracking-widest text-outline/50 uppercase">System Architecture Diagram</span>
+</div>
+</div>
+<div class="prose-column">
+<span class="font-label text-xs uppercase tracking-widest text-outline block mb-8">ARCHITECTURE</span>
+<p class="font-body text-lg leading-[1.7] text-on-surface-variant">
+                    The backend operates on a unidirectional data flow. Ingredients are registered as primitives, which are then composed into 'MealStates'. This allows the system to calculate the delta between the desired nutrition and the current pantry status with mathematical certainty.
+                </p>
+</div>
+</section>
+<!-- Decisions Section -->
+<section class="mb-40 max-w-[1000px] mx-auto flex flex-col items-center">
+<div class="w-full prose-column">
+<span class="font-label text-xs uppercase tracking-widest text-outline block mb-8">DECISIONS</span>
+<p class="font-body text-lg leading-[1.7] text-on-surface-variant mb-12">
+                    How do we solve the 'Half-Onion' problem? We move the complexity from the user to the algorithm. 
+                </p>
+</div>
+<div class="w-full max-w-[800px] ml-auto breakout-right bg-surface-container-low p-12 border-l-4 border-primary-container relative">
+<p class="font-headline italic text-on-surface-variant mb-12 opacity-80 border-b border-outline-variant/20 pb-4">
+                    The following log captures the moment the core logic shifted toward ingredient-first consolidation.
+                </p>
+<div class="flex flex-col gap-12">
+<!-- Turn 1 -->
+<div class="flex flex-col gap-4">
+<div class="flex items-center gap-3">
+<span class="font-label text-[10px] font-bold text-primary tracking-widest">DYLAN</span>
+<span class="h-[1px] flex-grow bg-outline-variant/20"></span>
+</div>
+<p class="font-body text-on-surface">The current recipe-first model is creating too much waste. If two recipes use 200g and 150g of chicken, but it's sold in 500g packs, the system ignores the leftover 150g. Can we flip the logic?</p>
+</div>
+<!-- Turn 2 -->
+<div class="flex flex-col gap-4">
+<div class="flex items-center gap-3">
+<span class="font-label text-[10px] font-bold text-error tracking-widest uppercase">Claude bot</span>
+<span class="h-[1px] flex-grow bg-outline-variant/20"></span>
+</div>
+<details class="group cursor-pointer">
+<summary class="list-none flex items-center gap-4 text-on-surface">
+<span class="font-body font-bold">Plan: ingredient consolidation approach</span>
+<span class="material-symbols-outlined text-sm group-open:rotate-180 transition-transform">expand_more</span>
+</summary>
+<div class="mt-4 p-6 bg-surface-container-lowest font-label text-xs text-on-surface-variant leading-relaxed">
+                                1. Aggregate total SKU volumes from selected recipes.<br/>
+                                2. Calculate modulo against standard retail packaging units.<br/>
+                                3. Inject "filler snacks" or "side components" to absorb delta residues.<br/>
+                                4. Return optimized shopping list.
+                            </div>
+</details>
+</div>
+</div>
+<div class="mt-12 flex justify-between items-center border-t border-outline-variant/20 pt-6">
+<span class="font-label text-[10px] text-outline">2 of 6 turns indicator</span>
+<span class="material-symbols-outlined text-outline text-lg">chat_bubble</span>
+</div>
+</div>
+</section>
+<!-- Outcome Section -->
+<section class="mb-40">
+<div class="prose-column mb-16">
+<span class="font-label text-xs uppercase tracking-widest text-outline block mb-8">OUTCOME</span>
+<p class="font-body text-lg leading-[1.7] text-on-surface-variant">
+                    The resulting platform reduced grocery waste by 40% in internal testing and cut the time spent on meal planning from 45 minutes to under 30 seconds.
+                </p>
+</div>
+<div class="max-w-[680px] mx-auto flex flex-col md:flex-row gap-8">
+<div class="w-[320px] h-[400px] bg-surface-container border border-outline-variant/20 overflow-hidden">
+<img class="w-full h-full object-cover opacity-80" data-alt="Mobile interface mockup showing a minimalist shopping list with checkbox items and bold typography on a dark background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCTtQoZlPukpwV8Heh-o1b7isNKSnaHsKJyl6PYmGGPJmCeMVBMsuAQ_DaIx1u-wZn7CCbFD5nUYR6wsgcRt4yrhk-QkL6B6fPzQ4hCIsyO6ujA4hb3nqdjTShjtGTuft5xN4FtJwQyRh3S8cUOWUmEUOdI2uTBIWqkiB7hycCE5mn11qpwEiPhbtaGgXKTfPR1jan2WjqF9lTGDH8G18SYtarcRaoFPrUlun0S1KuoSdDKtdmDZwLcFlk386lEptC4IafVirl1N3EU"/>
+</div>
+<div class="w-[320px] h-[400px] bg-surface-container border border-outline-variant/20 overflow-hidden">
+<img class="w-full h-full object-cover opacity-80" data-alt="Conceptual visualization of data flowing through nodes representing a clean and efficient server architecture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAmaP5uIA5j7aP6VSC1gtNvBjjHmRKbFq204u2KpQXpf3ZAOipLrDv6R0pdeO3b9k12-_2kv8-biMIG-5Gjb7oKDmoyGRSGz3cOOyKRip_xIun8rYePce-fBG6u0ePmGFEzZmZ8XI2skbSKW7bWdHhPfp-639TXlYTE0HQzhawr0lVjiEbPbo1q4Ys0IcHDS5EiM8teq8-z3xItUOGKRPG67a1Ccah2CXvhhczyIOVDm0peyW3D-u19BLZV7RIdDKtwnFDqIrOM8ppD"/>
+</div>
+</div>
+</section>
+<!-- Lessons Section -->
+<section class="mb-40 prose-column">
+<span class="font-label text-xs uppercase tracking-widest text-outline block mb-8">LESSONS</span>
+<p class="font-body text-lg leading-[1.7] text-on-surface-variant mb-12">
+                User experience isn't always about adding features; sometimes it's about removing variables. By constraining the user's choices to only those that were logistically sound, we paradoxically increased their satisfaction.
+            </p>
+<div class="bg-surface-container-high p-8 border border-outline-variant/10">
+<p class="font-headline italic text-sm text-on-surface-variant mb-8">Reflecting on the constraints of deterministic meal planning.</p>
+<div class="flex flex-col gap-6">
+<div class="flex flex-col gap-1">
+<span class="font-label text-[9px] uppercase tracking-widest text-primary">System Log</span>
+<p class="font-body text-sm text-on-surface">"Efficiency is the byproduct of discipline, not variety."</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Next Section -->
+<section class="mb-40 prose-column border-t border-outline-variant/20 pt-16">
+<a class="font-headline text-3xl text-on-surface hover:text-primary transition-colors flex items-center justify-between group" href="#">
+<span>Read more: How ingredient consolidation shaped the architecture</span>
+<span class="material-symbols-outlined group-hover:translate-x-2 transition-transform">arrow_forward</span>
+</a>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-[#0f1223] dark:bg-[#0f1223] flex flex-col md:flex-row justify-between items-center w-full px-8 py-24 max-w-[680px] mx-auto border-t border-slate-800/20 mt-40">
+<div class="font-mono text-xs uppercase tracking-widest Space Grotesk text-slate-600 dark:text-slate-500">
+            © 2024 The Midnight Essayist. Built as prose.
+        </div>
+<div class="flex gap-6 mt-8 md:mt-0">
+<a class="font-mono text-xs uppercase tracking-widest Space Grotesk text-slate-600 dark:text-slate-500 hover:text-[#3B5BDB] transition-colors" href="#">Colophon</a>
+<a class="font-mono text-xs uppercase tracking-widest Space Grotesk text-slate-600 dark:text-slate-500 hover:text-[#3B5BDB] transition-colors" href="#">RSS</a>
+<a class="font-mono text-xs uppercase tracking-widest Space Grotesk text-slate-600 dark:text-slate-500 hover:text-[#3B5BDB] transition-colors" href="#">Contact</a>
+</div>
+</footer>
+</body></html>
