@@ -3,12 +3,12 @@
   "title": "Plan iteration example",
   "date": "2026-04-12",
   "context": "Iterating on the chunk 4a amendments plan across two drafts, with a self-correction cycle between them.",
-  "note": "Shows the full request-to-approval arc: initial brief, Claude proposes with questions, Dylan answers, plan v1 ships, Claude catches its own mistake, plan v2 fixes it.",
+  "note": "Shows the full request-to-approval arc: initial brief, Claude proposes with questions, Dylan answers, plan v1 ships, Claude catches its own mistake mid-session and rewrites without being asked.",
   "sourceSessionId": "ff0e4a4a-a695-420d-9cb7-00506686e10e",
   "turns": [
     {
       "role": "user",
-      "text": "I want to add a few more improvements to the plan for portfolio. First, I want to make improvements to the chat transcript component. One change is I want to explore having a visual identity for claude and Dylan. Perhaps by using a robot icon for claude and a person icon for Dylan. Second, I want to be able to have some collapsed sections in the transcript, with only the key bits showing by default, but ability for the user to click to expand if they want to see the full detail. This is for example, for times when Claude presents a long plan, I don't want it to take pages of content, but I want the user to be able to go deep into the detail if they want to see and learn from it. Separate improvement to add to the plan: I want to start tracking a list of writing topics that I want to prepare articles for. I want it to be easy for me to add to it while I'm working on any other project. Usually but not always these will be centred around a chat transcript that I'm bookmarking. The purpose is to maintain a log of things I intend to write about in future on the portfolio, with relevant context to jog my memory if it's been a while. Now, come up with recommended changes to the portfolio plan to include these improvements. Present to me for review. Ask me questions to clarify any doubts."
+      "text": "I want to add a few more improvements to the plan for portfolio.\n\nFirst, I want to make improvements to the chat transcript component:\n- I want to explore having a visual identity for Claude and Dylan. Perhaps by using a robot icon for Claude and a person icon for Dylan.\n- I want to be able to have some collapsed sections in the transcript, with only the key bits showing by default, but ability for the user to click to expand if they want to see the full detail. This is for example, for times when Claude presents a long plan, I don't want it to take pages of content, but I want the user to be able to go deep into the detail if they want to see and learn from it.\n\nSeparate improvement to add to the plan: I want to start tracking a list of writing topics that I want to prepare articles for. I want it to be easy for me to add to it while I'm working on any other project. Usually but not always these will be centred around a chat transcript that I'm bookmarking. The purpose is to maintain a log of things I intend to write about in future on the portfolio, with relevant context to jog my memory if it's been a while.\n\nCome up with recommended changes to the portfolio plan to include these improvements. Present to me for review. Ask me questions to clarify any doubts."
     },
     {
       "role": "assistant",
@@ -18,7 +18,7 @@
     },
     {
       "role": "user",
-      "text": "1d 2 visualise both. ensure the icon & text option doesn't use too much horizontal space (consider stacking vertically). 3 other: collapse by default things like skill invocations, plans, research findings from claude. Only the key headlines from claude should be uncollapsed in longer messages. Generally, don't collapse Dylan's messages. Lightweight author review when publishing. I want to see this mocked up in the design explorer step. 4 answered in 3 5a 6a 7a addition from me: the /writing-topic skill should allow me to just invoke it with freeform text, and then automatically capture relevant context from the conversation. E.g. /writing-topic \"optimising the portfolio curation workflow by creating the writing topic skill\""
+      "text": "1. (d)\n2. Visualise both. Ensure the icon + text option doesn't use too much horizontal space (consider stacking vertically).\n3. Other: collapse by default things like skill invocations, plans, research findings from Claude. Only the key headlines from Claude should be uncollapsed in longer messages. Generally, don't collapse Dylan's messages. Lightweight author review when publishing. I want to see this mocked up in the design explorer step.\n4. Answered in 3.\n5. (a)\n6. (a)\n7. (a)\n\nAddition from me: the /writing-topic skill should allow me to just invoke it with freeform text, and then automatically capture relevant context from the conversation. E.g. `/writing-topic \"optimising the portfolio curation workflow by creating the writing topic skill\"`"
     },
     {
       "role": "assistant",
@@ -35,10 +35,6 @@
       "text": "Plan updated. Key changes from the previous draft:\n\n- **Reframed as amendments to shipped 4a.6**, not greenfield — schema, bookmark script, promote script, and `/bookmark` skill already exist and are being edited/relocated.\n- **New `scripts/render-transcript.mjs` shared helper** — single source of truth for transcript HTML + CSS, imported by both the preview harness and the future `<ChatTranscript>.astro` component. Render parity is guaranteed by a test gate.\n- **New `scripts/preview-transcript.mjs` CLI** — wraps `renderTranscript` in a standalone HTML page, opens in browser, supports `--variant a-h1|a-h2|b-h1|b-h2` for comparing the four icon-pair × header-layout combinations cheaply. `--batch` renders all drafts on one page for session-end review.\n- **Promote review is now a browser preview**, not a terminal listing — `promote-transcript.mjs` shells out to the preview harness, the user reviews in-browser, then p/e/r/c from the terminal.\n- **Design artefact path** — previews land at `plans/portfolio-stitch-assets/transcripts/preview-*.html`, committable and survives sessions.\n- **Memory saved** — `feedback_review_in_ui_component.md` captures the general principle.",
       "kind": "plan",
       "summary": "Plan updated"
-    },
-    {
-      "role": "assistant",
-      "text": "Plan approved. The plan file is at `[HOME]/.claude\\plans\\polished-wandering-widget.md`. Ready to start implementation when you give the word — want me to begin with a specific amendment (1/2/3/4), or work through them in order?"
     },
     {
       "role": "user",
