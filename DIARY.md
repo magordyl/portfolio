@@ -1,5 +1,17 @@
 # Development Diary
 
+## 2026-04-12 — Chunk 4a closed: capture workflows for writing topics and transcript bookmarks
+
+The last two foundation sub-chunks shipped together. The session's real contribution is infrastructure that makes portfolio content accumulate passively from normal work sessions rather than requiring dedicated "content creation" time.
+
+**Writing topic capture (`/writing-topic`)** replaces the monolithic `portfolio-writing-brainstorm.md` with per-topic files in `plans/writing-topics/`. The old file mixed three unrelated post ideas in a single 170-line document, making it hard to add context incrementally without tangling the others. Each topic now has its own file with frontmatter (slug, status, source project, linked transcripts) and the script auto-captures session context and transcript links at creation time. The three existing seeds migrated cleanly.
+
+**Session utils extraction** was the technical prerequisite. The bookmark and writing-topic scripts both need session JSONL discovery, event parsing, and redaction. Duplicating that across scripts means divergence on the first bug fix. Extracted to `scripts/session-utils.mjs` and updated bookmark-transcript to import from it. The extraction was additive (no behaviour change, bookmark still runs identically) but required reading every helper function in the bookmark script to decide what belonged in the shared module vs what was bookmark-specific. The split: session discovery, parsing, redaction, and user-turn filtering are shared; tool-use labelling, assistant content extraction, and the turn-merging pipeline stay in bookmark.
+
+**`/bookmark` relocated to workspace level.** The original placement in `portfolio/.claude/skills/` meant it only fired when CWD was the portfolio directory. Writing topic capture surfaced the same cross-project need. Both skills now live at workspace level, both point at portfolio scripts by absolute path. The latent gap was invisible until the second capture script needed the same cross-project reach.
+
+---
+
 ## 2026-04-12 — Mermaid validated for architecture diagrams
 
 Explored whether Mermaid could replace hand-authored SVG for architecture diagrams. The answer is yes. Built two iterations of a sample file (`mermaid-diagram-samples-{v1,v2}.html`) testing all three planned diagram types: architecture (new), flowchart (existing), and quadrant chart (existing).
