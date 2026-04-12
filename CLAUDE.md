@@ -45,22 +45,17 @@ Astro uses `@tailwindcss/vite` (Vite plugin), NOT `@astrojs/tailwind`. The `astr
 
 ## Current Status (2026-04-12)
 
-**Last session (2026-04-12) — Design system scaffold: `design.tokens.ts` created, shadcn exempted.**
+**Last session (2026-04-12) — Chunk 4d: case study structure and interview for the-weekly.**
 
 **What was done this session:**
-- Created `design.tokens.ts` at project root (two-export pattern: `tokens` for workspace schema, `palette` for raw Royal Tonal hex scale, `typeScale` for portfolio-specific named slots)
-- Updated CLAUDE.md: removed aspirational shadcn references, documented shadcn exemption, pointed Design System section at tokens file and workspace conventions
-- Updated workspace `design-system/design.md` with portfolio exemption note
-- `npm run check` passes clean (0 errors, 0 warnings)
-
-**Design system token coverage:** About half the portfolio's colour system maps to the workspace `ColorTokens` schema. The rest (royal-1, royal-6, royal-11, royal-12, ink-faint, tag-*, code-*, kicker, link as distinct from ring, card-hover as distinct from input) lives only in the `palette` export and `globals.css`. Schema extension deferred until a second project needs the same roles (option 3, agreed with user).
-
-**shadcn exemption:** Existing bespoke Astro components stay. Future components may use shadcn where applicable. No `components.json` or shadcn init needed.
-
-**Prior session context (4c.1):** Diagram, ChatTranscript, CaseStudyLayout components and project page routes all shipped. Preview harness working (`--slug plan-iteration-example --variant b-h2 --open`).
+- In-depth interview with Dylan capturing origin story, learning arc, product philosophy, and hiring-manager signal
+- Agreed case study structure: "learning to ship with Claude Code" framing, product as vehicle
+- Section structure locked: Problem (2 beats: product insight + why build now), Decisions (3: front-end only, TDD, opinionated UX), Outcome (product-focused, no Claude Code mention), Lessons (2: never touched code, skipped design)
+- Middle zone: Decisions only (no Architecture, no Design section). No transcript embeds. Screenshots deferred.
+- Structure + full interview context saved to `plans/the-weekly-case-study-draft.md` (commit `3dee29e`)
 
 **Next priorities (session order):**
-1. **4d** — write the-weekly case study against locked template + layout (Opus recommended)
+1. **4d (continued)** — Dylan writes prose for each section against the locked structure in `plans/the-weekly-case-study-draft.md`. Then iterate (2-iteration hard stop), build the MDX, update frontmatter (dates, live URL, tldr rewrite).
 2. **4c.2-4c.5** — remaining page layout explorers (/projects index, /writing, /log, /404+/privacy)
 
 **Deployed** — Cloudflare Pages, `magordyl/portfolio` (`main` branch). Live at `dylan-portfolio.magordyl.workers.dev`.

@@ -1,5 +1,19 @@
 # Development Diary
 
+## 2026-04-12 — Chunk 4d: the-weekly case study structure locked
+
+The first real case study structure is locked, and it immediately deviated from the template. The-weekly was planned as a standard product case study (Design + Architecture + Decisions middle zone). The interview surfaced a better story: this is a "learning to ship with Claude Code" piece, where the product is the vehicle.
+
+The reframe changed everything. Problem section does double duty: beat 1 is the product insight (Dylan was PM in the Coles shoppable recipes team, personally subscribed to meal kits, realised the value wasn't pre-portioning but the curated picking experience), beat 2 is why build it now (idea sat for months, started learning Claude Code, needed a real project). Middle zone collapsed to Decisions only: front-end-only scoping as a deliberate learning constraint, TDD from day one because Claude removes the time cost, and opinionated UX as a product philosophy stance. Lessons is where the Claude Code learning story peaks: never touched a line of code (expected to), and skipping design mockups was the biggest mistake.
+
+Architecture and Design sections were dropped. The no-backend architecture is a one-sentence point, not a section. The design iteration trail (MOB audit, 7 polish chunks) is interesting but secondary to the learning arc. No transcript embeds either. The piece earns its credibility through the admission shape in Lessons, not through showing working.
+
+The interview itself was the most valuable part of the session. Dylan's answers gave a clear writing-style baseline: direct, conversational, declarative. States what happened and why without dressing it up. That's the voice the prose needs to land in.
+
+Structure saved to `plans/the-weekly-case-study-draft.md` with full interview context. Dylan writes the prose next session.
+
+---
+
 ## 2026-04-12 — Design system scaffold: catching a gap the planning process created
 
 The portfolio had 10+ bespoke Astro components, a 12-step colour scale, a custom type system, and zero connection to the workspace design system. No `design.tokens.ts`, no shadcn. The implementation plan deliberately deferred this to chunk 7 (post-launch) to avoid coupling the portfolio build to an unproven shared layer. Defensible at the time, but three things drifted: the CLAUDE.md claimed shadcn as part of the stack before it was installed, the workspace `design-system.md` pre-flight rule arrived mid-build without auditing in-progress projects, and chunk 7's "post-launch" gate had no trigger to re-evaluate.
