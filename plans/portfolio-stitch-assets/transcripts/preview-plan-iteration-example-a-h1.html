@@ -93,6 +93,11 @@
   --royal-10: #6C85FF;
   --royal-11: #A5B4FF;
   --royal-12: #D5DCFA;
+  --violet-8:  #8C3BDB;
+  --violet-9:  #9D4DE8;
+  --violet-10: #B47CFF;
+  --violet-11: #C89BFF;
+  --violet-12: #E6D4FF;
   --ink:       #E6E2D9;
   --ink-dim:   #9C968A;
   --ink-faint: #5E584F;
@@ -159,18 +164,18 @@
   height: 14px;
 }
 
-/* Dylan: subtle warm badge */
+/* Dylan: royal register */
 .chat-transcript .badge--dylan {
-  background: var(--royal-3);
-  color: var(--royal-11);
-  border: 1px solid var(--royal-5);
+  background: var(--royal-4);
+  color: var(--royal-10);
+  border: 1px solid var(--royal-7);
 }
 
-/* Claude: brighter brand badge */
+/* Claude: violet register */
 .chat-transcript .badge--claude {
-  background: var(--royal-5);
-  color: var(--royal-10);
-  border: 1px solid var(--royal-8);
+  background: rgba(140, 59, 219, 0.15);
+  color: var(--violet-10);
+  border: 1px solid var(--violet-8);
 }
 
 /* Distinct sender label colours per spec */
@@ -182,14 +187,14 @@
   font-weight: 500;
 }
 
-/* Dylan: royal-300 (mapped to royal-11, warm accent) */
+/* Dylan: royal register label */
 .chat-transcript .turn--user .sender-label {
   color: var(--royal-11);
 }
 
-/* Claude: royal-500 (mapped to royal-8, core brand accent) */
+/* Claude: violet register label */
 .chat-transcript .turn--assistant .sender-label {
-  color: var(--royal-8);
+  color: var(--violet-11);
 }
 
 /* ── Turn body ───────────────────────────────────────── */
@@ -302,7 +307,7 @@
 /* ── Collapsible turns (plan / skill / research) ─────── */
 .chat-transcript details.turn {
   background: var(--royal-2);
-  border: 1px solid var(--royal-4);
+  border: 1px solid rgba(140, 59, 219, 0.2);
   border-radius: 8px;
   padding: 0.875rem 1rem;
 }
@@ -322,7 +327,7 @@
 .chat-transcript .summary-label {
   font-family: 'Geist Mono', monospace;
   font-style: italic;
-  color: var(--royal-9);
+  color: var(--violet-11);
   flex: 1;
   font-size: 0.8125rem;
 }
@@ -346,13 +351,13 @@
 .chat-transcript details[open] > summary {
   margin-bottom: 0.75rem;
   padding-bottom: 0.75rem;
-  border-bottom: 1px solid var(--royal-4);
+  border-bottom: 1px solid rgba(140, 59, 219, 0.2);
 }
 
-/* Kind-specific left accent on collapsed summaries */
-.chat-transcript .turn--plan > summary     { border-left: 2px solid var(--royal-10); padding-left: 0.75rem; }
-.chat-transcript .turn--skill > summary    { border-left: 2px solid var(--royal-8);  padding-left: 0.75rem; }
-.chat-transcript .turn--research > summary { border-left: 2px solid var(--royal-9);  padding-left: 0.75rem; }
+/* Kind-specific left accent — violet register for Claude's collapsed content */
+.chat-transcript .turn--plan > summary     { border-left: 2px solid var(--violet-10); padding-left: 0.75rem; }
+.chat-transcript .turn--skill > summary    { border-left: 2px solid var(--violet-8);  padding-left: 0.75rem; }
+.chat-transcript .turn--research > summary { border-left: 2px solid var(--violet-9);  padding-left: 0.75rem; }
 
 /* ── Headline turn sections ──────────────────────────── */
 .chat-transcript .headline-heading {
@@ -424,8 +429,8 @@
   <div class="variants"><a class="variant active" href="preview-plan-iteration-example-a-h1.html">a-h1</a><a class="variant" href="preview-plan-iteration-example-a-h2.html">a-h2</a><a class="variant" href="preview-plan-iteration-example-b-h1.html">b-h1</a><a class="variant" href="preview-plan-iteration-example-b-h2.html">b-h2</a></div>
 </header>
 <article class="chat-transcript chat-transcript--h1" data-variant="a-h1"><div class="transcript-note">Iterating on the transcript-component plan through Q&amp;A, then a rejection+revision cycle when review-in-UI feedback surfaced. Test fixture for the amended ChatTranscript component.</div><div class="turns"><div class="turn turn--verbatim turn--assistant"><div class="sender"><span class="badge badge--claude"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg></span><span class="sender-label">Claude</span></div><div class="turn-body"><p>Now rewriting the plan to reflect shipped 4a.6 + reusable preview script.</p><div class="tools"><span class="tool">[Write ~/.claude/plans/polished-wandering-widget.md]</span></div></div></div>
-<div class="turn turn--headline turn--assistant"><div class="sender"><span class="badge badge--claude"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg></span><span class="sender-label">Claude</span></div><div class="turn-body"><p>Plan updated. Key changes from the previous draft:</p>
-<ul><li><strong>Reframed as amendments to shipped 4a.6</strong>, not greenfield — schema, bookmark script, promote script, and <code>/bookmark</code> skill already exist and are being edited/relocated.</li><li><strong>New <code>scripts/render-transcript.mjs</code> shared helper</strong> — single source of truth for transcript HTML + CSS, imported by both the preview harness and the future <code>&lt;ChatTranscript&gt;.astro</code> component. Render parity is guaranteed by a test gate.</li><li><strong>New <code>scripts/preview-transcript.mjs</code> CLI</strong> — wraps <code>renderTranscript</code> in a standalone HTML page, opens in browser, supports <code>--variant a-h1|a-h2|b-h1|b-h2</code> for comparing the four icon-pair × header-layout combinations cheaply. <code>--batch</code> renders all drafts on one page for session-end review.</li><li><strong>Promote review is now a browser preview</strong>, not a terminal listing — <code>promote-transcript.mjs</code> shells out to the preview harness, the user reviews in-browser, then p/e/r/c from the terminal.</li><li><strong>Design artefact path</strong> — previews land at <code>plans/portfolio-stitch-assets/transcripts/preview-*.html</code>, committable and survives sessions.</li><li><strong>Memory saved</strong> — <code>feedback_review_in_ui_component.md</code> captures the general principle.</li></ul><div class="tools"><span class="tool">[ExitPlanMode]</span></div></div></div>
+<details class="turn turn--plan turn--assistant"><summary><div class="sender"><span class="badge badge--claude"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg></span><span class="sender-label">Claude</span></div><span class="summary-label">Plan updated</span><span class="chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span></summary><div class="turn-body"><p>Plan updated. Key changes from the previous draft:</p>
+<ul><li><strong>Reframed as amendments to shipped 4a.6</strong>, not greenfield — schema, bookmark script, promote script, and <code>/bookmark</code> skill already exist and are being edited/relocated.</li><li><strong>New <code>scripts/render-transcript.mjs</code> shared helper</strong> — single source of truth for transcript HTML + CSS, imported by both the preview harness and the future <code>&lt;ChatTranscript&gt;.astro</code> component. Render parity is guaranteed by a test gate.</li><li><strong>New <code>scripts/preview-transcript.mjs</code> CLI</strong> — wraps <code>renderTranscript</code> in a standalone HTML page, opens in browser, supports <code>--variant a-h1|a-h2|b-h1|b-h2</code> for comparing the four icon-pair × header-layout combinations cheaply. <code>--batch</code> renders all drafts on one page for session-end review.</li><li><strong>Promote review is now a browser preview</strong>, not a terminal listing — <code>promote-transcript.mjs</code> shells out to the preview harness, the user reviews in-browser, then p/e/r/c from the terminal.</li><li><strong>Design artefact path</strong> — previews land at <code>plans/portfolio-stitch-assets/transcripts/preview-*.html</code>, committable and survives sessions.</li><li><strong>Memory saved</strong> — <code>feedback_review_in_ui_component.md</code> captures the general principle.</li></ul><div class="tools"><span class="tool">[ExitPlanMode]</span></div></div></details>
 <div class="turn turn--verbatim turn--assistant"><div class="sender"><span class="badge badge--claude"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg></span><span class="sender-label">Claude</span></div><div class="turn-body"><p>Plan approved. The plan file is at <code>~/.claude/plans/polished-wandering-widget.md</code>. Ready to start implementation when you give the word — want me to begin with a specific amendment (1/2/3/4), or work through them in order?</p></div></div>
 <div class="turn turn--verbatim turn--user"><div class="sender"><span class="badge badge--dylan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><span class="sender-label">Dylan</span></div><div class="turn-body"><p>bookmark this conversation as an example of iterating on a plan. I will use this as the example to test the amended transcript component, once implemented.</p></div></div></div></article>
 </div>

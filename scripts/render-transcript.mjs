@@ -247,6 +247,11 @@ export const SHARED_CSS = `
   --royal-10: #6C85FF;
   --royal-11: #A5B4FF;
   --royal-12: #D5DCFA;
+  --violet-8:  #8C3BDB;
+  --violet-9:  #9D4DE8;
+  --violet-10: #B47CFF;
+  --violet-11: #C89BFF;
+  --violet-12: #E6D4FF;
   --ink:       #E6E2D9;
   --ink-dim:   #9C968A;
   --ink-faint: #5E584F;
@@ -313,18 +318,18 @@ export const SHARED_CSS = `
   height: 14px;
 }
 
-/* Dylan: subtle warm badge */
+/* Dylan: royal register */
 .chat-transcript .badge--dylan {
-  background: var(--royal-3);
-  color: var(--royal-11);
-  border: 1px solid var(--royal-5);
+  background: var(--royal-4);
+  color: var(--royal-10);
+  border: 1px solid var(--royal-7);
 }
 
-/* Claude: brighter brand badge */
+/* Claude: violet register */
 .chat-transcript .badge--claude {
-  background: var(--royal-5);
-  color: var(--royal-10);
-  border: 1px solid var(--royal-8);
+  background: rgba(140, 59, 219, 0.15);
+  color: var(--violet-10);
+  border: 1px solid var(--violet-8);
 }
 
 /* Distinct sender label colours per spec */
@@ -336,14 +341,14 @@ export const SHARED_CSS = `
   font-weight: 500;
 }
 
-/* Dylan: royal-300 (mapped to royal-11, warm accent) */
+/* Dylan: royal register label */
 .chat-transcript .turn--user .sender-label {
   color: var(--royal-11);
 }
 
-/* Claude: royal-500 (mapped to royal-8, core brand accent) */
+/* Claude: violet register label */
 .chat-transcript .turn--assistant .sender-label {
-  color: var(--royal-8);
+  color: var(--violet-11);
 }
 
 /* ── Turn body ───────────────────────────────────────── */
@@ -456,7 +461,7 @@ export const SHARED_CSS = `
 /* ── Collapsible turns (plan / skill / research) ─────── */
 .chat-transcript details.turn {
   background: var(--royal-2);
-  border: 1px solid var(--royal-4);
+  border: 1px solid rgba(140, 59, 219, 0.2);
   border-radius: 8px;
   padding: 0.875rem 1rem;
 }
@@ -476,7 +481,7 @@ export const SHARED_CSS = `
 .chat-transcript .summary-label {
   font-family: 'Geist Mono', monospace;
   font-style: italic;
-  color: var(--royal-9);
+  color: var(--violet-11);
   flex: 1;
   font-size: 0.8125rem;
 }
@@ -500,13 +505,13 @@ export const SHARED_CSS = `
 .chat-transcript details[open] > summary {
   margin-bottom: 0.75rem;
   padding-bottom: 0.75rem;
-  border-bottom: 1px solid var(--royal-4);
+  border-bottom: 1px solid rgba(140, 59, 219, 0.2);
 }
 
-/* Kind-specific left accent on collapsed summaries */
-.chat-transcript .turn--plan > summary     { border-left: 2px solid var(--royal-10); padding-left: 0.75rem; }
-.chat-transcript .turn--skill > summary    { border-left: 2px solid var(--royal-8);  padding-left: 0.75rem; }
-.chat-transcript .turn--research > summary { border-left: 2px solid var(--royal-9);  padding-left: 0.75rem; }
+/* Kind-specific left accent — violet register for Claude's collapsed content */
+.chat-transcript .turn--plan > summary     { border-left: 2px solid var(--violet-10); padding-left: 0.75rem; }
+.chat-transcript .turn--skill > summary    { border-left: 2px solid var(--violet-8);  padding-left: 0.75rem; }
+.chat-transcript .turn--research > summary { border-left: 2px solid var(--violet-9);  padding-left: 0.75rem; }
 
 /* ── Headline turn sections ──────────────────────────── */
 .chat-transcript .headline-heading {

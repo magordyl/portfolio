@@ -42,7 +42,7 @@ export function classifyTurn(turn) {
     const hasHeadings = /^#{2,3}\s+/m.test(text);
     if (hasHeadings) return { kind: 'headline' };
     const firstSent = text.split(/[.!?\n]/)[0]?.trim().slice(0, 80);
-    return { kind: 'headline', summary: firstSent || 'Long reply' };
+    return { kind: 'plan', summary: firstSent || 'Long reply' };
   }
 
   return { kind: 'verbatim' };
