@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plan iteration example</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;500&family=Geist:wght@400;500&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --page-bg: #0A0B16;
+    --page-fg: #E6E2D9;
+    --page-dim: #9C968A;
+    --page-accent: #6C85FF;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--page-bg);
+    color: var(--page-fg);
+    font-family: 'Geist', -apple-system, system-ui, sans-serif;
+    font-size: 16px;
+  }
+  .page {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+  header.preview-header {
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    padding-bottom: 1rem;
+  }
+  header.preview-header h1 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 500;
+    font-size: 1.5rem;
+    letter-spacing: -0.01em;
+    margin: 0 0 0.25rem;
+  }
+  header.preview-header .meta {
+    font-family: 'Geist Mono', monospace;
+    font-size: 0.6875rem;
+    color: var(--page-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+  .variants {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+    flex-wrap: wrap;
+  }
+  .variant {
+    font-family: 'Geist Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--page-dim);
+    text-decoration: none;
+    padding: 0.25rem 0.6rem;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 4px;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .variant:hover { color: var(--page-fg); border-color: rgba(255,255,255,0.3); }
+  .variant.active { color: var(--page-accent); border-color: var(--page-accent); }
+  .divider {
+    border: none;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    margin: 2.5rem 0;
+  }
+  .batch-label {
+    font-family: 'Geist Mono', monospace;
+    font-size: 0.6875rem;
+    color: var(--page-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 0.5rem;
+  }
+
+.chat-transcript {
+  --royal-1:  #0E0F1C;
+  --royal-2:  #121428;
+  --royal-3:  #181B36;
+  --royal-4:  #1E2346;
+  --royal-5:  #252C58;
+  --royal-6:  #2D366C;
+  --royal-7:  #364280;
+  --royal-8:  #3B5BDB;
+  --royal-9:  #4D6DE8;
+  --royal-10: #6C85FF;
+  --royal-11: #A5B4FF;
+  --royal-12: #D5DCFA;
+  --ink:       #E6E2D9;
+  --ink-dim:   #9C968A;
+  --ink-faint: #5E584F;
+
+  background: var(--royal-3);
+  border: 1px solid var(--royal-6);
+  border-radius: 8px;
+  padding: 1.5rem;
+  font-family: 'Geist Variable', 'Geist', -apple-system, system-ui, sans-serif;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--ink);
+}
+
+.chat-transcript .transcript-note {
+  font-family: 'Geist Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--ink-dim);
+  border-left: 2px solid var(--royal-7);
+  padding: 0.25rem 0 0.25rem 0.75rem;
+  margin-bottom: 1.25rem;
+  font-style: italic;
+}
+
+.chat-transcript .turns {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* ── Sender header ────────────────────────────────────── */
+.chat-transcript .sender {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.chat-transcript .badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.chat-transcript .badge svg {
+  width: 14px;
+  height: 14px;
+}
+
+.chat-transcript .badge--dylan {
+  background: var(--royal-4);
+  color: var(--royal-11);
+  border: 1px solid var(--royal-7);
+}
+
+.chat-transcript .badge--claude {
+  background: var(--royal-7);
+  color: var(--royal-12);
+  border: 1px solid var(--royal-8);
+}
+
+.chat-transcript .sender-label {
+  font-family: 'Geist Mono', monospace;
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-dim);
+  font-weight: 500;
+}
+
+/* ── Turn body ────────────────────────────────────────── */
+.chat-transcript .turn {
+  border: none;
+  margin: 0;
+}
+
+.chat-transcript .turn-body {
+  color: var(--ink);
+}
+
+.chat-transcript .turn-body p {
+  margin: 0 0 0.75rem;
+}
+
+.chat-transcript .turn-body p:last-child {
+  margin-bottom: 0;
+}
+
+.chat-transcript .turn-body ul {
+  margin: 0 0 0.75rem;
+  padding-left: 1.25rem;
+}
+
+.chat-transcript .turn-body li {
+  margin-bottom: 0.25rem;
+}
+
+.chat-transcript .turn-body code {
+  font-family: 'Geist Mono', monospace;
+  font-size: 0.85em;
+  background: var(--royal-2);
+  color: var(--royal-11);
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+}
+
+.chat-transcript .turn-body pre {
+  background: var(--royal-1);
+  border: 1px solid var(--royal-6);
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  overflow-x: auto;
+  margin: 0 0 0.75rem;
+}
+
+.chat-transcript .turn-body pre code {
+  background: none;
+  padding: 0;
+  color: var(--ink);
+}
+
+/* ── H1 horizontal layout: sender on row above body ───── */
+.chat-transcript--h1 .turn {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* ── H2 vertical layout: sender in narrow left gutter ──── */
+.chat-transcript--h2 .turn {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 1rem;
+  align-items: start;
+}
+
+.chat-transcript--h2 .sender {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.375rem;
+  padding-top: 0.125rem;
+}
+
+.chat-transcript--h2 details.turn {
+  display: block;
+}
+.chat-transcript--h2 details.turn > summary {
+  display: grid;
+  grid-template-columns: 96px 1fr auto;
+  gap: 1rem;
+  align-items: start;
+}
+.chat-transcript--h2 details.turn > .turn-body {
+  grid-column: 2 / -1;
+  padding-left: calc(96px + 1rem);
+  margin-top: 0.5rem;
+}
+
+/* Override: in H2, the turn-body inside a details should align with the summary's body column */
+.chat-transcript--h2 details.turn[open] > .turn-body {
+  padding-left: calc(96px + 1rem);
+}
+
+@media (max-width: 640px) {
+  .chat-transcript--h2 .turn,
+  .chat-transcript--h2 details.turn > summary {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+  .chat-transcript--h2 details.turn > .turn-body {
+    padding-left: 0;
+  }
+  .chat-transcript--h2 .sender {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+/* ── Collapsible turn styling ─────────────────────────── */
+.chat-transcript details.turn,
+.chat-transcript details.headline-section {
+  border: 1px solid var(--royal-6);
+  border-radius: 6px;
+  background: var(--royal-2);
+  padding: 0.75rem 1rem;
+}
+
+.chat-transcript details.turn[open],
+.chat-transcript details.headline-section[open] {
+  background: var(--royal-2);
+}
+
+.chat-transcript details > summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.chat-transcript details > summary::-webkit-details-marker {
+  display: none;
+}
+
+.chat-transcript .summary-label {
+  font-style: italic;
+  color: var(--royal-11);
+  flex: 1;
+  font-size: 0.875rem;
+}
+
+.chat-transcript .chevron {
+  display: inline-flex;
+  color: var(--ink-dim);
+  transition: transform 0.15s ease;
+  flex-shrink: 0;
+}
+
+.chat-transcript .chevron svg {
+  width: 16px;
+  height: 16px;
+}
+
+.chat-transcript details[open] > summary .chevron {
+  transform: rotate(180deg);
+}
+
+.chat-transcript details.turn > .turn-body {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--royal-6);
+}
+
+/* ── Headline turn sections ──────────────────────────── */
+.chat-transcript .headline-heading {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: var(--ink);
+  margin: 1rem 0 0.5rem;
+  letter-spacing: -0.01em;
+}
+
+.chat-transcript .headline-heading:first-child {
+  margin-top: 0;
+}
+
+.chat-transcript .headline-section {
+  margin-bottom: 0.75rem;
+}
+
+/* ── Tool-call strip ──────────────────────────────────── */
+.chat-transcript .tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  margin-top: 0.75rem;
+}
+
+.chat-transcript .tool {
+  font-family: 'Geist Mono', monospace;
+  font-size: 0.6875rem;
+  color: var(--royal-11);
+  background: rgba(59, 91, 219, 0.1);
+  border: 1px solid var(--royal-7);
+  border-radius: 3px;
+  padding: 0.15rem 0.4rem;
+}
+
+/* ── Kind-specific accents ────────────────────────────── */
+.chat-transcript .turn--plan summary     { border-left: 2px solid var(--royal-10); padding-left: 0.5rem; margin-left: -0.5rem; }
+.chat-transcript .turn--skill summary    { border-left: 2px solid var(--royal-11); padding-left: 0.5rem; margin-left: -0.5rem; }
+.chat-transcript .turn--research summary { border-left: 2px solid var(--royal-9);  padding-left: 0.5rem; margin-left: -0.5rem; }
+
+</style>
+</head>
+<body>
+<div class="page">
+<header class="preview-header">
+  <h1>Plan iteration example</h1>
+  <div class="meta">variant: a-h1</div>
+  <div class="variants"><a class="variant active" href="preview-plan-iteration-example-a-h1.html">a-h1</a><a class="variant" href="preview-plan-iteration-example-a-h2.html">a-h2</a><a class="variant" href="preview-plan-iteration-example-b-h1.html">b-h1</a><a class="variant" href="preview-plan-iteration-example-b-h2.html">b-h2</a></div>
+</header>
+<article class="chat-transcript chat-transcript--h1" data-variant="a-h1"><div class="transcript-note">Iterating on the transcript-component plan through Q&amp;A, then a rejection+revision cycle when review-in-UI feedback surfaced. Test fixture for the amended ChatTranscript component.</div><div class="turns"><div class="turn turn--verbatim turn--assistant"><div class="sender"><span class="badge badge--claude"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg></span><span class="sender-label">Claude</span></div><div class="turn-body"><p>Now rewriting the plan to reflect shipped 4a.6 + reusable preview script.</p><div class="tools"><span class="tool">[Write ~/.claude/plans/polished-wandering-widget.md]</span></div></div></div>
+<div class="turn turn--headline turn--assistant"><div class="sender"><span class="badge badge--claude"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg></span><span class="sender-label">Claude</span></div><div class="turn-body"><p>Plan updated. Key changes from the previous draft:</p>
+<ul><li><strong>Reframed as amendments to shipped 4a.6</strong>, not greenfield — schema, bookmark script, promote script, and <code>/bookmark</code> skill already exist and are being edited/relocated.</li><li><strong>New <code>scripts/render-transcript.mjs</code> shared helper</strong> — single source of truth for transcript HTML + CSS, imported by both the preview harness and the future <code>&lt;ChatTranscript&gt;.astro</code> component. Render parity is guaranteed by a test gate.</li><li><strong>New <code>scripts/preview-transcript.mjs</code> CLI</strong> — wraps <code>renderTranscript</code> in a standalone HTML page, opens in browser, supports <code>--variant a-h1|a-h2|b-h1|b-h2</code> for comparing the four icon-pair × header-layout combinations cheaply. <code>--batch</code> renders all drafts on one page for session-end review.</li><li><strong>Promote review is now a browser preview</strong>, not a terminal listing — <code>promote-transcript.mjs</code> shells out to the preview harness, the user reviews in-browser, then p/e/r/c from the terminal.</li><li><strong>Design artefact path</strong> — previews land at <code>plans/portfolio-stitch-assets/transcripts/preview-*.html</code>, committable and survives sessions.</li><li><strong>Memory saved</strong> — <code>feedback_review_in_ui_component.md</code> captures the general principle.</li></ul><div class="tools"><span class="tool">[ExitPlanMode]</span></div></div></div>
+<div class="turn turn--verbatim turn--assistant"><div class="sender"><span class="badge badge--claude"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg></span><span class="sender-label">Claude</span></div><div class="turn-body"><p>Plan approved. The plan file is at <code>~/.claude/plans/polished-wandering-widget.md</code>. Ready to start implementation when you give the word — want me to begin with a specific amendment (1/2/3/4), or work through them in order?</p></div></div>
+<div class="turn turn--verbatim turn--user"><div class="sender"><span class="badge badge--dylan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><span class="sender-label">Dylan</span></div><div class="turn-body"><p>bookmark this conversation as an example of iterating on a plan. I will use this as the example to test the amended transcript component, once implemented.</p></div></div></div></article>
+</div>
+</body>
+</html>

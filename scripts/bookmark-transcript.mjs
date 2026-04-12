@@ -18,6 +18,7 @@ import { join, dirname } from 'path';
 import { homedir } from 'os';
 import { fileURLToPath } from 'url';
 import { parseArgs } from 'util';
+import { mergeToolOnlyTurns, classifyAll } from './turn-classifier.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = join(__dirname, '..');
@@ -235,21 +236,25 @@ if (candidateTurns.length === 0) {
 
 // ── Extract turn data ────────────────────────────────────────────────────────
 
-const newTurns = [];
+const rawTurns = [];
 for (const ev of candidateTurns) {
   if (isRealUserTurn(ev)) {
     const text = redact(extractUserText(ev));
-    if (text) newTurns.push({ role: 'user', text });
+    if (text) rawTurns.push({ role: 'user', text });
   } else if (isAssistantTurn(ev)) {
     const { text, collapsedTools } = extractAssistantContent(ev);
     const redactedText = redact(text);
     if (redactedText || collapsedTools.length > 0) {
       const turn = { role: 'assistant', text: redactedText };
       if (collapsedTools.length > 0) turn.collapsedTools = collapsedTools.map(redact);
-      newTurns.push(turn);
+      rawTurns.push(turn);
     }
   }
 }
+
+// Merge tool-only assistant turns into their surrounding prose turns, then
+// classify each surviving turn so the render layer knows whether to collapse.
+const newTurns = classifyAll(mergeToolOnlyTurns(rawTurns));
 
 // ── Build / merge draft ──────────────────────────────────────────────────────
 

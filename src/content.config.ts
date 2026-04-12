@@ -54,6 +54,8 @@ const transcripts = defineCollection({
       z.object({
         role: z.enum(['user', 'assistant']),
         text: z.string(),
+        kind: z.enum(['verbatim', 'headline', 'plan', 'skill', 'research']).optional(),
+        summary: z.string().optional(),
         collapsedTools: z.array(z.string()).optional(),
       })
     ).min(2).max(8),

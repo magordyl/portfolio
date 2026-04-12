@@ -16,7 +16,9 @@ import { readFileSync, writeFileSync, existsSync, unlinkSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { createInterface } from 'readline';
+import { spawnSync } from 'child_process';
 import { parseArgs } from 'util';
+import { mergeToolOnlyTurns, classifyAll } from './turn-classifier.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = join(__dirname, '..');
@@ -77,6 +79,8 @@ function redact(text) {
 
 if (draft.turns) {
   draft.turns = draft.turns.map(t => ({ ...t, text: redact(t.text) }));
+  // Repair pre-fix drafts (tool-only turns, missing kinds) before validation.
+  draft.turns = classifyAll(mergeToolOnlyTurns(draft.turns));
 }
 
 // ── Structural validation ────────────────────────────────────────────────────
@@ -107,22 +111,20 @@ if (errors.length > 0) {
   process.exit(1);
 }
 
-// ── Print draft for review ───────────────────────────────────────────────────
+// Rewrite the repaired draft back to disk so the preview harness picks up the
+// same turns we'll promote (otherwise the harness re-reads the unrepaired file).
+writeFileSync(draftPath, JSON.stringify(draft, null, 2));
 
-console.log('\n──────────────────────────────────────────');
-console.log(`  Draft: ${slug}`);
-console.log(`  Title: ${draft.title}`);
-console.log(`  Date:  ${draft.date}`);
-console.log(`  Context: ${draft.context || '(empty — fill this in)'}`);
-console.log(`  Note:  ${draft.note || '(none)'}`);
-console.log(`  Turns: ${draft.turns.length}`);
-console.log('──────────────────────────────────────────');
-draft.turns.forEach((t, i) => {
-  const preview = t.text.slice(0, 120).replace(/\n/g, ' ');
-  const tools   = t.collapsedTools?.length ? ` [+ ${t.collapsedTools.length} tool(s)]` : '';
-  console.log(`  [${i + 1}] ${t.role.padEnd(9)} ${preview}${preview.length >= 120 ? '…' : ''}${tools}`);
-});
-console.log('──────────────────────────────────────────\n');
+// ── Metadata summary (one-liner) ─────────────────────────────────────────────
+
+console.log('');
+console.log(`  Draft:   ${slug}`);
+console.log(`  Title:   ${draft.title}`);
+console.log(`  Date:    ${draft.date}`);
+console.log(`  Turns:   ${draft.turns.length}`);
+console.log(`  Context: ${draft.context || '(empty — fill this in before promoting)'}`);
+console.log(`  Note:    ${draft.note || '(none)'}`);
+console.log('');
 
 if (dryRun) {
   console.log(`Dry run: would promote draft → src/content/transcripts/${slug}.json`);
@@ -136,33 +138,80 @@ if (existsSync(publishedPath)) {
   process.exit(1);
 }
 
-// ── Hand-review prompt ───────────────────────────────────────────────────────
+// ── Preview-then-prompt review loop ──────────────────────────────────────────
 
-async function confirm() {
-  if (skip) return true;
+const previewScript = join(__dirname, 'preview-transcript.mjs');
 
-  console.log('Before promoting, confirm:');
-  console.log('  • No real names that should be anonymised?');
-  console.log('  • No absolute paths missed by the regex?');
-  console.log('  • No private project names or internal details?');
-  console.log('  • Nothing you would not want a hiring manager to see?');
-  console.log('');
-  console.log('Type "yes" to proceed, anything else to abort:');
+function renderPreview() {
+  const result = spawnSync(process.execPath, [previewScript, '--slug', slug, '--open'], {
+    stdio: 'inherit',
+  });
+  if (result.status !== 0) {
+    console.warn('  (preview render returned non-zero — continuing anyway)');
+  }
+}
 
+async function promptAction() {
   const rl = createInterface({ input: process.stdin, output: process.stdout });
   return new Promise(resolve => {
-    rl.question('> ', answer => {
+    const msg = '  Review options: [p]romote  [e]dit draft  [r]e-render preview  [c]ancel > ';
+    rl.question(msg, answer => {
       rl.close();
-      resolve(answer.trim().toLowerCase() === 'yes');
+      resolve(answer.trim().toLowerCase());
     });
   });
 }
 
-const confirmed = await confirm();
-if (!confirmed) {
-  console.log('Aborted. Draft unchanged.');
-  process.exit(0);
+async function editDraftInEditor() {
+  const editor = process.env.EDITOR || (process.platform === 'win32' ? 'notepad' : 'nano');
+  const result = spawnSync(editor, [draftPath], { stdio: 'inherit' });
+  if (result.status !== 0) {
+    console.warn(`  $EDITOR (${editor}) exited non-zero. Check the draft manually at:\n    ${draftPath}`);
+  }
+  // Re-load, re-redact, re-validate.
+  const reloaded = JSON.parse(readFileSync(draftPath, 'utf8'));
+  if (reloaded.turns) {
+    reloaded.turns = reloaded.turns.map(t => ({ ...t, text: redact(t.text) }));
+    reloaded.turns = classifyAll(mergeToolOnlyTurns(reloaded.turns));
+  }
+  writeFileSync(draftPath, JSON.stringify(reloaded, null, 2));
+  Object.assign(draft, reloaded);
 }
+
+async function reviewLoop() {
+  if (skip) return true;
+
+  renderPreview();
+  console.log('');
+  console.log('  Hand-review checklist:');
+  console.log('    • No real names that should be anonymised');
+  console.log('    • No absolute paths missed by the regex');
+  console.log('    • No private project names or internal details');
+  console.log('    • Nothing you would not want a hiring manager to see');
+  console.log('');
+
+  while (true) {
+    const answer = await promptAction();
+    if (answer === 'p' || answer === 'promote') return true;
+    if (answer === 'c' || answer === 'cancel' || answer === '') {
+      console.log('Aborted. Draft left in place.');
+      return false;
+    }
+    if (answer === 'e' || answer === 'edit') {
+      await editDraftInEditor();
+      renderPreview();
+      continue;
+    }
+    if (answer === 'r' || answer === 'rerender' || answer === 're-render') {
+      renderPreview();
+      continue;
+    }
+    console.log(`  Unknown option: "${answer}". Try p/e/r/c.`);
+  }
+}
+
+const confirmed = await reviewLoop();
+if (!confirmed) process.exit(0);
 
 // ── Strip internal fields and promote ────────────────────────────────────────
 
