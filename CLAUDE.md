@@ -40,7 +40,7 @@ Astro uses `@tailwindcss/vite` (Vite plugin), NOT `@astrojs/tailwind`. The `astr
 
 ## Current Status (2026-04-12)
 
-**Last session (2026-04-12) — Mermaid validated for all diagram types including architecture.**
+**Last session (2026-04-12) — Chunk 4a closed: writing-topic workflow, session-utils extraction, /bookmark relocation.**
 
 - **Chunk 4b complete** (commit `5f9260c`). Project content template locked at `plans/portfolio-case-study-template.md`. Key decisions: "Projects"/"Writing" naming, flexible middle zone (1-3 sections from Decisions/Architecture/Design pool), word budgets as soft guides.
 - **Architecture diagrams use Mermaid**, not hand-authored SVG. Tested in `plans/portfolio-stitch-assets/mermaid-diagram-samples-{v1,v2}.html`. `classDef` handles three-tier node treatment (owned/highlighted/external). Sentence-case labels (CSS override on Mermaid's default uppercase). Subgraph labels stay uppercase by convention.
