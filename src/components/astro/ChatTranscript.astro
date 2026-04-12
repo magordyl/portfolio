@@ -13,14 +13,104 @@ if (!entry) throw new Error(`ChatTranscript: no transcript found with id "${id}"
 
 const { title, note, turns } = entry.data;
 
-// Collapse logic:
-// - user turns: never collapse
-// - kind 'verbatim' | 'headline' | undefined: never collapse
-// - kind 'plan' | 'skill' | 'research': collapse by default
-function shouldCollapse(turn: (typeof turns)[number]): boolean {
-  if (turn.role === 'user') return false;
-  if (!turn.kind || turn.kind === 'verbatim' || turn.kind === 'headline') return false;
-  return true;
+// Chevron SVG (lucide chevron-down, 16px) — reused across all expanders
+const chevronSvg = `<svg class="chevron-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>`;
+
+// ── Rendering helpers ───────────────────────────────────────────────────
+
+type Turn = (typeof turns)[number];
+
+/** Split a long turn's text by ## or ### headings into sections */
+function splitByHeadings(text: string): Array<{ heading: string | null; level: number; body: string }> {
+  const sections: Array<{ heading: string | null; level: number; body: string }> = [];
+  const lines = text.split('\n');
+  let current: { heading: string | null; level: number; body: string } = { heading: null, level: 0, body: '' };
+
+  for (const line of lines) {
+    const m = line.match(/^(#{2,3})\s+(.+)$/);
+    if (m) {
+      if (current.heading !== null || current.body.trim()) sections.push(current);
+      current = { level: m[1].length, heading: m[2].trim(), body: '' };
+    } else {
+      current.body += line + '\n';
+    }
+  }
+  if (current.heading !== null || current.body.trim()) sections.push(current);
+  return sections;
+}
+
+/** Minimal markdown → HTML: paragraphs, **bold**, `code`, bullet lists, code blocks */
+function renderMarkdown(text: string): string {
+  if (!text?.trim()) return '';
+  const blocks: string[] = [];
+  const lines = text.split('\n');
+  let i = 0;
+
+  while (i < lines.length) {
+    const line = lines[i];
+    // Fenced code block
+    if (/^```/.test(line)) {
+      const codeLines: string[] = [];
+      i++;
+      while (i < lines.length && !/^```/.test(lines[i])) {
+        codeLines.push(lines[i]);
+        i++;
+      }
+      i++;
+      blocks.push(`<pre><code>${escapeHtml(codeLines.join('\n'))}</code></pre>`);
+      continue;
+    }
+    // Bullet list
+    if (/^\s*[-*]\s+/.test(line)) {
+      const items: string[] = [];
+      while (i < lines.length && /^\s*[-*]\s+/.test(lines[i])) {
+        items.push(lines[i].replace(/^\s*[-*]\s+/, ''));
+        i++;
+      }
+      blocks.push(`<ul>${items.map(it => `<li>${renderInline(it)}</li>`).join('')}</ul>`);
+      continue;
+    }
+    // Numbered list
+    if (/^\s*\d+\.\s+/.test(line)) {
+      const items: string[] = [];
+      while (i < lines.length && /^\s*\d+\.\s+/.test(lines[i])) {
+        items.push(lines[i].replace(/^\s*\d+\.\s+/, ''));
+        i++;
+      }
+      blocks.push(`<ol>${items.map(it => `<li>${renderInline(it)}</li>`).join('')}</ol>`);
+      continue;
+    }
+    // Blank line
+    if (!line.trim()) { i++; continue; }
+    // Paragraph
+    const paraLines: string[] = [];
+    while (i < lines.length && lines[i].trim() && !/^```/.test(lines[i]) && !/^\s*[-*]\s+/.test(lines[i]) && !/^\s*\d+\.\s+/.test(lines[i]) && !/^#{2,3}\s+/.test(lines[i])) {
+      paraLines.push(lines[i]);
+      i++;
+    }
+    if (paraLines.length) blocks.push(`<p>${renderInline(paraLines.join(' '))}</p>`);
+  }
+  return blocks.join('\n');
+}
+
+function renderInline(text: string): string {
+  let out = escapeHtml(text);
+  out = out.replace(/`([^`]+)`/g, '<code>$1</code>');
+  out = out.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  return out;
+}
+
+function escapeHtml(str: string): string {
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+/** Determine how a turn should render */
+function turnMode(turn: Turn): 'verbatim' | 'collapsed' | 'headline' {
+  if (turn.role === 'user') return 'verbatim';
+  const kind = turn.kind || 'verbatim';
+  if (kind === 'headline') return 'headline';
+  if (kind === 'plan' || kind === 'skill' || kind === 'research') return 'collapsed';
+  return 'verbatim';
 }
 ---
 
@@ -30,20 +120,18 @@ function shouldCollapse(turn: (typeof turns)[number]): boolean {
   <ol class="transcript-turns">
     {turns.map((turn) => {
       const isUser = turn.role === 'user';
-      const collapse = shouldCollapse(turn);
+      const renderMode = turnMode(turn);
 
       return (
         <li class:list={['turn', isUser ? 'turn--user' : 'turn--claude']}>
           <div class="turn-gutter">
             <div class="turn-icon" aria-hidden="true">
               {isUser ? (
-                <!-- User icon (lucide User) -->
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                   <circle cx="12" cy="7" r="4"/>
                 </svg>
               ) : (
-                <!-- Bot icon (lucide Bot) -->
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M12 8V4H8"/>
                   <rect width="16" height="12" x="4" y="8" rx="2"/>
@@ -58,6 +146,7 @@ function shouldCollapse(turn: (typeof turns)[number]): boolean {
           </div>
 
           <div class="turn-body">
+            {/* Tool-call labels */}
             {turn.collapsedTools && turn.collapsedTools.length > 0 && (
               <ul class="turn-tools" aria-label="Tool calls">
                 {turn.collapsedTools.map(tool => (
@@ -66,16 +155,46 @@ function shouldCollapse(turn: (typeof turns)[number]): boolean {
               </ul>
             )}
 
-            {collapse ? (
-              <details class="turn-details">
-                <summary class="turn-summary">
-                  {turn.summary ?? 'Show full reply →'}
-                </summary>
-                <div class="turn-text" set:html={turn.text.replace(/\n/g, '<br>')} />
-              </details>
-            ) : (
-              <div class="turn-text" set:html={turn.text.replace(/\n/g, '<br>')} />
+            {/* Verbatim: render text directly */}
+            {renderMode === 'verbatim' && (
+              <div class="turn-text" set:html={renderMarkdown(turn.text)} />
             )}
+
+            {/* Collapsed (plan/skill/research): summary line visible, body in <details> */}
+            {renderMode === 'collapsed' && (
+              <details class="turn-section">
+                <summary class="turn-section-summary">
+                  <span class="turn-section-label">{turn.summary ?? 'Show full reply'}</span>
+                  <span class="turn-section-chevron" set:html={chevronSvg} />
+                </summary>
+                <div class="turn-section-body" set:html={renderMarkdown(turn.text)} />
+              </details>
+            )}
+
+            {/* Headline: each heading visible, section bodies individually collapsible */}
+            {renderMode === 'headline' && (() => {
+              const sections = splitByHeadings(turn.text);
+              return sections.map(sec => {
+                if (!sec.heading) {
+                  // Pre-heading prose — always visible
+                  return <div class="turn-text" set:html={renderMarkdown(sec.body)} />;
+                }
+                const bodyHtml = renderMarkdown(sec.body);
+                if (!bodyHtml) {
+                  // Heading with no body — just show the heading
+                  return <h4 class="turn-heading">{sec.heading}</h4>;
+                }
+                return (
+                  <details class="turn-section">
+                    <summary class="turn-section-summary">
+                      <span class="turn-heading-inline">{sec.heading}</span>
+                      <span class="turn-section-chevron" set:html={chevronSvg} />
+                    </summary>
+                    <div class="turn-section-body" set:html={bodyHtml} />
+                  </details>
+                );
+              });
+            })()}
           </div>
         </li>
       );
@@ -94,7 +213,6 @@ function shouldCollapse(turn: (typeof turns)[number]): boolean {
     font-size: var(--text-sm);
   }
 
-  /* Breakout: extend 120px past prose column on the right */
   .transcript--breakout {
     margin-right: -120px;
   }
@@ -105,7 +223,6 @@ function shouldCollapse(turn: (typeof turns)[number]): boolean {
     }
   }
 
-  /* Editorial note above the turns */
   .transcript-note {
     font-family: var(--font-sans);
     font-size: var(--text-sm);
@@ -124,7 +241,8 @@ function shouldCollapse(turn: (typeof turns)[number]): boolean {
     gap: var(--space-5);
   }
 
-  /* Turn: left gutter + body */
+  /* ── Turn: always visible gutter + body ─────────────── */
+
   .turn {
     display: grid;
     grid-template-columns: 40px 1fr;
@@ -132,7 +250,6 @@ function shouldCollapse(turn: (typeof turns)[number]): boolean {
     align-items: start;
   }
 
-  /* Gutter: icon circle + label stacked vertically */
   .turn-gutter {
     display: flex;
     flex-direction: column;
@@ -153,13 +270,8 @@ function shouldCollapse(turn: (typeof turns)[number]): boolean {
     flex-shrink: 0;
   }
 
-  .turn--user .turn-icon {
-    color: var(--royal-11);
-  }
-
-  .turn--claude .turn-icon {
-    color: var(--royal-10);
-  }
+  .turn--user .turn-icon { color: var(--royal-11); }
+  .turn--claude .turn-icon { color: var(--royal-10); }
 
   .turn-label {
     font-family: var(--font-mono);
@@ -170,10 +282,11 @@ function shouldCollapse(turn: (typeof turns)[number]): boolean {
     line-height: 1;
   }
 
-  /* Body: tool calls + text */
   .turn-body {
     min-width: 0;
   }
+
+  /* ── Tool-call labels ───────────────────────────────── */
 
   .turn-tools {
     list-style: none;
@@ -194,6 +307,8 @@ function shouldCollapse(turn: (typeof turns)[number]): boolean {
     display: inline-block;
   }
 
+  /* ── Verbatim text ──────────────────────────────────── */
+
   .turn-text {
     font-family: var(--font-sans);
     font-size: var(--text-sm);
@@ -201,46 +316,139 @@ function shouldCollapse(turn: (typeof turns)[number]): boolean {
     line-height: var(--lh-loose);
   }
 
-  /* Collapse: native <details>/<summary>, CSS-only chevron */
-  .turn-details {
-    /* No extra wrapper styles needed */
+  .turn-text :global(p) { margin: 0 0 0.5rem; }
+  .turn-text :global(p:last-child) { margin-bottom: 0; }
+  .turn-text :global(ul), .turn-text :global(ol) { margin: 0 0 0.5rem; padding-left: 1.25rem; }
+  .turn-text :global(li) { margin-bottom: 0.25rem; }
+  .turn-text :global(code) {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+    background: var(--royal-2);
+    color: var(--royal-11);
+    padding: 0.1em 0.3em;
+    border-radius: 3px;
+  }
+  .turn-text :global(pre) {
+    background: var(--royal-2);
+    border: 1px solid var(--royal-4);
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    overflow-x: auto;
+    margin: 0 0 0.5rem;
+  }
+  .turn-text :global(pre code) { background: none; padding: 0; color: var(--ink); }
+  .turn-text :global(strong) { color: var(--ink); font-weight: 600; }
+
+  /* ── Collapsible sections (nested WITHIN a turn) ────── */
+
+  .turn-section {
+    background: var(--royal-2);
+    border: 1px solid var(--royal-5);
+    border-radius: 6px;
+    margin: 0.5rem 0;
   }
 
-  .turn-summary {
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    color: var(--royal-11);
-    cursor: pointer;
+  .turn-section-summary {
     list-style: none;
+    cursor: pointer;
     display: flex;
     align-items: center;
-    gap: var(--space-2);
-    padding: var(--space-2) 0;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding: 0.625rem 0.875rem;
     user-select: none;
   }
 
-  .turn-summary::-webkit-details-marker {
-    display: none;
+  .turn-section-summary::-webkit-details-marker { display: none; }
+
+  /* Summary label for collapsed plan/skill/research */
+  .turn-section-label {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    font-style: italic;
+    color: var(--royal-11);
+    flex: 1;
   }
 
-  /* Chevron via pseudo-element */
-  .turn-summary::before {
-    content: '›';
-    display: inline-block;
-    transition: transform 0.15s ease;
+  /* Heading text for headline sections */
+  .turn-heading-inline {
+    font-family: var(--font-serif);
     font-size: var(--text-sm);
-    line-height: 1;
+    font-weight: 500;
+    color: var(--royal-12);
+    flex: 1;
+    letter-spacing: var(--ls-title);
   }
 
-  .turn-details[open] .turn-summary::before {
-    transform: rotate(90deg);
+  /* Standalone heading (no collapsible body) */
+  .turn-heading {
+    font-family: var(--font-serif);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--royal-12);
+    margin: 0.75rem 0 0.375rem;
+    letter-spacing: var(--ls-title);
   }
 
-  .turn-details[open] .turn-text {
-    margin-top: var(--space-3);
+  .turn-heading:first-child { margin-top: 0; }
+
+  /* ── Chevron: visible, rotates on open ──────────────── */
+
+  .turn-section-chevron {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--royal-10);
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
   }
 
-  /* Turn count footer */
+  .turn-section-chevron :global(.chevron-icon) {
+    display: block;
+  }
+
+  .turn-section[open] > .turn-section-summary .turn-section-chevron {
+    transform: rotate(180deg);
+  }
+
+  /* Expanded body */
+  .turn-section-body {
+    padding: 0 0.875rem 0.75rem;
+    border-top: 1px solid var(--royal-4);
+    margin: 0 0.875rem;
+    padding-top: 0.75rem;
+    margin-top: 0;
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    color: var(--ink);
+    line-height: var(--lh-loose);
+  }
+
+  .turn-section-body :global(p) { margin: 0 0 0.5rem; }
+  .turn-section-body :global(p:last-child) { margin-bottom: 0; }
+  .turn-section-body :global(ul), .turn-section-body :global(ol) { margin: 0 0 0.5rem; padding-left: 1.25rem; }
+  .turn-section-body :global(li) { margin-bottom: 0.25rem; }
+  .turn-section-body :global(code) {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+    background: var(--royal-3);
+    color: var(--royal-11);
+    padding: 0.1em 0.3em;
+    border-radius: 3px;
+  }
+  .turn-section-body :global(pre) {
+    background: var(--royal-3);
+    border: 1px solid var(--royal-5);
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    overflow-x: auto;
+    margin: 0 0 0.5rem;
+  }
+  .turn-section-body :global(pre code) { background: none; padding: 0; color: var(--ink); }
+  .turn-section-body :global(strong) { color: var(--ink); font-weight: 600; }
+
+  /* ── Turn count footer ──────────────────────────────── */
+
   .transcript-count {
     font-family: var(--font-mono);
     font-size: var(--text-xs);
