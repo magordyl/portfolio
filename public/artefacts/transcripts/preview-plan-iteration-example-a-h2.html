@@ -1,83 +1,18 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Plan iteration example</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;500&family=Geist:wght@400;500&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --page-bg: #0A0B16;
-    --page-fg: #E6E2D9;
-    --page-dim: #9C968A;
-    --page-accent: #6C85FF;
-  }
-  * { box-sizing: border-box; }
-  html, body {
-    margin: 0;
-    padding: 0;
-    background: var(--page-bg);
-    color: var(--page-fg);
-    font-family: 'Geist', -apple-system, system-ui, sans-serif;
-    font-size: 16px;
-  }
-  .page {
-    max-width: 760px;
-    margin: 0 auto;
-    padding: 2rem 1.5rem 4rem;
-  }
-  header.preview-header {
-    margin-bottom: 1.5rem;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-    padding-bottom: 1rem;
-  }
-  header.preview-header h1 {
-    font-family: 'Fraunces', Georgia, serif;
-    font-weight: 500;
-    font-size: 1.5rem;
-    letter-spacing: -0.01em;
-    margin: 0 0 0.25rem;
-  }
-  header.preview-header .meta {
-    font-family: 'Geist Mono', monospace;
-    font-size: 0.6875rem;
-    color: var(--page-dim);
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-  }
-  .variants {
-    display: flex;
-    gap: 0.5rem;
-    margin-top: 0.75rem;
-    flex-wrap: wrap;
-  }
-  .variant {
-    font-family: 'Geist Mono', monospace;
-    font-size: 0.75rem;
-    color: var(--page-dim);
-    text-decoration: none;
-    padding: 0.25rem 0.6rem;
-    border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 4px;
-    transition: border-color 0.15s, color 0.15s;
-  }
-  .variant:hover { color: var(--page-fg); border-color: rgba(255,255,255,0.3); }
-  .variant.active { color: var(--page-accent); border-color: var(--page-accent); }
-  .divider {
-    border: none;
-    border-top: 1px solid rgba(255,255,255,0.08);
-    margin: 2.5rem 0;
-  }
-  .batch-label {
-    font-family: 'Geist Mono', monospace;
-    font-size: 0.6875rem;
-    color: var(--page-dim);
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    margin-bottom: 0.5rem;
-  }
+:root{--page-bg:#0A0B16;--page-fg:#E6E2D9;--page-dim:#9C968A;--page-accent:#6C85FF}
+*{box-sizing:border-box}html,body{margin:0;padding:0;background:var(--page-bg);color:var(--page-fg);font-family:'Geist',-apple-system,system-ui,sans-serif;font-size:16px}
+.page{max-width:760px;margin:0 auto;padding:2rem 1.5rem 4rem}
+header.preview-header{margin-bottom:1.5rem;border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:1rem}
+header.preview-header h1{font-family:'Fraunces',Georgia,serif;font-weight:500;font-size:1.5rem;letter-spacing:-0.01em;margin:0 0 0.25rem}
+header.preview-header .meta{font-family:'Geist Mono',monospace;font-size:0.6875rem;color:var(--page-dim);text-transform:uppercase;letter-spacing:0.12em}
+.variants{display:flex;gap:0.5rem;margin-top:0.75rem;flex-wrap:wrap}
+.variant{font-family:'Geist Mono',monospace;font-size:0.75rem;color:var(--page-dim);text-decoration:none;padding:0.25rem 0.6rem;border:1px solid rgba(255,255,255,0.12);border-radius:4px;transition:border-color 0.15s,color 0.15s}
+.variant:hover{color:var(--page-fg);border-color:rgba(255,255,255,0.3)}.variant.active{color:var(--page-accent);border-color:var(--page-accent)}
 
 /* ── Token layer ─────────────────────────────────────── */
 .chat-transcript {
@@ -419,20 +354,75 @@
   padding: 0.125rem 0.4rem;
 }
 
-</style>
-</head>
-<body>
-<div class="page">
-<header class="preview-header">
-  <h1>Plan iteration example</h1>
-  <div class="meta">variant: a-h2</div>
-  <div class="variants"><a class="variant" href="/artefacts/transcripts/preview-plan-iteration-example-a-h1.html">a-h1</a><a class="variant active" href="/artefacts/transcripts/preview-plan-iteration-example-a-h2.html">a-h2</a><a class="variant" href="/artefacts/transcripts/preview-plan-iteration-example-b-h1.html">b-h1</a><a class="variant" href="/artefacts/transcripts/preview-plan-iteration-example-b-h2.html">b-h2</a></div>
-</header>
-<article class="chat-transcript chat-transcript--h2" data-variant="a-h2"><div class="transcript-note">Iterating on the transcript-component plan through Q&amp;A, then a rejection+revision cycle when review-in-UI feedback surfaced. Test fixture for the amended ChatTranscript component.</div><div class="turns"><div class="turn turn--verbatim turn--assistant"><div class="sender"><span class="badge badge--claude"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg></span><span class="sender-label">Claude</span></div><div class="turn-body"><p>Now rewriting the plan to reflect shipped 4a.6 + reusable preview script.</p><div class="tools"><span class="tool">[Write ~/.claude/plans/polished-wandering-widget.md]</span></div></div></div>
+</style></head><body><div class="page">
+<header class="preview-header"><h1>Plan iteration example</h1>
+<div class="meta">variant: a-h2</div>
+<div class="variants"><a class="variant" href="/artefacts/transcripts/preview-plan-iteration-example-a-h1.html">a-h1</a><a class="variant active" href="/artefacts/transcripts/preview-plan-iteration-example-a-h2.html">a-h2</a><a class="variant" href="/artefacts/transcripts/preview-plan-iteration-example-b-h1.html">b-h1</a><a class="variant" href="/artefacts/transcripts/preview-plan-iteration-example-b-h2.html">b-h2</a></div></header>
+<article class="chat-transcript chat-transcript--h2" data-variant="a-h2"><div class="transcript-note">Shows the full request-to-approval arc: initial brief, Claude proposes with questions, Dylan answers, plan v1 ships, Claude catches its own mistake, plan v2 fixes it.</div><div class="turns"><div class="turn turn--verbatim turn--user"><div class="sender"><span class="badge badge--dylan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><span class="sender-label">Dylan</span></div><div class="turn-body"><p>I want to add a few more improvements to the plan for portfolio. First, I want to make improvements to the chat transcript component. One change is I want to explore having a visual identity for claude and Dylan. Perhaps by using a robot icon for claude and a person icon for Dylan. Second, I want to be able to have some collapsed sections in the transcript, with only the key bits showing by default, but ability for the user to click to expand if they want to see the full detail. This is for example, for times when Claude presents a long plan, I don&#39;t want it to take pages of content, but I want the user to be able to go deep into the detail if they want to see and learn from it. Separate improvement to add to the plan: I want to start tracking a list of writing topics that I want to prepare articles for. I want it to be easy for me to add to it while I&#39;m working on any other project. Usually but not always these will be centred around a chat transcript that I&#39;m bookmarking. The purpose is to maintain a log of things I intend to write about in future on the portfolio, with relevant context to jog my memory if it&#39;s been a while. Now, come up with recommended changes to the portfolio plan to include these improvements. Present to me for review. Ask me questions to clarify any doubts.</p></div></div>
+<details class="turn turn--plan turn--assistant"><summary><div class="sender"><span class="badge badge--claude"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg></span><span class="sender-label">Claude</span></div><span class="summary-label">Plan: Where these changes land in the existing plan</span><span class="chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span></summary><div class="turn-body"><p>I&#39;ve read enough of the portfolio plan to propose concrete changes. Here&#39;s what I found and what I&#39;d change — with questions at the end.</p>
+<h3>Where these changes land in the existing plan</h3>
+<p>Three chunks are touched:</p>
+<ul><li><strong>4a.3</strong> (<code>portfolio-imagery-standards.md</code>) — Chat transcripts section: frame spec is currently locked with <strong>text-only</strong> sender labels and <strong>zero JS / no interactivity</strong>. Both improvements contradict this; we need to amend the spec before 4c.1 builds the component.</li><li><strong>4a.6</strong> (<code>portfolio-implementation.md</code>) — bookmark workflow: schema and capture script need small additions to support collapsible turns.</li><li><strong>4c.1</strong> — <code>&lt;ChatTranscript&gt;</code> component build: changes the render layer.</li><li><strong>New addition</strong> — writing topics workflow, layered on top of the existing <code>portfolio-writing-brainstorm.md</code> and the /bookmark skill.</li></ul>
+<h3>Improvement 1 — Visual identity for Claude and Dylan</h3>
+<p><strong>Current frame spec (locked in 4a.3):</strong> sender identity is <strong>text only</strong> — &quot;Dylan&quot; in Royal Tonal 300, &quot;Claude&quot; in Royal Tonal 500, both in Geist Mono caption size.</p>
+<p><strong>Proposed change:</strong> add a small icon badge left of the sender label line. <code>lucide-react</code> is the workspace icon library; both icons render as static inline SVG in the <code>.astro</code> component, zero JS.</p>
+<ul><li><strong>Dylan:</strong> <code>User</code> (or <code>UserCircle</code>) — Royal Tonal 300, inside a 24px Royal Tonal 900 circle</li><li><strong>Claude:</strong> <code>Sparkles</code> (or <code>Bot</code>) — Royal Tonal 500, inside a 24px Royal Tonal 900 circle</li><li>Text label stays (a11y, and keeps the &quot;Dylan / Claude&quot; naming explicit for the reader)</li><li>Colour stays Royal Tonal only — the transcript is still the existing visual register, just with an added glyph</li></ul>
+<p><strong>Why this is low-risk:</strong> icons are purely additive; no layout changes, no new dependencies, no JS. The only frame spec edit is the sender-label row.</p>
+<h3>Improvement 2 — Collapsible sections in transcripts</h3>
+<p><strong>The bigger amendment.</strong> The current spec explicitly says *&quot;Zero client-side JS — static render, no interactivity. No expand/collapse on tool calls.&quot;* The user ask directly inverts that for long assistant replies.</p>
+<p><strong>Proposed change:</strong> progressive disclosure via native HTML <code>&lt;details&gt;/&lt;summary&gt;</code> — <strong>still zero JS</strong>, zero framework, full keyboard a11y, works in static Astro render. Native <code>&lt;details&gt;</code> is HTML semantics, not &quot;interactivity&quot; in the JS/React sense, so the no-JS rule can stay true in spirit.</p>
+<p><strong>Schema extension (4a.6.1):</strong></p>
+<pre><code>turns: Array&lt;{
+  role: &#39;user&#39; | &#39;assistant&#39;,
+  text: string,
+  summary?: string,            // NEW — when set, text collapses behind this
+  collapsedTools?: string[]
+}&gt;</code></pre>
+<p><strong>Render rules (4c.1):</strong></p>
+<ul><li>If <code>turn.summary</code> is set → render <code>&lt;details&gt;&lt;summary&gt;{summary}&lt;/summary&gt;{text}&lt;/details&gt;</code> with &quot;Show full reply ↓&quot; affordance</li><li>If <code>turn.summary</code> is absent <strong>and</strong> <code>turn.text</code> exceeds a character threshold (proposed: 800 chars) → auto-collapse, with summary = first sentence or first 140 chars + &quot;…&quot;</li><li>Short turns → render as-is, no <code>&lt;details&gt;</code> wrapper</li><li>Tool calls <strong>stay always-collapsed</strong> (the existing 4a.3 rule stands)</li></ul>
+<p><strong>Capture script extension (4a.6.2):</strong> when writing the draft, for any assistant turn &gt;800 chars, auto-populate <code>summary</code> with the first sentence. User can edit or clear it during hand-review.</p>
+<p><strong>Frame spec amendment (4a.3):</strong> change the &quot;Zero client-side JS — static render, no interactivity&quot; line to: *&quot;Zero client-side JS. Progressive disclosure uses native <code>&lt;details&gt;/&lt;summary&gt;</code> only — no React, no framework.&quot;* Add a row to the frame-spec table for the <code>summary</code> (Geist italic, Royal Tonal 400) and the expand affordance.</p>
+<h3>Improvement 3 — Writing topics tracker</h3>
+<p><strong>What already exists:</strong> <code>portfolio/plans/portfolio-writing-brainstorm.md</code> — a freeform markdown doc with tags <code>[seed]</code> → <code>[researched]</code> → <code>[drafting]</code> → <code>[shipped]</code>. Currently one entry (Code-first artefacts). It&#39;s manual: no in-flow capture.</p>
+<p><strong>What the user wants:</strong> a low-friction way to add a seed topic from *any* working directory, usually (but not always) paired with a transcript bookmark, with enough context to jog memory later.</p>
+<p><strong>Proposed new sub-chunk 4a.7 — Writing topic capture workflow</strong> (sibling to 4a.6):</p>
+<ol><li><strong>New <code>/writing-topic</code> skill at workspace level</strong> (<code>.claude/skills/writing-topic/SKILL.md</code> in workspace repo — <strong>not</strong> portfolio repo, because it must work from any project&#39;s CWD). Wraps a new <code>scripts/writing-topic.mjs</code> that lives in portfolio repo.</li></ol>
+<ol><li><strong>Skill inputs:</strong></li></ol>
+<ul><li><code>--slug &lt;kebab&gt;</code> — required</li><li><code>--title &quot;...&quot;</code> — required, one-line working title</li><li><code>--thesis &quot;...&quot;</code> — optional but encouraged; exact wording of the point</li><li><code>--transcript &lt;slug&gt;</code> — optional link to a transcript bookmarked in the same session</li><li><code>--context &quot;...&quot;</code> — optional free-text (what was I doing when this hit me)</li></ul>
+<ol><li><strong>Storage:</strong> I&#39;d recommend changing from the <strong>single-file brainstorm doc</strong> to a <strong>folder of per-topic files</strong> at <code>portfolio/plans/writing-topics/&lt;slug&gt;.md</code>, with <code>portfolio/plans/writing-topics/INDEX.md</code> as the scan list. Reasons:</li></ol>
+<ul><li>One file per topic = safer concurrent appends, cleaner diffs, fits the same pattern as <code>ideas/</code></li><li>The existing <code>portfolio-writing-brainstorm.md</code> entry migrates to <code>writing-topics/code-first-artefacts.md</code> during the chunk</li><li>Adds a new topic = one <code>Write</code> call, not an Edit into a growing file</li><li>INDEX.md is the 1-line-per-topic scan list (same pattern as <code>ideas/INDEX.md</code>)</li></ul>
+<ol><li><strong>Frontmatter per topic file:</strong></li></ol>
+<p>   ``<code>yaml    ---    slug: code-first-artefacts    title: &quot;Build the tool, not the tooling&quot;    status: seed    captured: 2026-04-12    transcripts: [planner-v1-story-map]   # optional list of transcript slugs    source_project: planner-app           # auto-detected from CWD when captured    ---    </code>``    Body = thesis + freeform notes + context.</p>
+<ol><li><strong>Pairing with /bookmark:</strong> when <code>/bookmark</code> runs and the user also wants a writing topic, Claude chains the two calls in-flow: <code>/bookmark --slug X</code> then <code>/writing-topic --slug X --transcript X</code>. Not a merged command — two skills, one prompt, explicit intent.</li></ol>
+<ol><li><strong><code>/session-end</code> integration:</strong> extend the existing 4a.6.5 session-end wiring to also list new <code>writing-topics/</code> entries created this session, with the same &quot;promote / edit / delete&quot; prompt pattern.</li></ol>
+<ol><li><strong>First-use gate:</strong> before closing 4a, capture one real writing topic via the skill (can use the existing &quot;Code-first artefacts&quot; as the test case by migrating it through the new flow).</li></ol>
+<h3>Tensions to flag</h3>
+<ol><li><strong>/bookmark skill location.</strong> The current 4a.6.4 plan puts <code>/bookmark</code> inside the <strong>portfolio repo</strong> at <code>.claude/skills/bookmark/</code>. That makes it unreachable from any other project&#39;s CWD (e.g. when you&#39;re working in <code>planner-app/</code> and want to bookmark the moment). If we&#39;re adding <code>/writing-topic</code> at workspace level for cross-project use, <strong><code>/bookmark</code> should move with it</strong>. The script can still live in <code>portfolio/scripts/</code> — the workspace skill just invokes it by absolute path.</li></ol>
+<ol><li><strong>Locked rule change.</strong> The &quot;zero interactivity&quot; rule in 4a.3 was deliberate. Amending it to allow native <code>&lt;details&gt;</code> is a real scope-expansion decision that should be acknowledged in the diary, not slipped in silently.</li></ol>
+<ol><li><strong>Character threshold for auto-collapse.</strong> 800 chars is a guess. The real number wants to be calibrated against a couple of real assistant turns that match &quot;long plan that takes pages of content&quot; — might be 1200. We should set it and plan to revisit after 4c.1 renders real transcripts.</li></ol>
+<h3>Questions before I write the final plan</h3>
+<ol><li><strong>Icon choice for sender badges</strong> —</li></ol>
+<p>   (a) <code>User</code> + <code>Sparkles</code> (stylised, &quot;AI sparkle&quot; is a common visual cue)    (b) <code>User</code> + <code>Bot</code> (literal — looks like a robot icon)    (c) <code>UserCircle</code> + <code>Sparkles</code>    (d) Defer the exact glyph choice to the 4c.1 design explorer — build two variants in <code>case-study-v1.html</code> vs <code>v2.html</code> and pick one there</p>
+<ol><li><strong>Icon + text label, or icon only?</strong></li></ol>
+<p>   (a) Icon + &quot;Dylan&quot; / &quot;Claude&quot; text label (current plan + glyph)    (b) Icon only (cleaner, visually stronger, but weaker a11y and first-glance parse)    (c) Icon + text on desktop, icon only on mobile</p>
+<ol><li><strong>Collapsible mechanism</strong> —</li></ol>
+<p>   (a) Explicit <code>summary</code> field only — author marks what&#39;s collapsed during hand-review    (b) Auto-collapse only — any turn over the char threshold auto-folds with a generic &quot;Show full reply&quot;    (c) Both: auto-fills <code>summary</code> with first sentence when capturing long turns, hand-review can override, render logic doesn&#39;t care which path set the value *(my recommendation)*</p>
+<ol><li><strong>What does the collapsed &quot;key bits&quot; view show for a long Claude plan?</strong> —</li></ol>
+<p>   (a) First sentence, truncated    (b) First N chars (140? 200?) with ellipsis    (c) First paragraph (up to first blank line in the turn text)    (d) First heading (<code>##</code>, <code>###</code>) if one exists, otherwise fall back to (a)</p>
+<ol><li><strong>Writing topic capture — skill shape</strong> —</li></ol>
+<p>   (a) New <code>/writing-topic</code> skill at workspace level, separate from <code>/bookmark</code> *(my recommendation)*    (b) Extend <code>/bookmark</code> with a <code>--topic</code> flag that also writes a topic seed    (c) Extend the existing workspace <code>/new-idea</code> skill with a <code>type: writing</code> variant (reuses the <code>ideas/</code> pattern, but destination is portfolio not workspace — awkward)</p>
+<ol><li><strong>Writing topic storage format</strong> —</li></ol>
+<p>   (a) One file per topic under <code>portfolio/plans/writing-topics/&lt;slug&gt;.md</code> + <code>INDEX.md</code> scan list *(my recommendation — matches the <code>ideas/</code> pattern and the existing brainstorm doc migrates cleanly)*    (b) Keep <code>portfolio-writing-brainstorm.md</code> as a single appended file    (c) A new Astro <strong>content collection</strong> <code>writing-ideas</code> with a Zod schema (more rigorous, but adds build-time coupling; overkill for seed notes)</p>
+<ol><li><strong>Relocate /bookmark skill to workspace level</strong> along with the new <code>/writing-topic</code> skill? —</li></ol>
+<p>   (a) Yes — both at workspace <code>.claude/skills/</code>, both call scripts living in <code>portfolio/scripts/</code> *(my recommendation, fixes a latent cross-project gap in 4a.6)*    (b) No — keep <code>/bookmark</code> portfolio-local; only add <code>/writing-topic</code> at workspace level    (c) Both at portfolio level — means they only work when CWD is portfolio (punts the cross-project problem)</p>
+<p>Answer the ones you have a view on — skip any where you want me to pick. Once I have your answers I&#39;ll write the final plan into the plan file and exit plan mode.</p></div></details>
+<div class="turn turn--verbatim turn--user"><div class="sender"><span class="badge badge--dylan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><span class="sender-label">Dylan</span></div><div class="turn-body"><p>1d 2 visualise both. ensure the icon &amp; text option doesn&#39;t use too much horizontal space (consider stacking vertically). 3 other: collapse by default things like skill invocations, plans, research findings from claude. Only the key headlines from claude should be uncollapsed in longer messages. Generally, don&#39;t collapse Dylan&#39;s messages. Lightweight author review when publishing. I want to see this mocked up in the design explorer step. 4 answered in 3 5a 6a 7a addition from me: the /writing-topic skill should allow me to just invoke it with freeform text, and then automatically capture relevant context from the conversation. E.g. /writing-topic &quot;optimising the portfolio curation workflow by creating the writing topic skill&quot;</p></div></div>
+<details class="turn turn--plan turn--assistant"><summary><div class="sender"><span class="badge badge--claude"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg></span><span class="sender-label">Claude</span></div><span class="summary-label">Plan written</span><span class="chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span></summary><div class="turn-body"><p>Plan written. Key decisions captured:</p>
+<ul><li><strong>Icons:</strong> both pairs mocked in the 4c.1 design explorer; H1 (horizontal compact) AND H2 (vertical stacked) header layouts both built for comparison</li><li><strong>Collapse:</strong> new <code>kind</code> field on each turn (<code>verbatim | headline | plan | skill | research</code>) drives native <code>&lt;details&gt;/&lt;summary&gt;</code> render; auto-classified at capture time, reviewed during promote + session-end</li><li><strong>Writing topics:</strong> new workspace-level <code>/writing-topic</code> skill, freeform text is the primary invocation, auto-derives slug/title/source-project/session-context/transcript link; per-topic files under <code>portfolio/plans/writing-topics/</code> + INDEX</li><li><strong>Skill relocation:</strong> both <code>/bookmark</code> and <code>/writing-topic</code> sit at workspace level so they work from any project CWD; scripts stay in <code>portfolio/scripts/</code></li><li><strong>Design explorer sample transcript</strong> must contain all four kinds + both icon pairs + both header layouts so we pick on how it reads in context</li></ul>
+<p>Ready for your review.</p></div></details>
+<div class="turn turn--verbatim turn--assistant"><div class="sender"><span class="badge badge--claude"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg></span><span class="sender-label">Claude</span></div><div class="turn-body"><p>Two updates: 4a.6 is already shipped (my plan needs to reframe as amendments to shipped scripts, not creation), and the review step must render in the actual UI component via a reusable script. Let me save that feedback to memory and rewrite the plan.</p></div></div>
 <details class="turn turn--plan turn--assistant"><summary><div class="sender"><span class="badge badge--claude"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg></span><span class="sender-label">Claude</span></div><span class="summary-label">Plan updated</span><span class="chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span></summary><div class="turn-body"><p>Plan updated. Key changes from the previous draft:</p>
-<ul><li><strong>Reframed as amendments to shipped 4a.6</strong>, not greenfield — schema, bookmark script, promote script, and <code>/bookmark</code> skill already exist and are being edited/relocated.</li><li><strong>New <code>scripts/render-transcript.mjs</code> shared helper</strong> — single source of truth for transcript HTML + CSS, imported by both the preview harness and the future <code>&lt;ChatTranscript&gt;.astro</code> component. Render parity is guaranteed by a test gate.</li><li><strong>New <code>scripts/preview-transcript.mjs</code> CLI</strong> — wraps <code>renderTranscript</code> in a standalone HTML page, opens in browser, supports <code>--variant a-h1|a-h2|b-h1|b-h2</code> for comparing the four icon-pair × header-layout combinations cheaply. <code>--batch</code> renders all drafts on one page for session-end review.</li><li><strong>Promote review is now a browser preview</strong>, not a terminal listing — <code>promote-transcript.mjs</code> shells out to the preview harness, the user reviews in-browser, then p/e/r/c from the terminal.</li><li><strong>Design artefact path</strong> — previews land at <code>plans/portfolio-stitch-assets/transcripts/preview-*.html</code>, committable and survives sessions.</li><li><strong>Memory saved</strong> — <code>feedback_review_in_ui_component.md</code> captures the general principle.</li></ul><div class="tools"><span class="tool">[ExitPlanMode]</span></div></div></details>
-<div class="turn turn--verbatim turn--assistant"><div class="sender"><span class="badge badge--claude"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg></span><span class="sender-label">Claude</span></div><div class="turn-body"><p>Plan approved. The plan file is at <code>~/.claude/plans/polished-wandering-widget.md</code>. Ready to start implementation when you give the word — want me to begin with a specific amendment (1/2/3/4), or work through them in order?</p></div></div>
+<ul><li><strong>Reframed as amendments to shipped 4a.6</strong>, not greenfield — schema, bookmark script, promote script, and <code>/bookmark</code> skill already exist and are being edited/relocated.</li><li><strong>New <code>scripts/render-transcript.mjs</code> shared helper</strong> — single source of truth for transcript HTML + CSS, imported by both the preview harness and the future <code>&lt;ChatTranscript&gt;.astro</code> component. Render parity is guaranteed by a test gate.</li><li><strong>New <code>scripts/preview-transcript.mjs</code> CLI</strong> — wraps <code>renderTranscript</code> in a standalone HTML page, opens in browser, supports <code>--variant a-h1|a-h2|b-h1|b-h2</code> for comparing the four icon-pair × header-layout combinations cheaply. <code>--batch</code> renders all drafts on one page for session-end review.</li><li><strong>Promote review is now a browser preview</strong>, not a terminal listing — <code>promote-transcript.mjs</code> shells out to the preview harness, the user reviews in-browser, then p/e/r/c from the terminal.</li><li><strong>Design artefact path</strong> — previews land at <code>plans/portfolio-stitch-assets/transcripts/preview-*.html</code>, committable and survives sessions.</li><li><strong>Memory saved</strong> — <code>feedback_review_in_ui_component.md</code> captures the general principle.</li></ul></div></details>
+<div class="turn turn--verbatim turn--assistant"><div class="sender"><span class="badge badge--claude"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg></span><span class="sender-label">Claude</span></div><div class="turn-body"><p>Plan approved. The plan file is at <code>[HOME]/.claude\plans\polished-wandering-widget.md</code>. Ready to start implementation when you give the word — want me to begin with a specific amendment (1/2/3/4), or work through them in order?</p></div></div>
 <div class="turn turn--verbatim turn--user"><div class="sender"><span class="badge badge--dylan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><span class="sender-label">Dylan</span></div><div class="turn-body"><p>bookmark this conversation as an example of iterating on a plan. I will use this as the example to test the amended transcript component, once implemented.</p></div></div></div></article>
-</div>
-</body>
-</html>
+</div></body></html>

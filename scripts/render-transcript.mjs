@@ -81,6 +81,26 @@ function renderMarkdown(text) {
       continue;
     }
 
+    // Heading
+    const headingMatch = line.match(/^(#{1,6})\s+(.+)$/);
+    if (headingMatch) {
+      const level = Math.min(headingMatch[1].length + 1, 6);
+      blocks.push(`<h${level}>${renderInline(headingMatch[2])}</h${level}>`);
+      i++;
+      continue;
+    }
+
+    // Numbered list
+    if (/^\s*\d+\.\s+/.test(line)) {
+      const items = [];
+      while (i < lines.length && /^\s*\d+\.\s+/.test(lines[i])) {
+        items.push(lines[i].replace(/^\s*\d+\.\s+/, ''));
+        i++;
+      }
+      blocks.push(`<ol>${items.map(it => `<li>${renderInline(it)}</li>`).join('')}</ol>`);
+      continue;
+    }
+
     // Blank line
     if (!line.trim()) {
       i++;
@@ -94,7 +114,8 @@ function renderMarkdown(text) {
       lines[i].trim() &&
       !/^```/.test(lines[i]) &&
       !/^\s*[-*]\s+/.test(lines[i]) &&
-      !/^#{2,3}\s+/.test(lines[i])
+      !/^\s*\d+\.\s+/.test(lines[i]) &&
+      !/^#{1,6}\s+/.test(lines[i])
     ) {
       paraLines.push(lines[i]);
       i++;
