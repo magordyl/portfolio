@@ -1,5 +1,15 @@
 # Development Diary
 
+## 2026-04-12 — Design system scaffold: catching a gap the planning process created
+
+The portfolio had 10+ bespoke Astro components, a 12-step colour scale, a custom type system, and zero connection to the workspace design system. No `design.tokens.ts`, no shadcn. The implementation plan deliberately deferred this to chunk 7 (post-launch) to avoid coupling the portfolio build to an unproven shared layer. Defensible at the time, but three things drifted: the CLAUDE.md claimed shadcn as part of the stack before it was installed, the workspace `design-system.md` pre-flight rule arrived mid-build without auditing in-progress projects, and chunk 7's "post-launch" gate had no trigger to re-evaluate.
+
+The fix was straightforward: create `design.tokens.ts` with a two-export pattern (workspace schema mapping + raw palette), update CLAUDE.md to reflect reality, and add a portfolio exemption to the workspace shadcn rule. About half the colour system maps cleanly to the workspace `ColorTokens` interface; the rest (the full 12-step raw scale, ink-faint, tag tokens, code syntax tokens, kicker) stays in `globals.css` only. Schema extension deferred until a second project needs the same roles.
+
+The process lesson is more interesting than the fix. When a workspace-wide rule is added, it needs an audit pass against active projects in the same session. The design-system pre-flight check ("stop if no `design.tokens.ts`") was written for future projects but applied retroactively to one that was already deep into chunk 4. A 10-second glob would have caught the gap. Added this as rule 10 in workspace CLAUDE.md.
+
+---
+
 ## 2026-04-12 — Chunk 4c.1: Diagram, ChatTranscript, CaseStudyLayout
 
 Three components and the project page route shipped in one session. The interesting part was what came before the code: using Stitch to generate a layout mockup first, which gave us a spatial skeleton to build against rather than designing in code.

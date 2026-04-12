@@ -1,14 +1,19 @@
 # Portfolio — Project Context
 
-Personal portfolio site. Stack: Astro 6 + React islands + Tailwind v4 + shadcn (new-york-v4 style). Deployed to Cloudflare Pages from the `main` branch of `magordyl/portfolio`.
+Personal portfolio site. Stack: Astro 6 + React islands + Tailwind v4. Deployed to Cloudflare Pages from the `main` branch of `magordyl/portfolio`.
 
 ## Design System
 
-- **Colours:** Royal Tonal (12-step scale anchored on `#3B5BDB`) — see `src/styles/globals.css`
+- **Tokens:** `./design.tokens.ts` — imports defaults from `../design-system/`, overrides with Royal Tonal palette
+- **Conventions:** `../design-system/design.md`
+- **Colours:** Royal Tonal (12-step scale anchored on `#3B5BDB`) — raw scale + semantic aliases in `src/styles/globals.css`, canonical values in `design.tokens.ts`
 - **Fonts:** Fraunces (serif display) × Geist (sans body) × Geist Mono (code)
 - **Type scale:** 72/32/16 anchor — all sizes in `--text-*` CSS variables
 - **Radius:** 8px cards, 2px tags
 - **Dark mode only.** No toggle. Single palette.
+- **shadcn exemption:** This project does not use shadcn/ui. Existing components are bespoke Astro components built against design explorers. Future components may use shadcn where applicable and where they work with the token system.
+
+Rule: read `design.md` before generating UI code. Canonical colour values live in `design.tokens.ts`; CSS var names live in `globals.css`. Never hardcode hex in components.
 
 Full design decisions in `plans/portfolio-design-tokens.md`, `plans/portfolio-visual-direction.md`, `plans/portfolio-architecture.md` (this repo's `plans/`).
 
@@ -16,8 +21,8 @@ Full design decisions in `plans/portfolio-design-tokens.md`, `plans/portfolio-vi
 
 - `.astro` components for all static content — no React unless hydration is genuinely needed
 - React islands only for interactive bits (the "Get in touch" button, future nav drawer)
-- shadcn/ui components are style references — install via `npx shadcn@latest add <component>`, then wrap in `.astro` if static
 - Always use CSS custom properties (`var(--token)`) — never hardcode colour hex values in components
+- For new components: check if shadcn has a suitable primitive first; if it works with the token system, use it. Otherwise build bespoke.
 
 ## Content Collections
 
@@ -40,37 +45,19 @@ Astro uses `@tailwindcss/vite` (Vite plugin), NOT `@astrojs/tailwind`. The `astr
 
 ## Current Status (2026-04-12)
 
-**Last session (2026-04-12) — Chunk 4c.1 complete: components + layout + ChatTranscript fix.**
+**Last session (2026-04-12) — Design system scaffold: `design.tokens.ts` created, shadcn exempted.**
 
-**Commits this session:**
-- `1f952da` — Diagram, ChatTranscript, CaseStudyLayout, project page routes
-- `edc9f20` — diary entry for 4c.1
-- `0ce66f6` — untracked scripts + draft transcript committed
-- `96e1153` — ChatTranscript fix: nested expanders within turns, bolder chevron
+**What was done this session:**
+- Created `design.tokens.ts` at project root (two-export pattern: `tokens` for workspace schema, `palette` for raw Royal Tonal hex scale, `typeScale` for portfolio-specific named slots)
+- Updated CLAUDE.md: removed aspirational shadcn references, documented shadcn exemption, pointed Design System section at tokens file and workspace conventions
+- Updated workspace `design-system/design.md` with portfolio exemption note
+- `npm run check` passes clean (0 errors, 0 warnings)
 
-**Chunk 4c.1 complete.** Three components and the page route shipped:
-- **`Diagram.astro`** — 490px min-width scroll container, mobile bleed via negative margins, "scroll →" hint on mobile
-- **`ChatTranscript.astro`** — inline + breakout modes, vertical stacked Bot/User icons (24px circle gutter), three render modes (verbatim, collapsed plan/skill/research, headline with per-heading collapse), native `<details>` with 16px chevron-down SVG, markdown rendering, zero JS
-- **`CaseStudyLayout.astro`** — 680px prose column, hero from frontmatter (number badge, serif title, TL;DR, metadata bar, tags, live link, hero image placeholder), h2 styled as uppercase mono section kickers, breakout margin support, screenshot grid utility
-- **`pages/projects/[slug].astro`** — static routes for all 5 projects, MDX rendered with ChatTranscript + Diagram as injected components
+**Design system token coverage:** About half the portfolio's colour system maps to the workspace `ColorTokens` schema. The rest (royal-1, royal-6, royal-11, royal-12, ink-faint, tag-*, code-*, kicker, link as distinct from ring, card-hover as distinct from input) lives only in the `palette` export and `globals.css`. Schema extension deferred until a second project needs the same roles (option 3, agreed with user).
 
-**Design decisions locked this session:**
-- **Bot** icon for Claude (not Sparkles)
-- **Vertical stacked** header layout (icon + label in 40px left gutter)
-- **Stitch v1** layout as structural base (spacing tightened to token scale)
-- Stitch ideation artefact preserved at `plans/portfolio-assets/stitch-case-study-v1{-screenshot.png,.html}`
+**shadcn exemption:** Existing bespoke Astro components stay. Future components may use shadcn where applicable. No `components.json` or shadcn init needed.
 
-**Planned middle zone per project (from template):**
-
-| Project | Depth | Middle sections | Rationale |
-|---------|-------|----------------|-----------|
-| The Weekly (#1) | Full | Design, Architecture, Decisions | Strong design iteration trail |
-| Planner POC (#2) | Full | Architecture, Decisions | Migration + spending guard |
-| Workspace Audit (#3) | Lightweight | Decisions | Tooling/process project |
-| This Portfolio (#4) | Lightweight | Design | Meta: design system is the story |
-| Planner V1 (#5) | Full | Architecture, Design, Decisions | Complex system + new frontend |
-
-**Preview harness** (`scripts/render-transcript.mjs` + `scripts/preview-transcript.mjs`) already existed from prior session. Verified working with `--slug plan-iteration-example --variant b-h2 --open`. All four variants render; `b-h2` is the locked default.
+**Prior session context (4c.1):** Diagram, ChatTranscript, CaseStudyLayout components and project page routes all shipped. Preview harness working (`--slug plan-iteration-example --variant b-h2 --open`).
 
 **Next priorities (session order):**
 1. **4d** — write the-weekly case study against locked template + layout (Opus recommended)
@@ -82,5 +69,5 @@ Astro uses `@tailwindcss/vite` (Vite plugin), NOT `@astrojs/tailwind`. The `astr
 
 ## Implementation Plan
 
-Full plan: `plans/portfolio-implementation.md` (chunks 1–3 complete, then 4a → 4b → 4c → 4d → 5 → 5.5 → 5.6 → 6, plus optional chunk 7 design-system retrofit post-launch).
+Full plan: `plans/portfolio-implementation.md` (chunks 1–3 complete, then 4a → 4b → 4c → 4d → 5 → 5.5 → 5.6 → 6). Chunk 7 (design-system retrofit) was pulled forward — `design.tokens.ts` now exists. The remaining chunk 7 work (emitter script, generated globals.css) is optional post-launch.
 Current status tracked in `DIARY.md`.
