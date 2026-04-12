@@ -1,5 +1,19 @@
 # Development Diary
 
+## 2026-04-12 — Chunk 4b locked: content template + architecture diagram standards
+
+Shipped the project content template (`plans/portfolio-case-study-template.md`) and two architecture diagram explorers (`5f9260c`). This is the content hierarchy that 4c (layout) and 4d (writing) both build against. Content structure dictates layout, not the reverse.
+
+**The flexible middle zone is the structural innovation.** My first draft had a rigid six-section template (Hero, Problem, Process, Outcome, Lessons, Next). The user pushed back: projects have different strengths, and a fixed template would force every case study into the same mould. The fix was splitting "Process" into a pool of three optional sections (Decisions, Architecture, Design) where each project picks 1-3 and orders them by what's most interesting. The bookend sections (Hero, Problem, Outcome, Lessons, Next) stay fixed. This buys flexibility without losing structure. Future sections can be added to the pool without touching existing case studies.
+
+**Naming landed on "Projects" and "Writing".** Evaluated five options each for the project collection and the writing collection. "Case Studies" was the original label but felt overly formal and academic. "Projects" is the simplest, most straightforward label that accurately describes what the collection contains. "Writing" beat "Essays" (too intellectual), "Posts" (too bloggy), "Thinking" (too vague), and "Notes" (too informal). Tags and kickers must use these labels consistently. Tagging structure deferred until writing volume grows.
+
+**Architecture diagram standards shipped with v2 colour contrast improvements.** Built a design explorer showing three variations of the Planner V1 architecture diagram at case-study body width. Variation B (detailed with highlighted Vendor Gateway, 8 nodes) was selected. The v1 colours were too subtle on mobile, so v2 bumped every fill and stroke one step up the Royal Tonal scale. Key rule: architecture diagrams use Royal Tonal exclusively. Violet Signal does not appear in architecture diagrams because Violet is the "thinking/writing" content register, and mixing registers in a single diagram undermines the semantic colour system.
+
+**Mobile diagram legibility was the session's biggest technical problem.** All three v1 variations were unreadable on mobile because card padding ate ~40% of screen width. The solution has two parts. First, a hard floor: no SVG text below 11px in viewBox units, combined with a 490px minimum rendered width on the scroll container, which means 11px SVG text renders at 9px CSS on screen. Second, a dual presentation strategy: diagrams bleed to full container width on mobile (negative margins cancel card padding) and, if the container is still narrower than 490px, enable horizontal scroll with a "scroll →" hint. The `<Diagram>` Astro component will handle both behaviours with no JavaScript.
+
+---
+
 ## 2026-04-12 — Writing seeds captured, transcript promoted, 4a.6.6 gate closed
 
 Captured two writing brainstorm entries: a four-post series on how the workflow has evolved since starting Claude Code (engineering, portfolio maintenance, design, idea capture) and a standalone post on custom skills as a personal operating system. Both are seeds in `plans/portfolio-writing-brainstorm.md`, not to be drafted until chunk 5.5.
