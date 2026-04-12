@@ -253,6 +253,9 @@ This chunk exists specifically to make sure content structure dictates layout, n
 Starting point for discussion:
 ```
 Hero:          title + one-line TL;DR + tags + live link + primary image slot
+               [metadata bar: #03 · Started Mar 2026 · Shipped Apr 2026 · Last updated 12 Apr 2026]
+               number, started, finished from frontmatter; lastUpdated computed from git log at build time
+               "Shipped" becomes "In progress" when finished is omitted
 Problem:       what was broken or missing + why it mattered (~80 words)
 Process:       key product decisions + rejected alternatives + why (~200 words)
                [diagram slot: decision tree or architecture sketch]
@@ -283,7 +286,7 @@ Adjust the scaffold until every signal has a home and every section earns its pl
 
 ### Step 4b.3 — Word count targets
 
-- **Full case studies** (the-weekly, planner-app): 400–600 words body
+- **Full case studies** (the-weekly, planner-poc, planner-v1): 400–600 words body
 - **Lightweight case studies** (workspace-audit, portfolio itself): 200–350 words body
 - Each section gets a target band — writer knows when they're over budget
 - **Transcript embeds count as 50 words against the section budget regardless of actual turn length.** This prevents embeds from being used to pad word counts while still discouraging over-embedding — a section with 3 transcripts loses 150 words of its prose budget, which is usually the whole section.

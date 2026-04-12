@@ -7,7 +7,10 @@ const projects = defineCollection({
   schema: z.object({
     title: z.string(),
     tldr: z.string().max(120),
+    number: z.number().int().positive(),
     date: z.coerce.date(),
+    started: z.coerce.date(),
+    finished: z.coerce.date().optional(),
     tags: z.array(z.string()),
     live: z.url().optional(),
     hero: z.string().optional(),
