@@ -1,0 +1,1181 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Card deep-dive v6 — Final: featured system + tuned typography</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Geist+Mono:wght@400;500&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --royal-1:#0a0d1a; --royal-2:#0f1428; --royal-3:#141c3a; --royal-4:#1b2652;
+    --royal-5:#233270; --royal-6:#2b4094; --royal-7:#3350bf; --royal-8:#3B5BDB;
+    --royal-9:#5773e3; --royal-10:#8098ec; --royal-11:#adbcf2; --royal-12:#d8dff9;
+
+    --violet-8:#8C3BDB; --violet-9:#a157e3; --violet-10:#b77cec;
+    --violet-11:#cfa3f2; --violet-12:#e6cff9;
+
+    --ink:#e8ecff; --ink-muted:#a0aac4; --ink-dim:#6b7390;
+
+    --bg:#0a0d1a; --card:#0f1428; --card-hover:#141c3a; --rule:#1b2652;
+
+    --grad-rv: linear-gradient(135deg, var(--royal-8) 0%, var(--violet-8) 100%);
+    --grad-rv-soft: linear-gradient(135deg, rgba(59,91,219,0.12) 0%, rgba(140,59,219,0.12) 100%);
+
+    --font-display:"Fraunces",serif;
+    --font-sans:"Geist",system-ui,sans-serif;
+    --font-mono:"Geist Mono",monospace;
+
+    --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px; --s8:64px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    padding: var(--s8) var(--s5) var(--s8);
+    max-width: 1180px;
+    margin: 0 auto;
+  }
+
+  /* ---------- Doc framing ---------- */
+
+  .doc-head { margin-bottom: var(--s8); }
+  .doc-head .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--royal-10);
+    margin-bottom: var(--s3);
+  }
+  .doc-head h1 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 52px;
+    line-height: 1.0;
+    letter-spacing: -0.025em;
+    margin-bottom: var(--s4);
+  }
+  .doc-head p {
+    color: var(--ink-muted);
+    font-size: 17px;
+    max-width: 68ch;
+  }
+  .doc-head p + p { margin-top: var(--s3); }
+  .doc-head strong { color: var(--ink); font-weight: 500; }
+  .doc-head em { font-style: italic; color: var(--ink); }
+
+  section {
+    margin-top: var(--s8);
+    padding-top: var(--s6);
+    border-top: 1px solid var(--rule);
+  }
+  section:first-of-type { border-top: none; padding-top: 0; }
+  section > .kicker {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--royal-10);
+    margin-bottom: var(--s2);
+  }
+  section > h2 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 34px;
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+    margin-bottom: var(--s3);
+  }
+  section > .lede {
+    color: var(--ink-muted);
+    max-width: 68ch;
+    margin-bottom: var(--s6);
+    font-size: 15.5px;
+  }
+  section > .lede strong { color: var(--ink); font-weight: 500; }
+  section > .lede em { font-style: italic; color: var(--ink); }
+
+  .note {
+    background: var(--grad-rv-soft);
+    border: 1px solid var(--royal-7);
+    border-radius: 8px;
+    padding: var(--s4) var(--s5);
+    margin-top: var(--s5);
+    font-size: 14px;
+    color: var(--ink);
+    line-height: 1.65;
+  }
+  .note strong { color: var(--royal-11); }
+
+  .warning {
+    background: color-mix(in srgb, var(--violet-8) 10%, var(--royal-1));
+    border: 1px solid color-mix(in srgb, var(--violet-8) 35%, var(--rule));
+    border-radius: 8px;
+    padding: var(--s4) var(--s5);
+    margin-top: var(--s5);
+    font-size: 14px;
+    color: var(--ink);
+    line-height: 1.65;
+  }
+  .warning strong { color: var(--violet-11); }
+
+  .variant-label {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-muted);
+    margin-bottom: var(--s3);
+    letter-spacing: 0.04em;
+  }
+  .variant-label strong { color: var(--ink); font-weight: 500; }
+
+  .variant-group { margin-top: var(--s6); }
+  .variant-group:first-of-type { margin-top: var(--s5); }
+
+  /* ===================================================================
+     CARDS — Layout A shell (unchanged from v4/v5)
+     =================================================================== */
+
+  .cards-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--s5);
+  }
+  .cards-row.three { grid-template-columns: repeat(3, 1fr); }
+  .cards-row.one { grid-template-columns: 1fr; max-width: 560px; }
+
+  .card {
+    position: relative;
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: background 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
+  }
+  .card:hover {
+    background: var(--card-hover);
+    border-color: var(--royal-8);
+    box-shadow: inset 0 1px 0 rgba(165, 180, 255, 0.18);
+  }
+  .card.writing:hover {
+    border-color: var(--violet-8);
+  }
+
+  .card .strip {
+    position: relative;
+    height: 160px;
+    border-bottom: 1px solid var(--rule);
+    overflow: hidden;
+  }
+  .card .content {
+    padding: var(--s4) var(--s5) var(--s5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--s3);
+  }
+
+  .card .kicker {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--royal-10);
+    line-height: 1;
+    margin-top: var(--s1);
+  }
+  .card.writing .kicker { color: var(--violet-10); }
+
+  .card h3 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 22px;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+  .card h3 a.card-link {
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .card h3 a.card-link::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+  .card h3 a.card-link .arrow {
+    color: var(--royal-10);
+    margin-left: 6px;
+    display: inline-block;
+    transition: transform 140ms ease;
+  }
+  .card.writing h3 a.card-link .arrow { color: var(--violet-10); }
+  .card:hover h3 a.card-link .arrow { transform: translateX(3px); }
+
+  .card p.desc {
+    color: var(--ink-muted);
+    font-size: 14px;
+    line-height: 1.55;
+  }
+
+  .card .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s2);
+    list-style: none;
+    margin-top: var(--s2);
+    position: relative;
+    z-index: 2;
+  }
+  .card .tags li {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 3px var(--s2);
+    background: var(--royal-3);
+    color: var(--royal-11);
+    border-radius: 2px;
+    border: 1px solid var(--royal-4);
+  }
+  .card.writing .tags li {
+    background: color-mix(in srgb, var(--violet-8) 18%, var(--card));
+    color: var(--violet-11);
+    border-color: color-mix(in srgb, var(--violet-8) 35%, var(--card));
+  }
+
+  /* ===================================================================
+     SHARED SHELL for centred marks (unchanged)
+     =================================================================== */
+
+  .strip.v-numeral,
+  .strip.v-icon,
+  .strip.v-monogram {
+    display: grid;
+    place-items: center;
+    background: var(--royal-1);
+    position: relative;
+    padding: var(--s4);
+  }
+  .strip.v-numeral::before,
+  .strip.v-icon::before,
+  .strip.v-monogram::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(0deg, transparent 0 22px, color-mix(in srgb, var(--royal-8) 10%, transparent) 22px 23px);
+    pointer-events: none;
+  }
+  .card.writing .strip.v-numeral::before,
+  .card.writing .strip.v-icon::before,
+  .card.writing .strip.v-monogram::before {
+    background-image:
+      repeating-linear-gradient(0deg, transparent 0 22px, color-mix(in srgb, var(--violet-8) 10%, transparent) 22px 23px);
+  }
+  /* Featured cards get a neutral ruled texture (doesn't pick a side) */
+  .card.featured .strip.v-numeral::before,
+  .card.featured .strip.v-icon::before,
+  .card.featured .strip.v-monogram::before {
+    background-image:
+      repeating-linear-gradient(0deg, transparent 0 22px, rgba(180, 150, 240, 0.09) 22px 23px);
+  }
+
+  /* ===================================================================
+     V6 TYPOGRAPHY — Geist 400 (lighter than v5's 500)
+     Numeral 120px, monogram 72px, icon stroke 2.
+     =================================================================== */
+
+  .strip.v-numeral .num {
+    font-family: var(--font-sans);
+    font-weight: 400;
+    font-variant-numeric: lining-nums tabular-nums;
+    font-feature-settings: "ss01" on;
+    font-size: 120px;
+    line-height: 0.82;
+    letter-spacing: -0.04em;
+    color: var(--royal-8);
+    position: relative;
+  }
+  .card.writing .strip.v-numeral .num { color: var(--violet-8); }
+
+  .strip.v-icon svg {
+    width: 88px;
+    height: 88px;
+    stroke: var(--royal-8);
+    stroke-width: 2;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    position: relative;
+  }
+  .card.writing .strip.v-icon svg { stroke: var(--violet-8); }
+
+  .strip.v-monogram .mono {
+    font-family: var(--font-sans);
+    font-weight: 400;
+    font-size: 72px;
+    line-height: 0.85;
+    letter-spacing: -0.015em;
+    color: var(--royal-8);
+    position: relative;
+  }
+  .card.writing .strip.v-monogram .mono { color: var(--violet-8); }
+
+  /* ---- V5 typography (held for before/after comparison in §1) ---- */
+  .strip.v5-numeral .num {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-variant-numeric: lining-nums tabular-nums;
+    font-feature-settings: "ss01" on;
+    font-size: 120px;
+    line-height: 0.82;
+    letter-spacing: -0.04em;
+    color: var(--royal-8);
+    position: relative;
+  }
+  .strip.v5-numeral,
+  .strip.v5-icon,
+  .strip.v5-monogram {
+    display: grid;
+    place-items: center;
+    background: var(--royal-1);
+    position: relative;
+    padding: var(--s4);
+  }
+  .strip.v5-numeral::before,
+  .strip.v5-icon::before,
+  .strip.v5-monogram::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(0deg, transparent 0 22px, color-mix(in srgb, var(--royal-8) 10%, transparent) 22px 23px);
+    pointer-events: none;
+  }
+  .strip.v5-icon svg {
+    width: 88px;
+    height: 88px;
+    stroke: var(--royal-8);
+    stroke-width: 2.25;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    position: relative;
+  }
+  .strip.v5-monogram .mono {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 72px;
+    line-height: 0.85;
+    letter-spacing: -0.015em;
+    color: var(--royal-8);
+    position: relative;
+  }
+
+  /* ===================================================================
+     SCREENSHOT (Type 1) — auto-tint with deep colour lock
+     =================================================================== */
+
+  .strip.v-screenshot .photo {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #ff4d8f 0%, #ffe14d 45%, #4dc8ff 100%);
+    filter: saturate(0.75);
+  }
+  .strip.v-screenshot .photo::before {
+    content: "";
+    position: absolute;
+    top: 22%; left: 8%; right: 8%; height: 8%;
+    background: rgba(255,255,255,0.9);
+    border-radius: 2px;
+  }
+  .strip.v-screenshot .photo::after {
+    content: "";
+    position: absolute;
+    bottom: 18%; left: 8%; right: 30%; height: 6%;
+    background: rgba(255,255,255,0.62);
+    border-radius: 2px;
+    box-shadow:
+      0 12px 0 rgba(255,255,255,0.5),
+      0 24px 0 rgba(255,255,255,0.34),
+      0 36px 0 rgba(255,255,255,0.2);
+  }
+  .strip.v-screenshot::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--royal-8);
+    mix-blend-mode: color;
+    opacity: 0.9;
+    pointer-events: none;
+  }
+  .card.writing .strip.v-screenshot::after { background: var(--violet-8); }
+
+  /* ===================================================================
+     DIAGRAM (Type 2) — stroked SVG on dark radial background
+     =================================================================== */
+
+  .strip.v-diagram {
+    background: radial-gradient(circle at 50% 50%, var(--royal-2) 0%, var(--royal-1) 100%);
+  }
+  .strip.v-diagram svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .strip.v-diagram .d-stroke { stroke: var(--royal-10); stroke-width: 1.5; fill: none; }
+  .strip.v-diagram .d-stroke-dim { stroke: var(--royal-9); stroke-width: 1; fill: none; stroke-dasharray: 3 4; }
+  .strip.v-diagram .d-fill { fill: var(--royal-2); stroke: var(--royal-9); stroke-width: 1; }
+  .strip.v-diagram .d-label { fill: var(--royal-11); font-family: var(--font-mono); font-size: 9px; }
+  .card.writing .strip.v-diagram .d-stroke { stroke: var(--violet-10); }
+  .card.writing .strip.v-diagram .d-stroke-dim { stroke: var(--violet-9); }
+  .card.writing .strip.v-diagram .d-fill { stroke: var(--violet-9); }
+  .card.writing .strip.v-diagram .d-label { fill: var(--violet-11); }
+
+  /* ===================================================================
+     FEATURED CARD SYSTEM — v6 final
+     Every featured card gets ALL of:
+       (1) gradient border (1.5px perimeter)
+       (2) "FEATURED" gradient kicker pill (single word, single pill)
+       (3) gradient effect on the visual element:
+           - screenshot → gradient auto-tint overlay
+           - diagram    → gradient overlay (mix-blend-mode: color)
+           - numeral    → gradient background-clip on text
+           - icon       → gradient stroke via SVG url(#grad-rv-svg)
+           - monogram   → gradient background-clip on text
+     The v5 hero / gradient-mark strip type is dropped entirely.
+     =================================================================== */
+
+  /* (1) Gradient border */
+  .card.featured {
+    background:
+      linear-gradient(var(--card), var(--card)) padding-box,
+      var(--grad-rv) border-box;
+    border: 1.5px solid transparent;
+  }
+  .card.featured:hover {
+    background:
+      linear-gradient(var(--card-hover), var(--card-hover)) padding-box,
+      var(--grad-rv) border-box;
+  }
+  .card.featured .strip {
+    border-bottom-color: color-mix(in srgb, var(--royal-8) 30%, var(--rule));
+  }
+
+  /* Louder border variant for §3 comparison */
+  .card.featured.featured-louder {
+    border-width: 2px;
+  }
+
+  /* (2) "FEATURED" gradient kicker pill — replaces normal kicker */
+  .card.featured .kicker {
+    display: inline-block;
+    align-self: flex-start;
+    background: var(--grad-rv);
+    color: #fff;
+    padding: 4px 10px;
+    border-radius: 2px;
+    font-weight: 500;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    margin-top: 0;
+  }
+  .card.writing.featured .kicker { color: #fff; }
+
+  /* (3a) Featured screenshot — gradient auto-tint */
+  .card.featured .strip.v-screenshot::after {
+    background: var(--grad-rv);
+    mix-blend-mode: color;
+    opacity: 0.9;
+  }
+
+  /* (3b) Featured diagram — add gradient overlay */
+  .card.featured .strip.v-diagram::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--grad-rv);
+    mix-blend-mode: color;
+    opacity: 0.85;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  /* (3c) Featured numeral — gradient background-clip on text */
+  .card.featured .strip.v-numeral .num {
+    background: var(--grad-rv);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* (3d) Featured icon — gradient stroke via SVG url reference */
+  .card.featured .strip.v-icon svg {
+    stroke: url(#grad-rv-svg);
+  }
+
+  /* (3e) Featured monogram — gradient background-clip on text */
+  .card.featured .strip.v-monogram .mono {
+    background: var(--grad-rv);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* ===================================================================
+     Comparison table
+     =================================================================== */
+
+  .compare {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: var(--s6);
+    font-size: 13px;
+  }
+  .compare th, .compare td {
+    padding: var(--s3) var(--s4);
+    text-align: left;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+  }
+  .compare th {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--royal-11);
+    font-weight: 500;
+  }
+  .compare td.opt {
+    font-family: var(--font-display);
+    color: var(--ink);
+    font-weight: 500;
+    font-size: 15px;
+    width: 22%;
+  }
+  .compare td.effect {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--royal-11);
+  }
+  .compare td.desc { color: var(--ink-muted); }
+
+  /* ---------- Locked decisions block ---------- */
+
+  .locked {
+    margin-top: var(--s8);
+    padding: var(--s6);
+    background: color-mix(in srgb, var(--royal-8) 8%, var(--royal-1));
+    border: 1px solid var(--royal-7);
+    border-radius: 12px;
+  }
+  .locked h2 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 24px;
+    margin-bottom: var(--s4);
+  }
+  .locked .decision {
+    margin-top: var(--s5);
+    padding-top: var(--s5);
+    border-top: 1px solid var(--rule);
+  }
+  .locked .decision:first-of-type {
+    margin-top: var(--s3);
+    padding-top: 0;
+    border-top: none;
+  }
+  .locked .decision h3 {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--ink);
+    margin-bottom: var(--s2);
+    letter-spacing: -0.005em;
+  }
+  .locked .decision h3 .tag {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: var(--royal-11);
+    background: rgba(59,91,219,0.18);
+    padding: 2px 8px;
+    border-radius: 2px;
+    margin-right: var(--s2);
+    vertical-align: 2px;
+  }
+  .locked .decision p {
+    color: var(--ink-muted);
+    font-size: 14px;
+    line-height: 1.7;
+    max-width: 68ch;
+  }
+  .locked .decision p + p { margin-top: var(--s2); }
+  .locked .decision strong { color: var(--ink); font-weight: 500; }
+  .locked .decision em { font-style: italic; color: var(--ink); }
+  .locked .decision code {
+    font-family: var(--font-mono);
+    background: rgba(165, 180, 255, 0.1);
+    padding: 1px 6px;
+    border-radius: 2px;
+    color: var(--royal-11);
+    font-size: 12px;
+  }
+  .locked .decision ul {
+    margin-top: var(--s3);
+    padding-left: var(--s5);
+    color: var(--ink-muted);
+    font-size: 14px;
+    line-height: 1.75;
+  }
+  .locked .decision ul strong { color: var(--ink); }
+  .locked .decision ul code {
+    font-family: var(--font-mono);
+    background: rgba(165, 180, 255, 0.1);
+    padding: 1px 5px;
+    border-radius: 2px;
+    color: var(--royal-11);
+    font-size: 11.5px;
+  }
+
+  @media (max-width: 760px) {
+    .cards-row { grid-template-columns: 1fr; }
+    .cards-row.three { grid-template-columns: 1fr; }
+    .doc-head h1 { font-size: 38px; }
+    section > h2 { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Shared SVG defs for gradient stroke on featured icons -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="grad-rv-svg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3B5BDB"/>
+      <stop offset="100%" stop-color="#8C3BDB"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+<header class="doc-head">
+  <div class="eyebrow">Portfolio · card deep-dive · v6 · final · 2026-04-12</div>
+  <h1>Featured card system<br>+ tuned typography</h1>
+  <p>
+    <strong>v6 locks the card spec.</strong> Three changes from v5 drive it, all in response to your direction: <em>(1)</em> Geist 500 at 120px was overwhelming the content — tuned down to Geist 400 with lucide stroke at 2; <em>(2)</em> featured treatment is unified — border + "FEATURED" kicker pill + gradient effect on the visual element, one treatment, no tiers; <em>(3)</em> gradient-mark strip type is dropped entirely — the gradient lives only on featured-card treatments now, not as a visual type an author can pick.
+  </p>
+  <p>
+    The "one exception" rule: on a featured card, and <em>only</em> on a featured card, the gradient effect applies to whatever visual type the author chose — screenshot gets a gradient auto-tint, diagram gets a gradient overlay, numeral and monogram get gradient text fills, icon gets a gradient SVG stroke. The gradient becomes the mark of "featured" across every visual type, instead of gradient-mark being its own type that replaces content.
+  </p>
+</header>
+
+<!-- ============================================================ -->
+<section>
+  <div class="kicker">§1 · typography — tuned lighter</div>
+  <h2>Geist 400 for text marks, lucide stroke 2</h2>
+  <p class="lede">
+    v5 moved numerals and monograms to Geist 500 to match lucide's geometric weight. At 120px that read as too heavy — the numeral started competing with the card title for attention instead of sitting under it. v6 drops everything one weight step: Geist 400 for numeral and monogram, lucide stroke-width 2 for icon. Same family, one weight lighter, same visual pairing.
+  </p>
+
+  <div class="variant-label" style="margin-top:var(--s6)">v5 — <strong>Geist 500 + lucide 2.25</strong>. The 120px numeral competes with the title; at 2m reading distance the numeral is the first thing your eye lands on, not the card's real content.</div>
+  <div class="cards-row three">
+    <article class="card">
+      <div class="strip v5-numeral"><div class="num">01</div></div>
+      <div class="content">
+        <div class="kicker">SELECTED WORK · 01</div>
+        <h3><a class="card-link" href="#">Planner App<span class="arrow">→</span></a></h3>
+        <p class="desc">v5 — Geist 500 / 120px. Heavy enough to pull focus from the title.</p>
+        <ul class="tags"><li>v5</li></ul>
+      </div>
+    </article>
+    <article class="card">
+      <div class="strip v5-icon">
+        <svg viewBox="0 0 24 24">
+          <path d="M20 12V8a2 2 0 0 0-2-2h-3"/>
+          <path d="M9 6H6a2 2 0 0 0-2 2v4"/>
+          <path d="M4 16v2a2 2 0 0 0 2 2h3"/>
+          <path d="M15 20h3a2 2 0 0 0 2-2v-2"/>
+          <rect x="8" y="10" width="8" height="6" rx="1"/>
+        </svg>
+      </div>
+      <div class="content">
+        <div class="kicker">SELECTED WORK · 03</div>
+        <h3><a class="card-link" href="#">MOB analysis<span class="arrow">→</span></a></h3>
+        <p class="desc">v5 — lucide stroke 2.25. Matches Geist 500 but reads heavy next to lighter body text.</p>
+        <ul class="tags"><li>v5</li></ul>
+      </div>
+    </article>
+    <article class="card">
+      <div class="strip v5-monogram"><div class="mono">PLN</div></div>
+      <div class="content">
+        <div class="kicker">SELECTED WORK · 01</div>
+        <h3><a class="card-link" href="#">Planner App<span class="arrow">→</span></a></h3>
+        <p class="desc">v5 — Geist 500 / 72px. Smaller size masks the weight, but still on the heavy side.</p>
+        <ul class="tags"><li>v5</li></ul>
+      </div>
+    </article>
+  </div>
+
+  <div class="variant-label" style="margin-top:var(--s8)">v6 — <strong>Geist 400 + lucide 2</strong>. Numeral recedes to a supporting role; the card title reads as the primary element. Icon stroke drops in step so the family stays consistent.</div>
+  <div class="cards-row three">
+    <article class="card">
+      <div class="strip v-numeral"><div class="num">01</div></div>
+      <div class="content">
+        <div class="kicker">SELECTED WORK · 01</div>
+        <h3><a class="card-link" href="#">Planner App<span class="arrow">→</span></a></h3>
+        <p class="desc">v6 — Geist 400 / 120px. Numeral now supports the title, doesn't compete with it.</p>
+        <ul class="tags"><li>v6</li></ul>
+      </div>
+    </article>
+    <article class="card">
+      <div class="strip v-icon">
+        <svg viewBox="0 0 24 24">
+          <path d="M20 12V8a2 2 0 0 0-2-2h-3"/>
+          <path d="M9 6H6a2 2 0 0 0-2 2v4"/>
+          <path d="M4 16v2a2 2 0 0 0 2 2h3"/>
+          <path d="M15 20h3a2 2 0 0 0 2-2v-2"/>
+          <rect x="8" y="10" width="8" height="6" rx="1"/>
+        </svg>
+      </div>
+      <div class="content">
+        <div class="kicker">SELECTED WORK · 03</div>
+        <h3><a class="card-link" href="#">MOB analysis<span class="arrow">→</span></a></h3>
+        <p class="desc">v6 — lucide stroke 2. Sits in the same weight register as Geist 400.</p>
+        <ul class="tags"><li>v6</li></ul>
+      </div>
+    </article>
+    <article class="card">
+      <div class="strip v-monogram"><div class="mono">PLN</div></div>
+      <div class="content">
+        <div class="kicker">SELECTED WORK · 01</div>
+        <h3><a class="card-link" href="#">Planner App<span class="arrow">→</span></a></h3>
+        <p class="desc">v6 — Geist 400 / 72px. Lighter but still confident at this size.</p>
+        <ul class="tags"><li>v6</li></ul>
+      </div>
+    </article>
+  </div>
+
+  <div class="note">
+    <strong>Sibling rule still holds.</strong> v6 moves all three marks in lockstep — numeral, icon, monogram all step down one notch together. The shared-shell logic from v4 still means they render as family in any frame. Fraunces 500 stays on the card title (<code>h3</code>), which now reads as the dominant element in the content column — exactly what the card hierarchy wants.
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section>
+  <div class="kicker">§2 · featured card treatment</div>
+  <h2>One treatment, five visual types</h2>
+  <p class="lede">
+    Every featured card gets three things, always together: <strong>(1)</strong> a gradient border around the perimeter, <strong>(2)</strong> a gradient "FEATURED" kicker pill as the single kicker content, <strong>(3)</strong> a gradient effect applied to whatever visual type the strip is using. This is the one exception to the "text marks and icons use card register colour, never gradient" rule — on a featured card, the visual element <em>becomes</em> the gradient.
+  </p>
+  <p class="lede">
+    There are no tiers. A card is featured or it isn't. One per grid, as before. The visual type the author picks is still their call — the featured treatment adapts to all five.
+  </p>
+
+  <!-- Type 1: Screenshot featured -->
+  <div class="variant-group">
+    <div class="variant-label">Type 1 — <strong>Screenshot featured</strong>. The <code>mix-blend-mode: color</code> overlay (opacity 0.9) already existed as the auto-tint mechanism; on a featured card, the overlay background changes from flat <code>royal-8</code> to <code>var(--grad-rv)</code>. The screenshot's pixels now carry the gradient across the strip — royal top-left, violet bottom-right.</div>
+    <div class="cards-row">
+      <article class="card featured">
+        <div class="strip v-screenshot"><div class="photo"></div></div>
+        <div class="content">
+          <div class="kicker">FEATURED</div>
+          <h3><a class="card-link" href="#">Planner App<span class="arrow">→</span></a></h3>
+          <p class="desc">Featured + screenshot. Auto-tint overlay swaps from flat royal to the royal→violet gradient — same mechanism, different fill.</p>
+          <ul class="tags"><li>TYPESCRIPT</li><li>GTD</li></ul>
+        </div>
+      </article>
+      <article class="card writing featured">
+        <div class="strip v-screenshot"><div class="photo"></div></div>
+        <div class="content">
+          <div class="kicker">FEATURED</div>
+          <h3><a class="card-link" href="#">Writing as research<span class="arrow">→</span></a></h3>
+          <p class="desc">Writing-register featured. The gradient is the same on both registers — the kicker label colour no longer differentiates, because on featured cards the kicker IS the pill.</p>
+          <ul class="tags"><li>craft</li><li>meta</li></ul>
+        </div>
+      </article>
+    </div>
+  </div>
+
+  <!-- Type 2: Diagram featured -->
+  <div class="variant-group">
+    <div class="variant-label">Type 2 — <strong>Diagram featured</strong>. Same <code>mix-blend-mode: color</code> technique applied as a ::after overlay on the strip. Diagram strokes now render in gradient colour — royal in the top-left, violet in the bottom-right. Luminance of the strokes is preserved so the diagram still reads.</div>
+    <div class="cards-row">
+      <article class="card featured">
+        <div class="strip v-diagram">
+          <svg viewBox="0 0 300 160" preserveAspectRatio="xMidYMid meet">
+            <!-- Boxes and connectors — architecture sketch -->
+            <rect class="d-fill" x="28" y="40" width="64" height="30" rx="3"/>
+            <text class="d-label" x="60" y="58" text-anchor="middle">Webhook</text>
+            <rect class="d-fill" x="118" y="40" width="64" height="30" rx="3"/>
+            <text class="d-label" x="150" y="58" text-anchor="middle">Gate</text>
+            <rect class="d-fill" x="208" y="40" width="64" height="30" rx="3"/>
+            <text class="d-label" x="240" y="58" text-anchor="middle">Execute</text>
+            <rect class="d-fill" x="118" y="96" width="64" height="30" rx="3"/>
+            <text class="d-label" x="150" y="114" text-anchor="middle">Audit</text>
+            <path class="d-stroke" d="M92 55 L118 55"/>
+            <path class="d-stroke" d="M182 55 L208 55"/>
+            <path class="d-stroke-dim" d="M150 70 L150 96"/>
+            <path class="d-stroke-dim" d="M240 70 Q240 85 182 110"/>
+          </svg>
+        </div>
+        <div class="content">
+          <div class="kicker">FEATURED</div>
+          <h3><a class="card-link" href="#">Spend protection architecture<span class="arrow">→</span></a></h3>
+          <p class="desc">Featured + diagram. Same overlay mechanism as screenshot — <code>mix-blend-mode: color</code> preserves diagram linework while re-hueing to the gradient.</p>
+          <ul class="tags"><li>architecture</li><li>reliability</li></ul>
+        </div>
+      </article>
+      <article class="card writing featured">
+        <div class="strip v-diagram">
+          <svg viewBox="0 0 300 160" preserveAspectRatio="xMidYMid meet">
+            <circle class="d-stroke" cx="75" cy="80" r="26" fill="none"/>
+            <circle class="d-stroke" cx="225" cy="80" r="26" fill="none"/>
+            <path class="d-stroke-dim" d="M101 80 L199 80"/>
+            <text class="d-label" x="75" y="84" text-anchor="middle">Problem</text>
+            <text class="d-label" x="225" y="84" text-anchor="middle">Frame</text>
+            <path class="d-stroke" d="M150 50 L150 30" marker-end="none"/>
+            <text class="d-label" x="150" y="24" text-anchor="middle">Trade-off</text>
+          </svg>
+        </div>
+        <div class="content">
+          <div class="kicker">FEATURED</div>
+          <h3><a class="card-link" href="#">Problems before frames<span class="arrow">→</span></a></h3>
+          <p class="desc">Writing-register diagram featured. Same overlay, same effect — the gradient becomes the unifying "featured" signal across both registers.</p>
+          <ul class="tags"><li>frames</li><li>lessons</li></ul>
+        </div>
+      </article>
+    </div>
+  </div>
+
+  <!-- Type 3: Numeral featured -->
+  <div class="variant-group">
+    <div class="variant-label">Type 3 — <strong>Numeral featured</strong>. The numeral drops its card-register colour and picks up a gradient fill via <code>background-clip: text</code>. The numeral reads as a gradient mark directly — the featured signal lives on the mark itself, not on an overlay.</div>
+    <div class="cards-row">
+      <article class="card featured">
+        <div class="strip v-numeral"><div class="num">01</div></div>
+        <div class="content">
+          <div class="kicker">FEATURED</div>
+          <h3><a class="card-link" href="#">Planner App<span class="arrow">→</span></a></h3>
+          <p class="desc">Featured + numeral. The "01" is now a gradient mark. This IS the v2 gradient-text treatment — allowed again, but only here.</p>
+          <ul class="tags"><li>TYPESCRIPT</li><li>GTD</li></ul>
+        </div>
+      </article>
+      <article class="card writing featured">
+        <div class="strip v-numeral"><div class="num">04</div></div>
+        <div class="content">
+          <div class="kicker">FEATURED</div>
+          <h3><a class="card-link" href="#">Four guardrails<span class="arrow">→</span></a></h3>
+          <p class="desc">Writing-register numeral featured. Same gradient fill — the exception applies uniformly regardless of register.</p>
+          <ul class="tags"><li>postmortem</li><li>lessons</li></ul>
+        </div>
+      </article>
+    </div>
+  </div>
+
+  <!-- Type 5: Icon featured -->
+  <div class="variant-group">
+    <div class="variant-label">Type 5 — <strong>Icon featured</strong>. The lucide SVG stroke swaps from a flat card-register colour to a <code>linearGradient</code> referenced via <code>stroke="url(#grad-rv-svg)"</code>. One shared gradient definition sits in a hidden SVG at the top of the document; every featured icon references it. Result: icon strokes trace the gradient from corner to corner.</div>
+    <div class="cards-row">
+      <article class="card featured">
+        <div class="strip v-icon">
+          <svg viewBox="0 0 24 24">
+            <path d="M20 12V8a2 2 0 0 0-2-2h-3"/>
+            <path d="M9 6H6a2 2 0 0 0-2 2v4"/>
+            <path d="M4 16v2a2 2 0 0 0 2 2h3"/>
+            <path d="M15 20h3a2 2 0 0 0 2-2v-2"/>
+            <rect x="8" y="10" width="8" height="6" rx="1"/>
+          </svg>
+        </div>
+        <div class="content">
+          <div class="kicker">FEATURED</div>
+          <h3><a class="card-link" href="#">MOB analysis<span class="arrow">→</span></a></h3>
+          <p class="desc">Featured + icon. SVG stroke references a shared gradient — top-left of the icon is royal, bottom-right is violet.</p>
+          <ul class="tags"><li>ANALYSIS</li><li>SQL</li></ul>
+        </div>
+      </article>
+      <article class="card writing featured">
+        <div class="strip v-icon">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 20h9"/>
+            <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+          </svg>
+        </div>
+        <div class="content">
+          <div class="kicker">FEATURED</div>
+          <h3><a class="card-link" href="#">Writing as research<span class="arrow">→</span></a></h3>
+          <p class="desc">Writing-register icon featured. Same SVG stroke reference — uniform gradient treatment across registers.</p>
+          <ul class="tags"><li>craft</li><li>meta</li></ul>
+        </div>
+      </article>
+    </div>
+  </div>
+
+  <!-- Type 6: Monogram featured -->
+  <div class="variant-group">
+    <div class="variant-label">Type 6 — <strong>Monogram featured</strong>. Same <code>background-clip: text</code> technique as the numeral. Two- or three-letter lockups pick up the gradient fill directly — the mark IS the gradient.</div>
+    <div class="cards-row">
+      <article class="card featured">
+        <div class="strip v-monogram"><div class="mono">PLN</div></div>
+        <div class="content">
+          <div class="kicker">FEATURED</div>
+          <h3><a class="card-link" href="#">Planner App<span class="arrow">→</span></a></h3>
+          <p class="desc">Featured + monogram. PLN lockup in gradient — reads as a confident project mark, not a caption.</p>
+          <ul class="tags"><li>TYPESCRIPT</li><li>GTD</li></ul>
+        </div>
+      </article>
+      <article class="card writing featured">
+        <div class="strip v-monogram"><div class="mono">R/W</div></div>
+        <div class="content">
+          <div class="kicker">FEATURED</div>
+          <h3><a class="card-link" href="#">Read-write reciprocity<span class="arrow">→</span></a></h3>
+          <p class="desc">Writing-register monogram featured. Same gradient fill — uniform treatment across registers.</p>
+          <ul class="tags"><li>notes</li></ul>
+        </div>
+      </article>
+    </div>
+  </div>
+
+  <!-- In-context grid -->
+  <div class="variant-group" style="margin-top:var(--s8)">
+    <div class="variant-label">In context — <strong>landing 2×2 grid</strong>. One featured card (screenshot) sits alongside three non-featured cards using three different visual types. The featured card reads as the anchor without overwhelming the others; the gradient border, gradient kicker pill, and gradient auto-tinted screenshot all push in the same direction.</div>
+    <div class="cards-row">
+      <article class="card featured">
+        <div class="strip v-screenshot"><div class="photo"></div></div>
+        <div class="content">
+          <div class="kicker">FEATURED</div>
+          <h3><a class="card-link" href="#">Planner App<span class="arrow">→</span></a></h3>
+          <p class="desc">GTD personal planner with persistent SMS reminders, UTC-safe scheduling, and spend-protected AI coaching.</p>
+          <ul class="tags"><li>TYPESCRIPT</li><li>GTD</li></ul>
+        </div>
+      </article>
+      <article class="card">
+        <div class="strip v-diagram">
+          <svg viewBox="0 0 300 160" preserveAspectRatio="xMidYMid meet">
+            <rect class="d-fill" x="28" y="40" width="64" height="30" rx="3"/>
+            <text class="d-label" x="60" y="58" text-anchor="middle">Input</text>
+            <rect class="d-fill" x="118" y="40" width="64" height="30" rx="3"/>
+            <text class="d-label" x="150" y="58" text-anchor="middle">Parse</text>
+            <rect class="d-fill" x="208" y="40" width="64" height="30" rx="3"/>
+            <text class="d-label" x="240" y="58" text-anchor="middle">Output</text>
+            <path class="d-stroke" d="M92 55 L118 55"/>
+            <path class="d-stroke" d="M182 55 L208 55"/>
+          </svg>
+        </div>
+        <div class="content">
+          <div class="kicker">SELECTED WORK · 02</div>
+          <h3><a class="card-link" href="#">The Weekly<span class="arrow">→</span></a></h3>
+          <p class="desc">Coles recipes become a single consolidated shopping trolley. POC in three weekends.</p>
+          <ul class="tags"><li>REACT</li><li>POC</li></ul>
+        </div>
+      </article>
+      <article class="card writing">
+        <div class="strip v-numeral"><div class="num">04</div></div>
+        <div class="content">
+          <div class="kicker">ESSAY · LESSONS</div>
+          <h3><a class="card-link" href="#">Four guardrails that saved the budget<span class="arrow">→</span></a></h3>
+          <p class="desc">Killswitch, budget cap, idempotency, rollback. Why each layer is non-negotiable.</p>
+          <ul class="tags"><li>postmortem</li><li>lessons</li></ul>
+        </div>
+      </article>
+      <article class="card writing">
+        <div class="strip v-monogram"><div class="mono">R/W</div></div>
+        <div class="content">
+          <div class="kicker">NOTE · FRAGMENT</div>
+          <h3><a class="card-link" href="#">Read-write reciprocity<span class="arrow">→</span></a></h3>
+          <p class="desc">Writing as the thing that forces you to understand what you were claiming.</p>
+          <ul class="tags"><li>notes</li></ul>
+        </div>
+      </article>
+    </div>
+  </div>
+
+  <table class="compare">
+    <thead>
+      <tr>
+        <th>Visual type</th>
+        <th>Gradient effect</th>
+        <th>Technique</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="opt">Screenshot</td>
+        <td class="effect">Auto-tint overlay</td>
+        <td class="desc"><code>::after</code> with <code>background: var(--grad-rv)</code>, <code>mix-blend-mode: color</code>, opacity 0.9. Same mechanism as the non-featured auto-tint, different fill.</td>
+      </tr>
+      <tr>
+        <td class="opt">Diagram</td>
+        <td class="effect">Overlay blend</td>
+        <td class="desc">Same <code>::after</code> + <code>mix-blend-mode: color</code> technique. Diagram strokes retain luminance, pick up gradient hue.</td>
+      </tr>
+      <tr>
+        <td class="opt">Numeral</td>
+        <td class="effect">Text gradient fill</td>
+        <td class="desc"><code>background: var(--grad-rv)</code> with <code>background-clip: text</code>. The "01" / "04" mark IS the gradient.</td>
+      </tr>
+      <tr>
+        <td class="opt">Icon</td>
+        <td class="effect">SVG stroke reference</td>
+        <td class="desc"><code>stroke: url(#grad-rv-svg)</code>. Single shared <code>&lt;linearGradient&gt;</code> definition at document root; every featured icon references it.</td>
+      </tr>
+      <tr>
+        <td class="opt">Monogram</td>
+        <td class="effect">Text gradient fill</td>
+        <td class="desc">Same as numeral. Two- or three-letter lockups take the gradient via <code>background-clip: text</code>.</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================================================ -->
+<section>
+  <div class="kicker">§3 · border thickness</div>
+  <h2>1.5px vs 2px side by side</h2>
+  <p class="lede">
+    Your call. Same featured card, same treatment, different border weight. 1.5px is what v5 shipped; 2px is the "slightly louder" alternative.
+  </p>
+
+  <div class="variant-label" style="margin-top:var(--s6)"><strong>1.5px border</strong> — current v5/v6 default. Subtle perimeter; gradient is present but not shouting.</div>
+  <div class="cards-row">
+    <article class="card featured">
+      <div class="strip v-screenshot"><div class="photo"></div></div>
+      <div class="content">
+        <div class="kicker">FEATURED</div>
+        <h3><a class="card-link" href="#">Planner App<span class="arrow">→</span></a></h3>
+        <p class="desc">1.5px border. Gradient reads as part of the card, not as a frame around it.</p>
+        <ul class="tags"><li>TYPESCRIPT</li><li>GTD</li></ul>
+      </div>
+    </article>
+    <article class="card writing featured">
+      <div class="strip v-numeral"><div class="num">04</div></div>
+      <div class="content">
+        <div class="kicker">FEATURED</div>
+        <h3><a class="card-link" href="#">Four guardrails<span class="arrow">→</span></a></h3>
+        <p class="desc">1.5px border on writing register. Same subtlety.</p>
+        <ul class="tags"><li>postmortem</li></ul>
+      </div>
+    </article>
+  </div>
+
+  <div class="variant-label" style="margin-top:var(--s8)"><strong>2px border</strong> — louder alternative. Perimeter becomes a deliberate frame; the featured card pops harder off the page.</div>
+  <div class="cards-row">
+    <article class="card featured featured-louder">
+      <div class="strip v-screenshot"><div class="photo"></div></div>
+      <div class="content">
+        <div class="kicker">FEATURED</div>
+        <h3><a class="card-link" href="#">Planner App<span class="arrow">→</span></a></h3>
+        <p class="desc">2px border. Gradient becomes a perceptible frame — the card declares itself at a glance.</p>
+        <ul class="tags"><li>TYPESCRIPT</li><li>GTD</li></ul>
+      </div>
+    </article>
+    <article class="card writing featured featured-louder">
+      <div class="strip v-numeral"><div class="num">04</div></div>
+      <div class="content">
+        <div class="kicker">FEATURED</div>
+        <h3><a class="card-link" href="#">Four guardrails<span class="arrow">→</span></a></h3>
+        <p class="desc">2px border on writing register. Louder without feeling heavy.</p>
+        <ul class="tags"><li>postmortem</li></ul>
+      </div>
+    </article>
+  </div>
+
+  <div class="note">
+    <strong>My lean:</strong> 2px. The 1.5px version reads a little timid next to the full gradient treatment on the visual element — the border gives up too much of the "featured" job to the strip overlay, and on a writing card with a numeral the perimeter almost disappears. 2px reclaims its share of the signal. Not a strong preference though — take a look and tell me which one you want to lock.
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section>
+  <div class="kicker">§4 · decisions locked</div>
+  <h2>Card spec freeze</h2>
+  <p class="lede">
+    Everything below ships into the Card component's prop surface. Nothing left open except the 1.5px / 2px border pick in §3.
+  </p>
+
+  <div class="locked">
+    <h2>Locked</h2>
+
+    <div class="decision">
+      <h3><span class="tag">Typography</span> Geist 400 for centred marks</h3>
+      <p>
+        Numeral: Geist 400, 120px, tight tracking, tabular lining nums. Monogram: Geist 400, 72px. Icon: lucide stroke-width 2 at 88px. Shared shell unchanged from v4 (same background, padding, grid texture, register tint). Fraunces stays on headings and prose — never used for UI marks.
+      </p>
+    </div>
+
+    <div class="decision">
+      <h3><span class="tag">Featured</span> One treatment, three things together</h3>
+      <p>
+        Every featured card gets all three: <strong>gradient border</strong> (1.5px or 2px — TBD in §3), <strong>"FEATURED" gradient kicker pill</strong> (single word, replaces the normal kicker content entirely), and a <strong>gradient effect on the visual element</strong> adapted to the visual type the author picked. No tiered options, no opt-out on any of the three. Card prop:
+      </p>
+      <ul>
+        <li><code>featured?: boolean</code> — that's the whole API.</li>
+      </ul>
+      <p>
+        At most one featured card per grid. Enforced by review, not by types.
+      </p>
+    </div>
+
+    <div class="decision">
+      <h3><span class="tag">Gradient</span> Reserved to featured cards, five techniques</h3>
+      <p>
+        The gradient (<code>var(--grad-rv)</code>) appears in exactly the following places:
+      </p>
+      <ul>
+        <li><strong>Featured-card border</strong> — perimeter frame.</li>
+        <li><strong>Featured-card kicker pill</strong> — "FEATURED" label background.</li>
+        <li><strong>Featured-card visual element</strong> — type-specific:
+          <ul>
+            <li>Screenshot: <code>mix-blend-mode: color</code> overlay with gradient fill.</li>
+            <li>Diagram: same technique as screenshot.</li>
+            <li>Numeral: <code>background-clip: text</code> gradient fill.</li>
+            <li>Monogram: <code>background-clip: text</code> gradient fill.</li>
+            <li>Icon: <code>stroke="url(#grad-rv-svg)"</code> via shared SVG gradient definition.</li>
+          </ul>
+        </li>
+      </ul>
+      <p>
+        The v5 "gradient-mark strip" visual type is <strong>dropped entirely</strong>. There is no sixth visual type. The default author pool is five types: screenshot, diagram, numeral, icon, monogram. The gradient is never a visual type an author picks — it's an effect that applies when the author (or the system) sets <code>featured</code> to true.
+      </p>
+    </div>
+
+    <div class="decision">
+      <h3><span class="tag">Q2</span> Screenshot helper variant API (unchanged from v5)</h3>
+      <p>
+        The <code>Card</code> component's imagery surface stays small. M5 (meta split) and M6 (detail zoom) live in the <code>&lt;Screenshot&gt;</code> helper as a <code>variant</code> prop. Default is <code>variant="detail"</code> (M6); M5 is explicit opt-in via <code>variant="meta-split"</code>. The hierarchy rule ("max one M5 per grid") lives in the style guide and is enforced by review.
+      </p>
+    </div>
+
+    <div class="decision">
+      <h3><span class="tag">Visual types</span> Five, no more</h3>
+      <p>
+        The final visual-type pool: <strong>screenshot</strong>, <strong>diagram</strong>, <strong>numeral</strong>, <strong>icon</strong>, <strong>monogram</strong>. Card prop: <code>kind: "screenshot" | "diagram" | "numeral" | "icon" | "monogram"</code>. Rendering rules per type unchanged from v4 — shared shell for centred marks (numeral / icon / monogram), dedicated treatment for screenshot and diagram.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section>
+  <div class="kicker">§5 · next</div>
+  <h2>Card spec freezes, foundation work resumes</h2>
+  <p class="lede">
+    Once you pick the border thickness in §3, the card component spec is frozen. Nothing else on the card side until chunk 4c.1 (page layout mockups), when the component gets built straight from this doc. The iteration trail (v1 → v6) stays preserved in <code>plans/portfolio-stitch-assets/</code> as the spine of a future design-system case study — <em>"here's what we rejected at each step and why"</em> is more interesting than the final spec alone.
+  </p>
+  <p class="lede">
+    The next work on the critical path is <strong>chunk 4a.4</strong> — synthesising the voice research, diary audit, and imagery standards into <code>.claude/rules/writing-style.md</code> at the workspace root. Foundation work (4a.4 → 4a.5 → 4a.6) still gates chunk 4b.
+  </p>
+</section>
+
+</body>
+</html>

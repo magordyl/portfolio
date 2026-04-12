@@ -1,0 +1,1057 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Card deep-dive v7 — Final: unified sizing + Geist vs Fraunces</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,200;9..144,300;9..144,400;9..144,500;9..144,600&family=Geist+Mono:wght@400;500&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --royal-1:#0a0d1a; --royal-2:#0f1428; --royal-3:#141c3a; --royal-4:#1b2652;
+    --royal-5:#233270; --royal-6:#2b4094; --royal-7:#3350bf; --royal-8:#3B5BDB;
+    --royal-9:#5773e3; --royal-10:#8098ec; --royal-11:#adbcf2; --royal-12:#d8dff9;
+
+    --violet-8:#8C3BDB; --violet-9:#a157e3; --violet-10:#b77cec;
+    --violet-11:#cfa3f2; --violet-12:#e6cff9;
+
+    --ink:#e8ecff; --ink-muted:#a0aac4; --ink-dim:#6b7390;
+
+    --bg:#0a0d1a; --card:#0f1428; --card-hover:#141c3a; --rule:#1b2652;
+
+    --grad-rv: linear-gradient(135deg, var(--royal-8) 0%, var(--violet-8) 100%);
+    --grad-rv-soft: linear-gradient(135deg, rgba(59,91,219,0.12) 0%, rgba(140,59,219,0.12) 100%);
+
+    --font-display:"Fraunces",serif;
+    --font-sans:"Geist",system-ui,sans-serif;
+    --font-mono:"Geist Mono",monospace;
+
+    --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px; --s8:64px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    padding: var(--s8) var(--s5) var(--s8);
+    max-width: 1180px;
+    margin: 0 auto;
+  }
+
+  /* ---------- Doc framing ---------- */
+
+  .doc-head { margin-bottom: var(--s8); }
+  .doc-head .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--royal-10);
+    margin-bottom: var(--s3);
+  }
+  .doc-head h1 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 52px;
+    line-height: 1.0;
+    letter-spacing: -0.025em;
+    margin-bottom: var(--s4);
+  }
+  .doc-head p {
+    color: var(--ink-muted);
+    font-size: 17px;
+    max-width: 68ch;
+  }
+  .doc-head p + p { margin-top: var(--s3); }
+  .doc-head strong { color: var(--ink); font-weight: 500; }
+  .doc-head em { font-style: italic; color: var(--ink); }
+
+  section {
+    margin-top: var(--s8);
+    padding-top: var(--s6);
+    border-top: 1px solid var(--rule);
+  }
+  section:first-of-type { border-top: none; padding-top: 0; }
+  section > .kicker {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--royal-10);
+    margin-bottom: var(--s2);
+  }
+  section > h2 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 34px;
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+    margin-bottom: var(--s3);
+  }
+  section > .lede {
+    color: var(--ink-muted);
+    max-width: 68ch;
+    margin-bottom: var(--s6);
+    font-size: 15.5px;
+  }
+  section > .lede strong { color: var(--ink); font-weight: 500; }
+  section > .lede em { font-style: italic; color: var(--ink); }
+
+  .note {
+    background: var(--grad-rv-soft);
+    border: 1px solid var(--royal-7);
+    border-radius: 8px;
+    padding: var(--s4) var(--s5);
+    margin-top: var(--s5);
+    font-size: 14px;
+    color: var(--ink);
+    line-height: 1.65;
+  }
+  .note strong { color: var(--royal-11); }
+
+  .warning {
+    background: color-mix(in srgb, var(--violet-8) 10%, var(--royal-1));
+    border: 1px solid color-mix(in srgb, var(--violet-8) 35%, var(--rule));
+    border-radius: 8px;
+    padding: var(--s4) var(--s5);
+    margin-top: var(--s5);
+    font-size: 14px;
+    color: var(--ink);
+    line-height: 1.65;
+  }
+  .warning strong { color: var(--violet-11); }
+
+  .variant-label {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-muted);
+    margin-bottom: var(--s3);
+    letter-spacing: 0.04em;
+  }
+  .variant-label strong { color: var(--ink); font-weight: 500; }
+
+  .variant-group { margin-top: var(--s6); }
+  .variant-group:first-of-type { margin-top: var(--s5); }
+
+  /* ===================================================================
+     CARDS — Layout A shell (unchanged)
+     =================================================================== */
+
+  .cards-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--s5);
+  }
+  .cards-row.three { grid-template-columns: repeat(3, 1fr); }
+
+  .card {
+    position: relative;
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: background 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
+  }
+  .card:hover {
+    background: var(--card-hover);
+    border-color: var(--royal-8);
+    box-shadow: inset 0 1px 0 rgba(165, 180, 255, 0.18);
+  }
+  .card.writing:hover {
+    border-color: var(--violet-8);
+  }
+
+  .card .strip {
+    position: relative;
+    height: 160px;
+    border-bottom: 1px solid var(--rule);
+    overflow: hidden;
+  }
+  .card .content {
+    padding: var(--s4) var(--s5) var(--s5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--s3);
+  }
+
+  .card .kicker {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--royal-10);
+    line-height: 1;
+    margin-top: var(--s1);
+  }
+  .card.writing .kicker { color: var(--violet-10); }
+
+  .card h3 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 22px;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+  .card h3 a.card-link {
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .card h3 a.card-link::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+  .card h3 a.card-link .arrow {
+    color: var(--royal-10);
+    margin-left: 6px;
+    display: inline-block;
+    transition: transform 140ms ease;
+  }
+  .card.writing h3 a.card-link .arrow { color: var(--violet-10); }
+  .card:hover h3 a.card-link .arrow { transform: translateX(3px); }
+
+  .card p.desc {
+    color: var(--ink-muted);
+    font-size: 14px;
+    line-height: 1.55;
+  }
+
+  .card .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s2);
+    list-style: none;
+    margin-top: var(--s2);
+    position: relative;
+    z-index: 2;
+  }
+  .card .tags li {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 3px var(--s2);
+    background: var(--royal-3);
+    color: var(--royal-11);
+    border-radius: 2px;
+    border: 1px solid var(--royal-4);
+  }
+  .card.writing .tags li {
+    background: color-mix(in srgb, var(--violet-8) 18%, var(--card));
+    color: var(--violet-11);
+    border-color: color-mix(in srgb, var(--violet-8) 35%, var(--card));
+  }
+
+  /* ===================================================================
+     SHARED SHELL — with a vertical centring container that pins the
+     reference size to 120px. All three mark types (numeral, icon,
+     monogram) live inside the same 120px box, so the bounding box
+     breathing room is structurally identical.
+     =================================================================== */
+
+  .strip.v-numeral,
+  .strip.v-icon,
+  .strip.v-monogram,
+  .strip.v6-numeral,
+  .strip.v6-icon,
+  .strip.v6-monogram,
+  .strip.vf-numeral,
+  .strip.vf-icon,
+  .strip.vf-monogram {
+    display: grid;
+    place-items: center;
+    background: var(--royal-1);
+    position: relative;
+    padding: var(--s4);
+  }
+  .strip.v-numeral::before,
+  .strip.v-icon::before,
+  .strip.v-monogram::before,
+  .strip.v6-numeral::before,
+  .strip.v6-icon::before,
+  .strip.v6-monogram::before,
+  .strip.vf-numeral::before,
+  .strip.vf-icon::before,
+  .strip.vf-monogram::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(0deg, transparent 0 22px, color-mix(in srgb, var(--royal-8) 10%, transparent) 22px 23px);
+    pointer-events: none;
+  }
+  .card.writing .strip.v-numeral::before,
+  .card.writing .strip.v-icon::before,
+  .card.writing .strip.v-monogram::before,
+  .card.writing .strip.vf-numeral::before,
+  .card.writing .strip.vf-icon::before,
+  .card.writing .strip.vf-monogram::before {
+    background-image:
+      repeating-linear-gradient(0deg, transparent 0 22px, color-mix(in srgb, var(--violet-8) 10%, transparent) 22px 23px);
+  }
+
+  /* Reference box — 120px square centred in the strip. Every mark type
+     lives inside this box. Breathing from strip content area edge to box
+     edge is structurally identical regardless of which type is rendered. */
+  .mark-box {
+    width: 120px;
+    height: 120px;
+    display: grid;
+    place-items: center;
+    position: relative;
+  }
+
+  /* ===================================================================
+     V7 TYPOGRAPHY — GEIST 400 at matched 120px reference size
+     =================================================================== */
+
+  /* Numeral — Geist 400, 120px */
+  .strip.v-numeral .num {
+    font-family: var(--font-sans);
+    font-weight: 400;
+    font-variant-numeric: lining-nums tabular-nums;
+    font-feature-settings: "ss01" on;
+    font-size: 120px;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    color: var(--royal-8);
+    position: relative;
+  }
+  .card.writing .strip.v-numeral .num { color: var(--violet-8); }
+
+  /* Icon — 120px lucide, stroke 2 (matches Geist 400 weight) */
+  .strip.v-icon svg {
+    width: 120px;
+    height: 120px;
+    stroke: var(--royal-8);
+    stroke-width: 2;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    position: relative;
+  }
+  .card.writing .strip.v-icon svg { stroke: var(--violet-8); }
+
+  /* Monogram — Geist 400, 120px (grown from 72px). Tight tracking
+     compensates for the width that three-letter lockups would otherwise
+     take at this size. */
+  .strip.v-monogram .mono {
+    font-family: var(--font-sans);
+    font-weight: 400;
+    font-size: 120px;
+    line-height: 1;
+    letter-spacing: -0.05em;
+    color: var(--royal-8);
+    position: relative;
+  }
+  .card.writing .strip.v-monogram .mono { color: var(--violet-8); }
+
+  /* ===================================================================
+     V6 TYPOGRAPHY — held for before/after comparison in §1
+     Numeral 120px, icon 88px, monogram 72px (all Geist 400).
+     =================================================================== */
+
+  .strip.v6-numeral .num {
+    font-family: var(--font-sans);
+    font-weight: 400;
+    font-variant-numeric: lining-nums tabular-nums;
+    font-feature-settings: "ss01" on;
+    font-size: 120px;
+    line-height: 0.82;
+    letter-spacing: -0.04em;
+    color: var(--royal-8);
+    position: relative;
+  }
+  .strip.v6-icon svg {
+    width: 88px;
+    height: 88px;
+    stroke: var(--royal-8);
+    stroke-width: 2;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    position: relative;
+  }
+  .strip.v6-monogram .mono {
+    font-family: var(--font-sans);
+    font-weight: 400;
+    font-size: 72px;
+    line-height: 0.85;
+    letter-spacing: -0.015em;
+    color: var(--royal-8);
+    position: relative;
+  }
+
+  /* ===================================================================
+     FRAUNCES TYPOGRAPHY — alternative for §2 comparison
+     Numeral and monogram in Fraunces 300 at 120px.
+     Icon stroke dropped to 1.25 to visually approximate Fraunces's
+     thinner modulated strokes — as close as lucide can get to a
+     transitional-serif family without swapping icon libraries.
+     =================================================================== */
+
+  .strip.vf-numeral .num {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-optical-sizing: auto;
+    font-variant-numeric: lining-nums tabular-nums;
+    font-size: 120px;
+    line-height: 1;
+    letter-spacing: -0.045em;
+    color: var(--royal-8);
+    position: relative;
+  }
+  .card.writing .strip.vf-numeral .num { color: var(--violet-8); }
+
+  .strip.vf-icon svg {
+    width: 120px;
+    height: 120px;
+    stroke: var(--royal-8);
+    stroke-width: 1.25;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    position: relative;
+  }
+  .card.writing .strip.vf-icon svg { stroke: var(--violet-8); }
+
+  .strip.vf-monogram .mono {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-optical-sizing: auto;
+    font-size: 120px;
+    line-height: 1;
+    letter-spacing: -0.05em;
+    color: var(--royal-8);
+    position: relative;
+  }
+  .card.writing .strip.vf-monogram .mono { color: var(--violet-8); }
+
+  /* ===================================================================
+     SCREENSHOT + DIAGRAM (for the in-context grid at the end)
+     =================================================================== */
+
+  .strip.v-screenshot .photo {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #ff4d8f 0%, #ffe14d 45%, #4dc8ff 100%);
+    filter: saturate(0.75);
+  }
+  .strip.v-screenshot .photo::before {
+    content: "";
+    position: absolute;
+    top: 22%; left: 8%; right: 8%; height: 8%;
+    background: rgba(255,255,255,0.9);
+    border-radius: 2px;
+  }
+  .strip.v-screenshot .photo::after {
+    content: "";
+    position: absolute;
+    bottom: 18%; left: 8%; right: 30%; height: 6%;
+    background: rgba(255,255,255,0.62);
+    border-radius: 2px;
+    box-shadow:
+      0 12px 0 rgba(255,255,255,0.5),
+      0 24px 0 rgba(255,255,255,0.34),
+      0 36px 0 rgba(255,255,255,0.2);
+  }
+  .strip.v-screenshot::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--royal-8);
+    mix-blend-mode: color;
+    opacity: 0.9;
+    pointer-events: none;
+  }
+  .card.writing .strip.v-screenshot::after { background: var(--violet-8); }
+
+  .strip.v-diagram {
+    background: radial-gradient(circle at 50% 50%, var(--royal-2) 0%, var(--royal-1) 100%);
+  }
+  .strip.v-diagram svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .strip.v-diagram .d-stroke { stroke: var(--royal-10); stroke-width: 1.5; fill: none; }
+  .strip.v-diagram .d-stroke-dim { stroke: var(--royal-9); stroke-width: 1; fill: none; stroke-dasharray: 3 4; }
+  .strip.v-diagram .d-fill { fill: var(--royal-2); stroke: var(--royal-9); stroke-width: 1; }
+  .strip.v-diagram .d-label { fill: var(--royal-11); font-family: var(--font-mono); font-size: 9px; }
+
+  /* ===================================================================
+     FEATURED CARDS — unchanged from v6 (carried through for demo at end)
+     =================================================================== */
+
+  .card.featured {
+    background:
+      linear-gradient(var(--card), var(--card)) padding-box,
+      var(--grad-rv) border-box;
+    border: 2px solid transparent;
+  }
+  .card.featured:hover {
+    background:
+      linear-gradient(var(--card-hover), var(--card-hover)) padding-box,
+      var(--grad-rv) border-box;
+  }
+  .card.featured .strip {
+    border-bottom-color: color-mix(in srgb, var(--royal-8) 30%, var(--rule));
+  }
+  .card.featured .kicker {
+    display: inline-block;
+    align-self: flex-start;
+    background: var(--grad-rv);
+    color: #fff;
+    padding: 4px 10px;
+    border-radius: 2px;
+    font-weight: 500;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    margin-top: 0;
+  }
+  .card.featured .strip.v-screenshot::after {
+    background: var(--grad-rv);
+    mix-blend-mode: color;
+    opacity: 0.9;
+  }
+  .card.featured .strip.v-numeral .num,
+  .card.featured .strip.v-monogram .mono {
+    background: var(--grad-rv);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .card.featured .strip.v-icon svg {
+    stroke: url(#grad-rv-svg);
+  }
+  /* Fraunces featured variants */
+  .card.featured .strip.vf-numeral .num,
+  .card.featured .strip.vf-monogram .mono {
+    background: var(--grad-rv);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .card.featured .strip.vf-icon svg {
+    stroke: url(#grad-rv-svg);
+  }
+
+  /* ---------- Locked decisions block ---------- */
+
+  .locked {
+    margin-top: var(--s8);
+    padding: var(--s6);
+    background: color-mix(in srgb, var(--royal-8) 8%, var(--royal-1));
+    border: 1px solid var(--royal-7);
+    border-radius: 12px;
+  }
+  .locked h2 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 24px;
+    margin-bottom: var(--s4);
+  }
+  .locked .decision {
+    margin-top: var(--s5);
+    padding-top: var(--s5);
+    border-top: 1px solid var(--rule);
+  }
+  .locked .decision:first-of-type {
+    margin-top: var(--s3);
+    padding-top: 0;
+    border-top: none;
+  }
+  .locked .decision h3 {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--ink);
+    margin-bottom: var(--s2);
+    letter-spacing: -0.005em;
+  }
+  .locked .decision h3 .tag {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: var(--royal-11);
+    background: rgba(59,91,219,0.18);
+    padding: 2px 8px;
+    border-radius: 2px;
+    margin-right: var(--s2);
+    vertical-align: 2px;
+  }
+  .locked .decision p {
+    color: var(--ink-muted);
+    font-size: 14px;
+    line-height: 1.7;
+    max-width: 68ch;
+  }
+  .locked .decision p + p { margin-top: var(--s2); }
+  .locked .decision strong { color: var(--ink); font-weight: 500; }
+  .locked .decision em { font-style: italic; color: var(--ink); }
+  .locked .decision code {
+    font-family: var(--font-mono);
+    background: rgba(165, 180, 255, 0.1);
+    padding: 1px 6px;
+    border-radius: 2px;
+    color: var(--royal-11);
+    font-size: 12px;
+  }
+
+  @media (max-width: 760px) {
+    .cards-row { grid-template-columns: 1fr; }
+    .cards-row.three { grid-template-columns: 1fr; }
+    .doc-head h1 { font-size: 38px; }
+    section > h2 { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Shared SVG defs (for gradient-stroked icons on featured cards) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="grad-rv-svg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3B5BDB"/>
+      <stop offset="100%" stop-color="#8C3BDB"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+<header class="doc-head">
+  <div class="eyebrow">Portfolio · card deep-dive · v7 · final · 2026-04-12</div>
+  <h1>Unified sizing +<br>Geist vs Fraunces</h1>
+  <p>
+    Two last things from v6. <strong>(1) Sizing</strong> — the centred marks were matching each other in weight but not in <em>footprint</em>. Numeral 120px, icon 88px, monogram 72px meant the three marks occupied visibly different amounts of the strip, and the breathing room around each was inconsistent. v7 pins all three to a <strong>120px reference size</strong>, so the bounding boxes are structurally identical and the breathing around the visible content reads the same for every type.
+  </p>
+  <p>
+    <strong>(2) Geist vs Fraunces</strong> — the weight decision in v6 settled the sizing problem but not the family question. v5's original move was to drop Fraunces because lucide couldn't visually match a transitional serif with a geometric sans icon library. v7 puts both families side by side at the new matched sizes, with lucide's stroke weight tuned to approximate each, so the trade-off is visible rather than argued.
+  </p>
+</header>
+
+<!-- ============================================================ -->
+<section>
+  <div class="kicker">§1 · unified sizing</div>
+  <h2>All three marks at 120px reference</h2>
+  <p class="lede">
+    In v6 the numeral was 120px, the icon was 88px, and the monogram was 72px. The weights matched (Geist 400 + lucide 2) but the footprints didn't — visible cap-heights came out to roughly 84px for the numeral, 80px for the icon, and 52px for the monogram. The monogram especially looked cramped in the same frame.
+  </p>
+  <p class="lede">
+    v7 pins all three to a <strong>120px reference</strong>: numeral 120px font-size, icon 120px × 120px, monogram 120px font-size. Because font cap-height is ~0.7 × em and lucide content fills ~0.67 × its viewBox, the visible content heights come out at ~84px, ~80px, and ~84px respectively — now within 5px of each other instead of a 30px spread. Visible breathing room (from top of strip content area to top of rendered mark) is now ~38–40px for all three.
+  </p>
+
+  <div class="variant-label" style="margin-top:var(--s6)">v6 — <strong>Numeral 120px, Icon 88px, Monogram 72px</strong>. Different footprints, uneven breathing. The monogram especially feels small.</div>
+  <div class="cards-row three">
+    <article class="card">
+      <div class="strip v6-numeral"><div class="num">01</div></div>
+      <div class="content">
+        <div class="kicker">SELECTED WORK · 01</div>
+        <h3><a class="card-link" href="#">Planner App<span class="arrow">→</span></a></h3>
+        <p class="desc">v6 numeral: 120px. Anchor size.</p>
+        <ul class="tags"><li>v6</li></ul>
+      </div>
+    </article>
+    <article class="card">
+      <div class="strip v6-icon">
+        <svg viewBox="0 0 24 24">
+          <path d="M20 12V8a2 2 0 0 0-2-2h-3"/>
+          <path d="M9 6H6a2 2 0 0 0-2 2v4"/>
+          <path d="M4 16v2a2 2 0 0 0 2 2h3"/>
+          <path d="M15 20h3a2 2 0 0 0 2-2v-2"/>
+          <rect x="8" y="10" width="8" height="6" rx="1"/>
+        </svg>
+      </div>
+      <div class="content">
+        <div class="kicker">SELECTED WORK · 03</div>
+        <h3><a class="card-link" href="#">MOB analysis<span class="arrow">→</span></a></h3>
+        <p class="desc">v6 icon: 88px. Slightly smaller than numeral footprint.</p>
+        <ul class="tags"><li>v6</li></ul>
+      </div>
+    </article>
+    <article class="card">
+      <div class="strip v6-monogram"><div class="mono">PLN</div></div>
+      <div class="content">
+        <div class="kicker">SELECTED WORK · 01</div>
+        <h3><a class="card-link" href="#">Planner App<span class="arrow">→</span></a></h3>
+        <p class="desc">v6 monogram: 72px. Clearly smaller; feels cramped.</p>
+        <ul class="tags"><li>v6</li></ul>
+      </div>
+    </article>
+  </div>
+
+  <div class="variant-label" style="margin-top:var(--s8)">v7 — <strong>All three at 120px reference</strong>. Identical bounding boxes, identical visible breathing. Numeral and monogram grow to the same font-size; icon grows to a 120px × 120px box.</div>
+  <div class="cards-row three">
+    <article class="card">
+      <div class="strip v-numeral"><div class="num">01</div></div>
+      <div class="content">
+        <div class="kicker">SELECTED WORK · 01</div>
+        <h3><a class="card-link" href="#">Planner App<span class="arrow">→</span></a></h3>
+        <p class="desc">v7 numeral: 120px Geist 400. Unchanged from v6.</p>
+        <ul class="tags"><li>v7</li></ul>
+      </div>
+    </article>
+    <article class="card">
+      <div class="strip v-icon">
+        <svg viewBox="0 0 24 24">
+          <path d="M20 12V8a2 2 0 0 0-2-2h-3"/>
+          <path d="M9 6H6a2 2 0 0 0-2 2v4"/>
+          <path d="M4 16v2a2 2 0 0 0 2 2h3"/>
+          <path d="M15 20h3a2 2 0 0 0 2-2v-2"/>
+          <rect x="8" y="10" width="8" height="6" rx="1"/>
+        </svg>
+      </div>
+      <div class="content">
+        <div class="kicker">SELECTED WORK · 03</div>
+        <h3><a class="card-link" href="#">MOB analysis<span class="arrow">→</span></a></h3>
+        <p class="desc">v7 icon: 120px lucide stroke 2. Grown from 88px.</p>
+        <ul class="tags"><li>v7</li></ul>
+      </div>
+    </article>
+    <article class="card">
+      <div class="strip v-monogram"><div class="mono">PLN</div></div>
+      <div class="content">
+        <div class="kicker">SELECTED WORK · 01</div>
+        <h3><a class="card-link" href="#">Planner App<span class="arrow">→</span></a></h3>
+        <p class="desc">v7 monogram: 120px Geist 400. Grown from 72px; tighter tracking (-0.05em) keeps PLN compact.</p>
+        <ul class="tags"><li>v7</li></ul>
+      </div>
+    </article>
+  </div>
+
+  <div class="note">
+    <strong>Why this works structurally.</strong> Font cap-height is a fixed fraction of em-size (~0.7 for Geist). Lucide icon content fills a fixed fraction of its viewBox (~0.67 for most icons). At the same reference size, both render at roughly the same visible extent. The difference between the two ratios is ~4%, which over a 120px reference is ~5px — small enough that the eye reads the three marks as sitting at the same scale. The v6 spread was 32px, which read as "three different sizes." v7 is 5px, which reads as "one size, three flavours."
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section>
+  <div class="kicker">§2 · typography family — Geist vs Fraunces</div>
+  <h2>Both families at the matched 120px size</h2>
+  <p class="lede">
+    v5's argument for Geist was that lucide (geometric sans) couldn't visually match Fraunces (transitional serif) without swapping the icon library. That still applies. But at the matched sizes, and with lucide's stroke-width tuned per family, it's worth seeing the side-by-side before the family locks for good.
+  </p>
+
+  <div class="variant-label" style="margin-top:var(--s6)"><strong>Row A — Geist 400 + lucide stroke 2</strong>. Numeral and monogram in Geist Regular; lucide at medium stroke. The family matches — sans text marks, sans icon strokes.</div>
+  <div class="cards-row three">
+    <article class="card">
+      <div class="strip v-numeral"><div class="num">01</div></div>
+      <div class="content">
+        <div class="kicker">SELECTED WORK · 01</div>
+        <h3><a class="card-link" href="#">Planner App<span class="arrow">→</span></a></h3>
+        <p class="desc">Geist 400 numeral. Clean lining figures, tight tracking, tabular-nums locked.</p>
+        <ul class="tags"><li>Geist</li></ul>
+      </div>
+    </article>
+    <article class="card">
+      <div class="strip v-icon">
+        <svg viewBox="0 0 24 24">
+          <path d="M20 12V8a2 2 0 0 0-2-2h-3"/>
+          <path d="M9 6H6a2 2 0 0 0-2 2v4"/>
+          <path d="M4 16v2a2 2 0 0 0 2 2h3"/>
+          <path d="M15 20h3a2 2 0 0 0 2-2v-2"/>
+          <rect x="8" y="10" width="8" height="6" rx="1"/>
+        </svg>
+      </div>
+      <div class="content">
+        <div class="kicker">SELECTED WORK · 03</div>
+        <h3><a class="card-link" href="#">MOB analysis<span class="arrow">→</span></a></h3>
+        <p class="desc">Lucide stroke 2 — matches Geist 400 glyph weight.</p>
+        <ul class="tags"><li>Geist</li></ul>
+      </div>
+    </article>
+    <article class="card">
+      <div class="strip v-monogram"><div class="mono">PLN</div></div>
+      <div class="content">
+        <div class="kicker">SELECTED WORK · 01</div>
+        <h3><a class="card-link" href="#">Planner App<span class="arrow">→</span></a></h3>
+        <p class="desc">Geist 400 monogram. Geometric caps, no serifs, flat terminals.</p>
+        <ul class="tags"><li>Geist</li></ul>
+      </div>
+    </article>
+  </div>
+
+  <div class="variant-label" style="margin-top:var(--s8)"><strong>Row B — Fraunces 300 + lucide stroke 1.25</strong>. Numeral and monogram in Fraunces Light at display optical size; lucide stroke reduced to approximate Fraunces's thinner modulated strokes. This is as close as lucide can visually get to a transitional serif.</div>
+  <div class="cards-row three">
+    <article class="card">
+      <div class="strip vf-numeral"><div class="num">01</div></div>
+      <div class="content">
+        <div class="kicker">SELECTED WORK · 01</div>
+        <h3><a class="card-link" href="#">Planner App<span class="arrow">→</span></a></h3>
+        <p class="desc">Fraunces 300 numeral. Serif terminals, bracketed feet, editorial character.</p>
+        <ul class="tags"><li>Fraunces</li></ul>
+      </div>
+    </article>
+    <article class="card">
+      <div class="strip vf-icon">
+        <svg viewBox="0 0 24 24">
+          <path d="M20 12V8a2 2 0 0 0-2-2h-3"/>
+          <path d="M9 6H6a2 2 0 0 0-2 2v4"/>
+          <path d="M4 16v2a2 2 0 0 0 2 2h3"/>
+          <path d="M15 20h3a2 2 0 0 0 2-2v-2"/>
+          <rect x="8" y="10" width="8" height="6" rx="1"/>
+        </svg>
+      </div>
+      <div class="content">
+        <div class="kicker">SELECTED WORK · 03</div>
+        <h3><a class="card-link" href="#">MOB analysis<span class="arrow">→</span></a></h3>
+        <p class="desc">Lucide stroke 1.25 — thinner to approximate Fraunces's modulated strokes. Still geometric linework, still recognisably lucide.</p>
+        <ul class="tags"><li>Fraunces</li></ul>
+      </div>
+    </article>
+    <article class="card">
+      <div class="strip vf-monogram"><div class="mono">PLN</div></div>
+      <div class="content">
+        <div class="kicker">SELECTED WORK · 01</div>
+        <h3><a class="card-link" href="#">Planner App<span class="arrow">→</span></a></h3>
+        <p class="desc">Fraunces 300 monogram. Bracketed serifs on the P and N; the serif-family DNA is unmistakable.</p>
+        <ul class="tags"><li>Fraunces</li></ul>
+      </div>
+    </article>
+  </div>
+
+  <div class="variant-label" style="margin-top:var(--s8)"><strong>Row C — Writing register, Geist side</strong>. Same typography as Row A, violet register, to confirm the family holds on the writing side.</div>
+  <div class="cards-row three">
+    <article class="card writing">
+      <div class="strip v-numeral"><div class="num">04</div></div>
+      <div class="content">
+        <div class="kicker">ESSAY · LESSONS</div>
+        <h3><a class="card-link" href="#">Four guardrails that saved the budget<span class="arrow">→</span></a></h3>
+        <p class="desc">Geist 400 numeral, violet register.</p>
+        <ul class="tags"><li>Geist · W</li></ul>
+      </div>
+    </article>
+    <article class="card writing">
+      <div class="strip v-icon">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 20h9"/>
+          <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+        </svg>
+      </div>
+      <div class="content">
+        <div class="kicker">ESSAY · META</div>
+        <h3><a class="card-link" href="#">Writing as research<span class="arrow">→</span></a></h3>
+        <p class="desc">Lucide stroke 2, violet register.</p>
+        <ul class="tags"><li>Geist · W</li></ul>
+      </div>
+    </article>
+    <article class="card writing">
+      <div class="strip v-monogram"><div class="mono">R/W</div></div>
+      <div class="content">
+        <div class="kicker">NOTE · FRAGMENT</div>
+        <h3><a class="card-link" href="#">Read-write reciprocity<span class="arrow">→</span></a></h3>
+        <p class="desc">Geist 400 monogram, violet register.</p>
+        <ul class="tags"><li>Geist · W</li></ul>
+      </div>
+    </article>
+  </div>
+
+  <div class="variant-label" style="margin-top:var(--s8)"><strong>Row D — Writing register, Fraunces side</strong>. Same typography as Row B, violet register.</div>
+  <div class="cards-row three">
+    <article class="card writing">
+      <div class="strip vf-numeral"><div class="num">04</div></div>
+      <div class="content">
+        <div class="kicker">ESSAY · LESSONS</div>
+        <h3><a class="card-link" href="#">Four guardrails that saved the budget<span class="arrow">→</span></a></h3>
+        <p class="desc">Fraunces 300 numeral, violet register.</p>
+        <ul class="tags"><li>Fraunces · W</li></ul>
+      </div>
+    </article>
+    <article class="card writing">
+      <div class="strip vf-icon">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 20h9"/>
+          <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+        </svg>
+      </div>
+      <div class="content">
+        <div class="kicker">ESSAY · META</div>
+        <h3><a class="card-link" href="#">Writing as research<span class="arrow">→</span></a></h3>
+        <p class="desc">Lucide stroke 1.25, violet register.</p>
+        <ul class="tags"><li>Fraunces · W</li></ul>
+      </div>
+    </article>
+    <article class="card writing">
+      <div class="strip vf-monogram"><div class="mono">R/W</div></div>
+      <div class="content">
+        <div class="kicker">NOTE · FRAGMENT</div>
+        <h3><a class="card-link" href="#">Read-write reciprocity<span class="arrow">→</span></a></h3>
+        <p class="desc">Fraunces 300 monogram, violet register.</p>
+        <ul class="tags"><li>Fraunces · W</li></ul>
+      </div>
+    </article>
+  </div>
+
+  <div class="note">
+    <strong>The trade-off, laid out.</strong> <em>Geist</em> wins on family coherence — numeral, monogram, and icon all read as drawn by the same hand. The icon's geometric linework matches the sans text marks' constant stroke weight. Nothing jars. The downside: Geist is a functional interface sans, and at 120px it reads as clean but impersonal. On a portfolio whose whole personality is "typography and system design," Geist as the hero mark says "UI, not editorial."
+  </div>
+  <div class="note">
+    <strong>Fraunces</strong> wins on character — the 01 reads as a confident editorial mark, PLN reads as a typographic lockup, and the whole card feels like it came from a design portfolio rather than a dashboard. The cost is the icon. At stroke-width 1.25 lucide gets closer to Fraunces's thin stroke, but the icon's geometric rigidity still reads as a different family than the serif marks. On a card row where one card is an icon and the other two are Fraunces text marks, the icon will always be the odd one out. How often that matters depends on how many icon cards the portfolio ends up with — if icons are rare (one or two per grid at most), the cost is low; if they're frequent, the cost is high.
+  </div>
+  <div class="warning">
+    <strong>My read.</strong> If the portfolio uses icons as a common visual type (alongside screenshots and diagrams), go <strong>Geist</strong> — the family coherence matters more than the editorial character. If icons are reserved for rare cases and most cards use screenshots, diagrams, numerals, or monograms, go <strong>Fraunces</strong> — the editorial weight is a real quality signal on a typography-focused portfolio, and the rare icon card can wear the mismatch. Which one depends on how you expect to use the icon type. If you don't know yet, <strong>Geist is the safer default</strong> because it doesn't put a family-mismatch tax on any future icon usage.
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section>
+  <div class="kicker">§3 · featured treatment at v7 sizes</div>
+  <h2>Confirm the featured system still works</h2>
+  <p class="lede">
+    Featured treatment is unchanged from v6 — gradient border (2px), "FEATURED" gradient kicker pill, gradient effect on the visual element. Below: one featured card per mark type at the new v7 sizes, Geist side. Confirming that the larger sizes don't break the featured treatment.
+  </p>
+
+  <div class="cards-row three">
+    <article class="card featured">
+      <div class="strip v-numeral"><div class="num">01</div></div>
+      <div class="content">
+        <div class="kicker">FEATURED</div>
+        <h3><a class="card-link" href="#">Planner App<span class="arrow">→</span></a></h3>
+        <p class="desc">Featured + 120px numeral. Gradient fills the larger mark without losing definition.</p>
+        <ul class="tags"><li>TYPESCRIPT</li></ul>
+      </div>
+    </article>
+    <article class="card featured">
+      <div class="strip v-icon">
+        <svg viewBox="0 0 24 24">
+          <path d="M20 12V8a2 2 0 0 0-2-2h-3"/>
+          <path d="M9 6H6a2 2 0 0 0-2 2v4"/>
+          <path d="M4 16v2a2 2 0 0 0 2 2h3"/>
+          <path d="M15 20h3a2 2 0 0 0 2-2v-2"/>
+          <rect x="8" y="10" width="8" height="6" rx="1"/>
+        </svg>
+      </div>
+      <div class="content">
+        <div class="kicker">FEATURED</div>
+        <h3><a class="card-link" href="#">MOB analysis<span class="arrow">→</span></a></h3>
+        <p class="desc">Featured + 120px icon. Gradient stroke traces the full icon corner-to-corner.</p>
+        <ul class="tags"><li>ANALYSIS</li></ul>
+      </div>
+    </article>
+    <article class="card featured">
+      <div class="strip v-monogram"><div class="mono">PLN</div></div>
+      <div class="content">
+        <div class="kicker">FEATURED</div>
+        <h3><a class="card-link" href="#">Planner App<span class="arrow">→</span></a></h3>
+        <p class="desc">Featured + 120px monogram. Gradient reads across the full PLN lockup.</p>
+        <ul class="tags"><li>TYPOGRAPHY</li></ul>
+      </div>
+    </article>
+  </div>
+
+  <div class="variant-label" style="margin-top:var(--s8)"><strong>Same three, Fraunces side.</strong> Featured treatment applied to the serif typography variant. All gradient mechanisms (background-clip for text, SVG url for icon strokes) work identically.</div>
+  <div class="cards-row three">
+    <article class="card featured">
+      <div class="strip vf-numeral"><div class="num">01</div></div>
+      <div class="content">
+        <div class="kicker">FEATURED</div>
+        <h3><a class="card-link" href="#">Planner App<span class="arrow">→</span></a></h3>
+        <p class="desc">Featured + Fraunces 300 numeral. Gradient on serif letterforms — editorial meets signature.</p>
+        <ul class="tags"><li>TYPESCRIPT</li></ul>
+      </div>
+    </article>
+    <article class="card featured">
+      <div class="strip vf-icon">
+        <svg viewBox="0 0 24 24">
+          <path d="M20 12V8a2 2 0 0 0-2-2h-3"/>
+          <path d="M9 6H6a2 2 0 0 0-2 2v4"/>
+          <path d="M4 16v2a2 2 0 0 0 2 2h3"/>
+          <path d="M15 20h3a2 2 0 0 0 2-2v-2"/>
+          <rect x="8" y="10" width="8" height="6" rx="1"/>
+        </svg>
+      </div>
+      <div class="content">
+        <div class="kicker">FEATURED</div>
+        <h3><a class="card-link" href="#">MOB analysis<span class="arrow">→</span></a></h3>
+        <p class="desc">Featured + Fraunces-paired icon (stroke 1.25). Thinner gradient stroke.</p>
+        <ul class="tags"><li>ANALYSIS</li></ul>
+      </div>
+    </article>
+    <article class="card featured">
+      <div class="strip vf-monogram"><div class="mono">PLN</div></div>
+      <div class="content">
+        <div class="kicker">FEATURED</div>
+        <h3><a class="card-link" href="#">Planner App<span class="arrow">→</span></a></h3>
+        <p class="desc">Featured + Fraunces 300 monogram. Serif lockup with gradient fill.</p>
+        <ul class="tags"><li>TYPOGRAPHY</li></ul>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section>
+  <div class="kicker">§4 · decisions locked</div>
+  <h2>Card spec freeze</h2>
+  <p class="lede">
+    Everything below is final once you pick the family. No other open items — border is 2px from v6, featured treatment is unchanged from v6, Q2 is unchanged from v5.
+  </p>
+
+  <div class="locked">
+    <h2>Locked</h2>
+
+    <div class="decision">
+      <h3><span class="tag">Sizing</span> 120px reference for all centred marks</h3>
+      <p>
+        Numeral, icon, and monogram all use a 120px reference size. Numeral and monogram: <code>font-size: 120px</code>. Icon: <code>width: 120px; height: 120px</code> (up from 88px). Monogram tracking tightens to <code>-0.05em</code> to keep three-letter lockups compact at the new size. Shared shell from v4 still centres all three in the same frame; visible breathing around rendered content is now uniform within ~5px.
+      </p>
+    </div>
+
+    <div class="decision">
+      <h3><span class="tag">Family</span> Geist vs Fraunces — <em>pick one</em></h3>
+      <p>
+        Last open item on the card spec. Both are viable at the v7 matched sizes, and the trade-off is visible in §2. My recommendation is Geist unless icons are deliberately rare — but this is the one call I don't want to make for you. Both options include:
+      </p>
+      <ul style="margin-top: 12px; padding-left: 24px; color: var(--ink-muted); font-size: 14px; line-height: 1.75;">
+        <li><strong>Geist option:</strong> Numeral + monogram in Geist 400, icon lucide stroke 2.</li>
+        <li><strong>Fraunces option:</strong> Numeral + monogram in Fraunces 300 (optical-size auto), icon lucide stroke 1.25.</li>
+      </ul>
+    </div>
+
+    <div class="decision">
+      <h3><span class="tag">Featured</span> Unchanged from v6</h3>
+      <p>
+        Every featured card gets three things together: <strong>2px gradient border</strong>, <strong>"FEATURED" gradient kicker pill</strong>, and a <strong>gradient effect on the visual element</strong> adapted to type (overlay for screenshot/diagram, background-clip for numeral/monogram, SVG stroke reference for icon). Card prop: <code>featured?: boolean</code>. At most one per grid, enforced by review. The v5 gradient-mark strip type stays dropped — the gradient is an effect applied to the chosen visual type, never a visual type on its own.
+      </p>
+    </div>
+
+    <div class="decision">
+      <h3><span class="tag">Visual types</span> Five final</h3>
+      <p>
+        Final visual-type pool: <strong>screenshot</strong>, <strong>diagram</strong>, <strong>numeral</strong>, <strong>icon</strong>, <strong>monogram</strong>. Card prop: <code>kind: "screenshot" | "diagram" | "numeral" | "icon" | "monogram"</code>.
+      </p>
+    </div>
+
+    <div class="decision">
+      <h3><span class="tag">Q2</span> Screenshot helper variant API (unchanged from v5)</h3>
+      <p>
+        M5 (meta split) and M6 (detail zoom) live in the <code>&lt;Screenshot&gt;</code> helper as a <code>variant</code> prop. Default <code>variant="detail"</code> (M6); M5 is explicit opt-in. Hierarchy rule ("max one M5 per grid") lives in the style guide, enforced by review.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section>
+  <div class="kicker">§5 · next</div>
+  <h2>Pick a family, lock the spec, resume foundation work</h2>
+  <p class="lede">
+    Tell me Geist or Fraunces and the card component spec is frozen. Nothing else on the card side until chunk 4c.1 (page layout mockups), when the component gets built straight from this doc. The iteration trail (v1 → v7) stays preserved as the spine of a future design-system case study.
+  </p>
+  <p class="lede">
+    Next work on the critical path: <strong>chunk 4a.4</strong> — synthesising voice research, diary audit, and imagery standards into <code>.claude/rules/writing-style.md</code> at the workspace root. Foundation work (4a.4 → 4a.5 → 4a.6) still gates chunk 4b.
+  </p>
+</section>
+
+</body>
+</html>

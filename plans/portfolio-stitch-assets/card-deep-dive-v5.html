@@ -1,0 +1,1162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Card deep-dive v5 — Typography unification + Featured cards</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Geist+Mono:wght@400;500&family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --royal-1:#0a0d1a; --royal-2:#0f1428; --royal-3:#141c3a; --royal-4:#1b2652;
+    --royal-5:#233270; --royal-6:#2b4094; --royal-7:#3350bf; --royal-8:#3B5BDB;
+    --royal-9:#5773e3; --royal-10:#8098ec; --royal-11:#adbcf2; --royal-12:#d8dff9;
+
+    --violet-8:#8C3BDB; --violet-9:#a157e3; --violet-10:#b77cec;
+    --violet-11:#cfa3f2; --violet-12:#e6cff9;
+
+    --ink:#e8ecff; --ink-muted:#a0aac4; --ink-dim:#6b7390;
+
+    --bg:#0a0d1a; --card:#0f1428; --card-hover:#141c3a; --rule:#1b2652;
+
+    --grad-rv: linear-gradient(135deg, var(--royal-8) 0%, var(--violet-8) 100%);
+    --grad-rv-soft: linear-gradient(135deg, rgba(59,91,219,0.12) 0%, rgba(140,59,219,0.12) 100%);
+
+    --font-display:"Fraunces",serif;
+    --font-sans:"Geist",system-ui,sans-serif;
+    --font-mono:"Geist Mono",monospace;
+
+    --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px; --s8:64px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    padding: var(--s8) var(--s5) var(--s8);
+    max-width: 1180px;
+    margin: 0 auto;
+  }
+
+  /* ---------- Doc framing ---------- */
+
+  .doc-head { margin-bottom: var(--s8); }
+  .doc-head .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--royal-10);
+    margin-bottom: var(--s3);
+  }
+  .doc-head h1 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 52px;
+    line-height: 1.0;
+    letter-spacing: -0.025em;
+    margin-bottom: var(--s4);
+  }
+  .doc-head p {
+    color: var(--ink-muted);
+    font-size: 17px;
+    max-width: 68ch;
+  }
+  .doc-head p + p { margin-top: var(--s3); }
+  .doc-head strong { color: var(--ink); font-weight: 500; }
+  .doc-head em { font-style: italic; color: var(--ink); }
+
+  section {
+    margin-top: var(--s8);
+    padding-top: var(--s6);
+    border-top: 1px solid var(--rule);
+  }
+  section:first-of-type { border-top: none; padding-top: 0; }
+  section > .kicker {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--royal-10);
+    margin-bottom: var(--s2);
+  }
+  section > h2 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 34px;
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+    margin-bottom: var(--s3);
+  }
+  section > .lede {
+    color: var(--ink-muted);
+    max-width: 68ch;
+    margin-bottom: var(--s6);
+    font-size: 15.5px;
+  }
+  section > .lede strong { color: var(--ink); font-weight: 500; }
+  section > .lede em { font-style: italic; color: var(--ink); }
+
+  .note {
+    background: var(--grad-rv-soft);
+    border: 1px solid var(--royal-7);
+    border-radius: 8px;
+    padding: var(--s4) var(--s5);
+    margin-top: var(--s5);
+    font-size: 14px;
+    color: var(--ink);
+    line-height: 1.65;
+  }
+  .note strong { color: var(--royal-11); }
+
+  .warning {
+    background: color-mix(in srgb, var(--violet-8) 10%, var(--royal-1));
+    border: 1px solid color-mix(in srgb, var(--violet-8) 35%, var(--rule));
+    border-radius: 8px;
+    padding: var(--s4) var(--s5);
+    margin-top: var(--s5);
+    font-size: 14px;
+    color: var(--ink);
+    line-height: 1.65;
+  }
+  .warning strong { color: var(--violet-11); }
+
+  .variant-label {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-muted);
+    margin-bottom: var(--s3);
+    letter-spacing: 0.04em;
+  }
+  .variant-label strong { color: var(--ink); font-weight: 500; }
+
+  .variant-group { margin-top: var(--s6); }
+  .variant-group:first-of-type { margin-top: var(--s5); }
+
+  /* ===================================================================
+     CARDS — Layout A: top third strip, content below
+     (unchanged from v4)
+     =================================================================== */
+
+  .cards-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--s5);
+  }
+  .cards-row.three { grid-template-columns: repeat(3, 1fr); }
+
+  .card {
+    position: relative;
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: background 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
+  }
+  .card:hover {
+    background: var(--card-hover);
+    border-color: var(--royal-8);
+    box-shadow: inset 0 1px 0 rgba(165, 180, 255, 0.18);
+  }
+  .card.writing:hover {
+    border-color: var(--violet-8);
+  }
+
+  .card .strip {
+    position: relative;
+    height: 160px;
+    border-bottom: 1px solid var(--rule);
+    overflow: hidden;
+  }
+  .card .content {
+    padding: var(--s4) var(--s5) var(--s5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--s3);
+  }
+
+  .card .kicker {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--royal-10);
+    line-height: 1;
+    margin-top: var(--s1);
+  }
+  .card.writing .kicker { color: var(--violet-10); }
+
+  .card h3 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 22px;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+  .card h3 a.card-link {
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .card h3 a.card-link::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+  .card h3 a.card-link .arrow {
+    color: var(--royal-10);
+    margin-left: 6px;
+    display: inline-block;
+    transition: transform 140ms ease;
+  }
+  .card.writing h3 a.card-link .arrow { color: var(--violet-10); }
+  .card:hover h3 a.card-link .arrow { transform: translateX(3px); }
+
+  .card p.desc {
+    color: var(--ink-muted);
+    font-size: 14px;
+    line-height: 1.55;
+  }
+
+  .card .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s2);
+    list-style: none;
+    margin-top: var(--s2);
+    position: relative;
+    z-index: 2;
+  }
+  .card .tags li {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 3px var(--s2);
+    background: var(--royal-3);
+    color: var(--royal-11);
+    border-radius: 2px;
+    border: 1px solid var(--royal-4);
+  }
+  .card.writing .tags li {
+    background: color-mix(in srgb, var(--violet-8) 18%, var(--card));
+    color: var(--violet-11);
+    border-color: color-mix(in srgb, var(--violet-8) 35%, var(--card));
+  }
+
+  /* ===================================================================
+     SHARED SHELL for centred text/icon marks
+     (unchanged from v4 — this was the right call)
+     =================================================================== */
+
+  .strip.v-numeral,
+  .strip.v-icon,
+  .strip.v-monogram {
+    display: grid;
+    place-items: center;
+    background: var(--royal-1);
+    position: relative;
+    padding: var(--s4);
+  }
+  .strip.v-numeral::before,
+  .strip.v-icon::before,
+  .strip.v-monogram::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(0deg, transparent 0 22px, color-mix(in srgb, var(--royal-8) 10%, transparent) 22px 23px);
+    pointer-events: none;
+  }
+  .card.writing .strip.v-numeral::before,
+  .card.writing .strip.v-icon::before,
+  .card.writing .strip.v-monogram::before {
+    background-image:
+      repeating-linear-gradient(0deg, transparent 0 22px, color-mix(in srgb, var(--violet-8) 10%, transparent) 22px 23px);
+  }
+
+  /* ===================================================================
+     V4 TYPOGRAPHY (held for before/after comparison only)
+     =================================================================== */
+
+  .strip.v4-numeral .num {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: 120px;
+    line-height: 0.82;
+    letter-spacing: -0.04em;
+    color: var(--royal-8);
+    position: relative;
+  }
+  .card.writing .strip.v4-numeral .num { color: var(--violet-8); }
+
+  .strip.v4-icon svg {
+    width: 88px;
+    height: 88px;
+    stroke: var(--royal-8);
+    stroke-width: 1.5;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    position: relative;
+  }
+  .card.writing .strip.v4-icon svg { stroke: var(--violet-8); }
+
+  .strip.v4-monogram .mono {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 72px;
+    line-height: 0.85;
+    letter-spacing: -0.035em;
+    color: var(--royal-8);
+    position: relative;
+  }
+  .card.writing .strip.v4-monogram .mono { color: var(--violet-8); }
+
+  /* Alias v4 types onto the shared shell so they render in the same frame */
+  .strip.v4-numeral,
+  .strip.v4-icon,
+  .strip.v4-monogram {
+    display: grid;
+    place-items: center;
+    background: var(--royal-1);
+    position: relative;
+    padding: var(--s4);
+  }
+  .strip.v4-numeral::before,
+  .strip.v4-icon::before,
+  .strip.v4-monogram::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(0deg, transparent 0 22px, color-mix(in srgb, var(--royal-8) 10%, transparent) 22px 23px);
+    pointer-events: none;
+  }
+  .card.writing .strip.v4-numeral::before,
+  .card.writing .strip.v4-icon::before,
+  .card.writing .strip.v4-monogram::before {
+    background-image:
+      repeating-linear-gradient(0deg, transparent 0 22px, color-mix(in srgb, var(--violet-8) 10%, transparent) 22px 23px);
+  }
+
+  /* ===================================================================
+     V5 TYPOGRAPHY — Geist sans for all three marks
+     Numeral, monogram, and icon stroke all visually match.
+     - Numeral: Geist 500, 120px
+     - Monogram: Geist 500, 72px
+     - Icon: lucide stroke-width 2.25 (matches Geist 500 glyph weight at these sizes)
+     =================================================================== */
+
+  /* ---- Type 3: numeral — Geist sans ---- */
+  .strip.v-numeral .num {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-variant-numeric: lining-nums tabular-nums;
+    font-feature-settings: "ss01" on;
+    font-size: 120px;
+    line-height: 0.82;
+    letter-spacing: -0.04em;
+    color: var(--royal-8);
+    position: relative;
+  }
+  .card.writing .strip.v-numeral .num { color: var(--violet-8); }
+
+  /* ---- Type 5: icon (lucide) — stroke tuned to match Geist 500 ---- */
+  .strip.v-icon svg {
+    width: 88px;
+    height: 88px;
+    stroke: var(--royal-8);
+    stroke-width: 2.25;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    position: relative;
+  }
+  .card.writing .strip.v-icon svg { stroke: var(--violet-8); }
+
+  /* ---- Type 6: monogram — Geist sans, matches numeral ---- */
+  .strip.v-monogram .mono {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 72px;
+    line-height: 0.85;
+    letter-spacing: -0.015em;
+    color: var(--royal-8);
+    position: relative;
+  }
+  .card.writing .strip.v-monogram .mono { color: var(--violet-8); }
+
+  /* ---- Type 1 screenshot (for the in-context grid) ---- */
+  .strip.v-screenshot .photo {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #ff4d8f 0%, #ffe14d 45%, #4dc8ff 100%);
+    filter: saturate(0.75);
+  }
+  .strip.v-screenshot .photo::before {
+    content: "";
+    position: absolute;
+    top: 22%; left: 8%; right: 8%; height: 8%;
+    background: rgba(255,255,255,0.9);
+    border-radius: 2px;
+  }
+  .strip.v-screenshot .photo::after {
+    content: "";
+    position: absolute;
+    bottom: 18%; left: 8%; right: 30%; height: 6%;
+    background: rgba(255,255,255,0.62);
+    border-radius: 2px;
+    box-shadow:
+      0 12px 0 rgba(255,255,255,0.5),
+      0 24px 0 rgba(255,255,255,0.34),
+      0 36px 0 rgba(255,255,255,0.2);
+  }
+  .strip.v-screenshot::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--royal-8);
+    mix-blend-mode: color;
+    opacity: 0.9;
+    pointer-events: none;
+  }
+  .card.writing .strip.v-screenshot::after { background: var(--violet-8); }
+
+  /* ---- Type 2 diagram (for the in-context grid) ---- */
+  .strip.v-diagram {
+    background: radial-gradient(circle at 50% 50%, var(--royal-2) 0%, var(--royal-1) 100%);
+  }
+  .strip.v-diagram svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .strip.v-diagram .d-stroke { stroke: var(--royal-10); stroke-width: 1.5; fill: none; }
+  .strip.v-diagram .d-stroke-dim { stroke: var(--royal-9); stroke-width: 1; fill: none; stroke-dasharray: 3 4; }
+  .strip.v-diagram .d-fill { fill: var(--royal-2); stroke: var(--royal-9); stroke-width: 1; }
+  .strip.v-diagram .d-label { fill: var(--royal-11); font-family: var(--font-mono); font-size: 9px; }
+  .card.writing .strip.v-diagram .d-stroke { stroke: var(--violet-10); }
+
+  /* ===================================================================
+     FEATURED CARDS
+     "Featured" = at most one per grid. Marks the card the page wants
+     the reader to look at first. Four variations explored below.
+     =================================================================== */
+
+  /* ---- F1 · Gradient border ---- */
+  /* The perimeter treatment. 1.5px gradient runs the royal→violet wash
+     around the entire card. Strip content is unchanged from the
+     non-featured version — the border alone says "featured." */
+  .card.featured-border {
+    background:
+      linear-gradient(var(--card), var(--card)) padding-box,
+      var(--grad-rv) border-box;
+    border: 1.5px solid transparent;
+  }
+  .card.featured-border:hover {
+    background:
+      linear-gradient(var(--card-hover), var(--card-hover)) padding-box,
+      var(--grad-rv) border-box;
+  }
+  /* Keep strip bottom rule subtle so it doesn't fight the border */
+  .card.featured-border .strip {
+    border-bottom-color: color-mix(in srgb, var(--royal-8) 30%, var(--rule));
+  }
+
+  /* ---- F2 · Gradient kicker pill ---- */
+  /* The content treatment. Kicker label becomes a small gradient pill,
+     register colour preserved via text colour. Nothing else changes. */
+  .card.featured-kicker .kicker {
+    display: inline-block;
+    background: var(--grad-rv);
+    color: #fff;
+    padding: 4px 10px;
+    border-radius: 2px;
+    font-weight: 500;
+    align-self: flex-start;
+    margin-top: 0;
+  }
+  .card.writing.featured-kicker .kicker { background: var(--grad-rv); color: #fff; }
+
+  /* ---- F3 · Gradient-mark strip ---- */
+  /* The strip treatment. The whole imagery slot is the signature gradient
+     mark — radial royal + radial violet on deep royal-1 background with
+     a subtle diagonal ruled texture. Per Q1, this strip type is RESERVED
+     to featured cards — it cannot appear anywhere else. */
+  .strip.v-gradmark {
+    background:
+      radial-gradient(circle at 28% 32%, var(--royal-8), transparent 62%),
+      radial-gradient(circle at 74% 72%, var(--violet-8), transparent 58%),
+      var(--royal-1);
+    position: relative;
+  }
+  .strip.v-gradmark::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(
+      135deg,
+      transparent 0 7px,
+      rgba(255,255,255,0.055) 7px 8px
+    );
+  }
+  /* Optional label inside gradient-mark strip — sits on top of the wash
+     and picks up the ink colour, not a register colour. */
+  .strip.v-gradmark .gm-label {
+    position: absolute;
+    bottom: var(--s4);
+    left: var(--s5);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.72);
+    z-index: 2;
+  }
+
+  /* ---- F4 · Combined: gradient border + gradient-mark strip ---- */
+  /* The maximum featured treatment. Reserved for the SINGLE hero card on
+     the landing grid — the "start here" anchor. Combines F1 and F3. */
+  .card.featured-hero {
+    background:
+      linear-gradient(var(--card), var(--card)) padding-box,
+      var(--grad-rv) border-box;
+    border: 1.5px solid transparent;
+  }
+  .card.featured-hero:hover {
+    background:
+      linear-gradient(var(--card-hover), var(--card-hover)) padding-box,
+      var(--grad-rv) border-box;
+  }
+  .card.featured-hero .strip {
+    border-bottom-color: color-mix(in srgb, var(--royal-8) 40%, var(--rule));
+  }
+
+  /* ===================================================================
+     Comparison table
+     =================================================================== */
+
+  .compare {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: var(--s6);
+    font-size: 13px;
+  }
+  .compare th, .compare td {
+    padding: var(--s3) var(--s4);
+    text-align: left;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+  }
+  .compare th {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--royal-11);
+    font-weight: 500;
+  }
+  .compare td.opt {
+    font-family: var(--font-display);
+    color: var(--ink);
+    font-weight: 500;
+    font-size: 15px;
+    width: 22%;
+  }
+  .compare td.verdict {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    width: 15%;
+  }
+  .compare .good  { color: #7BD88F; }
+  .compare .mid   { color: var(--royal-11); }
+  .compare .bad   { color: var(--violet-11); }
+  .compare td.desc { color: var(--ink-muted); }
+  .compare tr.pick { background: color-mix(in srgb, var(--violet-8) 7%, transparent); }
+  .compare tr.pick td.opt { color: var(--violet-12); }
+
+  /* ---------- Recommend box ---------- */
+
+  .recommend {
+    margin-top: var(--s8);
+    padding: var(--s6);
+    background:
+      linear-gradient(var(--royal-1), var(--royal-1)) padding-box,
+      var(--grad-rv) border-box;
+    border: 1px solid transparent;
+    border-radius: 12px;
+  }
+  .recommend h2 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 28px;
+    margin-bottom: var(--s3);
+  }
+  .recommend p {
+    color: var(--ink-muted);
+    font-size: 15px;
+    line-height: 1.7;
+    max-width: 66ch;
+  }
+  .recommend p + p { margin-top: var(--s3); }
+  .recommend strong { color: var(--ink); font-weight: 500; }
+  .recommend em { font-style: italic; color: var(--ink); }
+  .recommend code {
+    font-family: var(--font-mono);
+    background: rgba(165, 180, 255, 0.1);
+    padding: 1px 6px;
+    border-radius: 2px;
+    color: var(--royal-11);
+    font-size: 13px;
+  }
+  .recommend ul {
+    margin-top: var(--s4);
+    padding-left: var(--s5);
+    color: var(--ink-muted);
+    font-size: 14px;
+    line-height: 1.8;
+  }
+  .recommend ul strong { color: var(--ink); }
+  .recommend ol {
+    margin-top: var(--s4);
+    padding-left: var(--s5);
+    color: var(--ink-muted);
+    font-size: 14px;
+    line-height: 1.8;
+  }
+  .recommend ol strong { color: var(--ink); }
+
+  /* ---------- Decisions locked block ---------- */
+
+  .locked {
+    margin-top: var(--s8);
+    padding: var(--s6);
+    background: color-mix(in srgb, var(--royal-8) 8%, var(--royal-1));
+    border: 1px solid var(--royal-7);
+    border-radius: 12px;
+  }
+  .locked h2 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 24px;
+    margin-bottom: var(--s4);
+  }
+  .locked .decision {
+    margin-top: var(--s5);
+    padding-top: var(--s5);
+    border-top: 1px solid var(--rule);
+  }
+  .locked .decision:first-of-type {
+    margin-top: var(--s3);
+    padding-top: 0;
+    border-top: none;
+  }
+  .locked .decision h3 {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--ink);
+    margin-bottom: var(--s2);
+    letter-spacing: -0.005em;
+  }
+  .locked .decision h3 .tag {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: var(--royal-11);
+    background: rgba(59,91,219,0.18);
+    padding: 2px 8px;
+    border-radius: 2px;
+    margin-right: var(--s2);
+    vertical-align: 2px;
+  }
+  .locked .decision p {
+    color: var(--ink-muted);
+    font-size: 14px;
+    line-height: 1.7;
+    max-width: 68ch;
+  }
+  .locked .decision p + p { margin-top: var(--s2); }
+  .locked .decision strong { color: var(--ink); font-weight: 500; }
+  .locked .decision em { font-style: italic; color: var(--ink); }
+  .locked .decision code {
+    font-family: var(--font-mono);
+    background: rgba(165, 180, 255, 0.1);
+    padding: 1px 6px;
+    border-radius: 2px;
+    color: var(--royal-11);
+    font-size: 12px;
+  }
+
+  @media (max-width: 760px) {
+    .cards-row { grid-template-columns: 1fr; }
+    .doc-head h1 { font-size: 38px; }
+    section > h2 { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="doc-head">
+  <div class="eyebrow">Portfolio · card deep-dive · v5 · 2026-04-12</div>
+  <h1>Typography unification +<br>featured cards</h1>
+  <p>
+    Two changes from <strong>v4</strong>, both driven by the same principle: <em>visual marks that sit in the same frame should read as siblings, not strangers</em>.
+  </p>
+  <p>
+    <strong>(1) Typography fix.</strong> v4 had numerals and monograms on Fraunces and icons on lucide-react. Fraunces is a transitional display serif; lucide draws with geometric sans strokes. Sitting in the same grid, types 3, 5, and 6 looked like three different projects pretending to be one. v5 moves numerals and monograms to <strong>Geist sans 500</strong> and tunes lucide to <strong>stroke-width 2.25</strong> so all three share a single visual family. Fraunces stays where it belongs — headings and prose — and is no longer asked to carry UI marks it wasn't drawn for.
+  </p>
+  <p>
+    <strong>(2) Featured card variations.</strong> With the gradient-mark type now reserved to featured cards only (Q1 resolution below), featured needs its own treatment vocabulary. v5 explores four options: gradient border (F1), gradient kicker pill (F2), gradient-mark strip (F3), and the combined border-plus-strip "hero" treatment (F4) reserved for the single most important card on a page.
+  </p>
+</header>
+
+<!-- ============================================================ -->
+<section>
+  <div class="kicker">§1 · typography unification</div>
+  <h2>Geist sans for numerals, monograms, and icons</h2>
+  <p class="lede">
+    The v4 "three fonts in one frame" problem shows up clearest in a row of three cards. Below: v4 first, then v5. Same strip shell, same register colour, same sizing rules — only the typography family changes.
+  </p>
+
+  <div class="variant-label" style="margin-top:var(--s6)">Before — <strong>v4 typography</strong>. Numeral = Fraunces 300 / 120px; Monogram = Fraunces 400 / 72px; Icon = lucide stroke 1.5 / 88px. The serif-versus-geometric mismatch is most visible between the icon and the two text marks.</div>
+  <div class="cards-row three">
+    <article class="card">
+      <div class="strip v4-numeral"><div class="num">01</div></div>
+      <div class="content">
+        <div class="kicker">SELECTED WORK · 01</div>
+        <h3><a class="card-link" href="#">Planner App<span class="arrow">→</span></a></h3>
+        <p class="desc">Numeral: Fraunces 300. Serif letterforms read editorial and dramatic.</p>
+        <ul class="tags"><li>v4</li></ul>
+      </div>
+    </article>
+    <article class="card">
+      <div class="strip v4-icon">
+        <svg viewBox="0 0 24 24">
+          <path d="M20 12V8a2 2 0 0 0-2-2h-3"/>
+          <path d="M9 6H6a2 2 0 0 0-2 2v4"/>
+          <path d="M4 16v2a2 2 0 0 0 2 2h3"/>
+          <path d="M15 20h3a2 2 0 0 0 2-2v-2"/>
+          <rect x="8" y="10" width="8" height="6" rx="1"/>
+        </svg>
+      </div>
+      <div class="content">
+        <div class="kicker">SELECTED WORK · 03</div>
+        <h3><a class="card-link" href="#">MOB analysis<span class="arrow">→</span></a></h3>
+        <p class="desc">Icon: lucide stroke 1.5. Geometric sans line-work with rounded caps.</p>
+        <ul class="tags"><li>v4</li></ul>
+      </div>
+    </article>
+    <article class="card">
+      <div class="strip v4-monogram"><div class="mono">PLN</div></div>
+      <div class="content">
+        <div class="kicker">SELECTED WORK · 01</div>
+        <h3><a class="card-link" href="#">Planner App<span class="arrow">→</span></a></h3>
+        <p class="desc">Monogram: Fraunces 400. Same family as numeral, half the size.</p>
+        <ul class="tags"><li>v4</li></ul>
+      </div>
+    </article>
+  </div>
+
+  <div class="warning">
+    <strong>What you're seeing in v4.</strong> The Fraunces marks have <em>flared terminals</em>, <em>bracketed serifs</em>, and a <em>modulated stroke</em> — they carry obvious serif-family DNA. The lucide icon has <em>round caps</em>, <em>constant stroke width</em>, and <em>geometric primitives</em> — it carries obvious sans-family DNA. At close range the mismatch is subtle; at normal viewing distance the three cards look like they were authored by three different people. This is the "three fonts in one frame" problem: the shared shell from v4 fixed the sizing drift but didn't fix the family drift.
+  </div>
+
+  <div class="variant-label" style="margin-top:var(--s8)">After — <strong>v5 typography</strong>. Numeral = Geist 500 / 120px; Monogram = Geist 500 / 72px; Icon = lucide stroke 2.25 / 88px. One family, three expressions.</div>
+  <div class="cards-row three">
+    <article class="card">
+      <div class="strip v-numeral"><div class="num">01</div></div>
+      <div class="content">
+        <div class="kicker">SELECTED WORK · 01</div>
+        <h3><a class="card-link" href="#">Planner App<span class="arrow">→</span></a></h3>
+        <p class="desc">Numeral: Geist 500. Clean lining figures, tight tracking, tabular-nums locked.</p>
+        <ul class="tags"><li>v5</li></ul>
+      </div>
+    </article>
+    <article class="card">
+      <div class="strip v-icon">
+        <svg viewBox="0 0 24 24">
+          <path d="M20 12V8a2 2 0 0 0-2-2h-3"/>
+          <path d="M9 6H6a2 2 0 0 0-2 2v4"/>
+          <path d="M4 16v2a2 2 0 0 0 2 2h3"/>
+          <path d="M15 20h3a2 2 0 0 0 2-2v-2"/>
+          <rect x="8" y="10" width="8" height="6" rx="1"/>
+        </svg>
+      </div>
+      <div class="content">
+        <div class="kicker">SELECTED WORK · 03</div>
+        <h3><a class="card-link" href="#">MOB analysis<span class="arrow">→</span></a></h3>
+        <p class="desc">Icon: lucide stroke 2.25. Heavier stroke visually matches Geist 500 glyph weight.</p>
+        <ul class="tags"><li>v5</li></ul>
+      </div>
+    </article>
+    <article class="card">
+      <div class="strip v-monogram"><div class="mono">PLN</div></div>
+      <div class="content">
+        <div class="kicker">SELECTED WORK · 01</div>
+        <h3><a class="card-link" href="#">Planner App<span class="arrow">→</span></a></h3>
+        <p class="desc">Monogram: Geist 500. Same family as numeral, half the size, same stroke weight.</p>
+        <ul class="tags"><li>v5</li></ul>
+      </div>
+    </article>
+  </div>
+
+  <div class="note">
+    <strong>Why Geist and not Fraunces.</strong> The choice is forced by lucide. You cannot make a geometric-sans icon library visually match a transitional-serif display face without either replacing lucide (huge scope expansion, loses the library we've already committed to) or hand-drawing a custom icon family that matches Fraunces (also huge, and a permanent maintenance burden). The cheaper move is to align the text marks with the icon family. Geist is the portfolio's body sans, so numeral and monogram fall into a font that was already on the page — Fraunces isn't displaced, it's returned to the role it was drawn for (display headings, prose, long-form writing). The gradient border, register colours, shared shell, and sizing rules from v4 are all unchanged.
+  </div>
+
+  <div class="variant-label" style="margin-top:var(--s6)">Writing-register row (v5) — same typography rules, violet register, to confirm the family holds on the writing side too.</div>
+  <div class="cards-row three">
+    <article class="card writing">
+      <div class="strip v-numeral"><div class="num">04</div></div>
+      <div class="content">
+        <div class="kicker">ESSAY · LESSONS</div>
+        <h3><a class="card-link" href="#">Four guardrails that saved the budget<span class="arrow">→</span></a></h3>
+        <p class="desc">Writing register, Geist 500 numeral.</p>
+        <ul class="tags"><li>v5</li></ul>
+      </div>
+    </article>
+    <article class="card writing">
+      <div class="strip v-icon">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 20h9"/>
+          <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+        </svg>
+      </div>
+      <div class="content">
+        <div class="kicker">ESSAY · META</div>
+        <h3><a class="card-link" href="#">Writing as research<span class="arrow">→</span></a></h3>
+        <p class="desc">Writing register, lucide stroke 2.25.</p>
+        <ul class="tags"><li>v5</li></ul>
+      </div>
+    </article>
+    <article class="card writing">
+      <div class="strip v-monogram"><div class="mono">R/W</div></div>
+      <div class="content">
+        <div class="kicker">NOTE · FRAGMENT</div>
+        <h3><a class="card-link" href="#">Read-write reciprocity<span class="arrow">→</span></a></h3>
+        <p class="desc">Writing register, Geist 500 monogram.</p>
+        <ul class="tags"><li>v5</li></ul>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section>
+  <div class="kicker">§2 · featured cards</div>
+  <h2>Four ways to say "start here"</h2>
+  <p class="lede">
+    A featured card is the anchor of a grid — the "start here" mark. There is <strong>at most one per grid</strong> (the landing 2×2, the <code>/projects</code> index hero, the <code>/writing</code> index hero). It doesn't replace hierarchy from content — it reinforces the hierarchy that's already there from position and writing.
+  </p>
+  <p class="lede">
+    With Q1 resolved to <em>gradient-mark is reserved for featured cards only</em>, the gradient leaves the default-content pool entirely. It becomes a featured-card treatment, not a visual type the author can pick. Four variations below, from lightest to heaviest.
+  </p>
+
+  <!-- F1 · gradient border -->
+  <div class="variant-group">
+    <div class="variant-label">F1 — <strong>Gradient border</strong>. 1.5px gradient runs the royal→violet wash around the card perimeter. Strip content is whatever the author picks (screenshot, diagram, numeral, icon, monogram). The border alone marks the card as featured. <em>Lightest treatment.</em></div>
+    <div class="cards-row">
+      <article class="card featured-border">
+        <div class="strip v-numeral"><div class="num">01</div></div>
+        <div class="content">
+          <div class="kicker">SELECTED WORK · 01</div>
+          <h3><a class="card-link" href="#">Planner App<span class="arrow">→</span></a></h3>
+          <p class="desc">Border says "featured." Numeral says "this is piece 01." The register colour (royal) still reads. Everything else unchanged.</p>
+          <ul class="tags"><li>TYPESCRIPT</li><li>GTD</li></ul>
+        </div>
+      </article>
+      <article class="card writing featured-border">
+        <div class="strip v-icon">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 20h9"/>
+            <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+          </svg>
+        </div>
+        <div class="content">
+          <div class="kicker">ESSAY · FEATURED</div>
+          <h3><a class="card-link" href="#">Writing as research<span class="arrow">→</span></a></h3>
+          <p class="desc">Writing-register featured. Same gradient border; the violet register still reads in the kicker, tags, and icon stroke.</p>
+          <ul class="tags"><li>craft</li><li>meta</li></ul>
+        </div>
+      </article>
+    </div>
+  </div>
+
+  <!-- F2 · gradient kicker pill -->
+  <div class="variant-group">
+    <div class="variant-label">F2 — <strong>Gradient kicker pill</strong>. The kicker label becomes a small gradient pill. Strip content, border, and body are all unchanged from a normal card. <em>Subtle content-level treatment.</em></div>
+    <div class="cards-row">
+      <article class="card featured-kicker">
+        <div class="strip v-numeral"><div class="num">01</div></div>
+        <div class="content">
+          <div class="kicker">FEATURED · 01</div>
+          <h3><a class="card-link" href="#">Planner App<span class="arrow">→</span></a></h3>
+          <p class="desc">Featured signal lives inside the content, not on the perimeter. Reads quieter than F1 at a glance.</p>
+          <ul class="tags"><li>TYPESCRIPT</li><li>GTD</li></ul>
+        </div>
+      </article>
+      <article class="card writing featured-kicker">
+        <div class="strip v-icon">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 20h9"/>
+            <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+          </svg>
+        </div>
+        <div class="content">
+          <div class="kicker">FEATURED · ESSAY</div>
+          <h3><a class="card-link" href="#">Writing as research<span class="arrow">→</span></a></h3>
+          <p class="desc">Same treatment, writing side. Pill uses the gradient; register colour still reads in the icon stroke and tag tint.</p>
+          <ul class="tags"><li>craft</li><li>meta</li></ul>
+        </div>
+      </article>
+    </div>
+  </div>
+
+  <!-- F3 · gradient-mark strip -->
+  <div class="variant-group">
+    <div class="variant-label">F3 — <strong>Gradient-mark strip</strong>. The imagery slot itself is the signature gradient — radial royal plus radial violet on a deep royal-1 background with a subtle diagonal ruled texture. Per Q1, this strip type <em>only exists</em> on featured cards. An optional label can sit at the bottom-left as a meta-mark. <em>Strong strip-level treatment.</em></div>
+    <div class="cards-row">
+      <article class="card">
+        <div class="strip v-gradmark">
+          <span class="gm-label">Featured · 01</span>
+        </div>
+        <div class="content">
+          <div class="kicker">SELECTED WORK · 01</div>
+          <h3><a class="card-link" href="#">Planner App<span class="arrow">→</span></a></h3>
+          <p class="desc">The strip IS the gradient. No screenshot, no diagram, no numeral — the gradient mark is the imagery. Strongest "featured" signal short of combining treatments.</p>
+          <ul class="tags"><li>TYPESCRIPT</li><li>GTD</li></ul>
+        </div>
+      </article>
+      <article class="card writing">
+        <div class="strip v-gradmark">
+          <span class="gm-label">Featured · Essay</span>
+        </div>
+        <div class="content">
+          <div class="kicker">ESSAY · FEATURED</div>
+          <h3><a class="card-link" href="#">Writing as research<span class="arrow">→</span></a></h3>
+          <p class="desc">Register-neutral by design — the gradient is the signal, register colour still reads in kicker, tags, and border on hover.</p>
+          <ul class="tags"><li>craft</li><li>meta</li></ul>
+        </div>
+      </article>
+    </div>
+  </div>
+
+  <!-- F4 · combined hero -->
+  <div class="variant-group">
+    <div class="variant-label">F4 — <strong>Combined hero: border + gradient-mark strip</strong>. The maximum treatment. Gradient border around the perimeter, gradient-mark strip inside. Reserved for <em>the single most important card on the landing page</em> — not "featured cards in general," just the one hero card the grid is built around. <em>Use at most once per page.</em></div>
+    <div class="cards-row">
+      <article class="card featured-hero">
+        <div class="strip v-gradmark">
+          <span class="gm-label">Start here · 01</span>
+        </div>
+        <div class="content">
+          <div class="kicker">SELECTED WORK · HERO</div>
+          <h3><a class="card-link" href="#">Planner App<span class="arrow">→</span></a></h3>
+          <p class="desc">Border plus gradient strip. Reserved for the hero card on the landing grid — the unambiguous "start here" anchor. Never more than one per page.</p>
+          <ul class="tags"><li>TYPESCRIPT</li><li>GTD</li></ul>
+        </div>
+      </article>
+      <article class="card writing featured-hero">
+        <div class="strip v-gradmark">
+          <span class="gm-label">Start here · Essay</span>
+        </div>
+        <div class="content">
+          <div class="kicker">ESSAY · HERO</div>
+          <h3><a class="card-link" href="#">Writing as research<span class="arrow">→</span></a></h3>
+          <p class="desc">F4 on the writing side. Same treatment, same one-per-page rule. Only appears on the <code>/writing</code> index hero, never inside a 2×2 landing grid that already has a work hero.</p>
+          <ul class="tags"><li>craft</li><li>meta</li></ul>
+        </div>
+      </article>
+    </div>
+  </div>
+
+  <!-- In-context grid -->
+  <div class="variant-group" style="margin-top:var(--s8)">
+    <div class="variant-label">In context — a landing 2×2 grid with <strong>one F4 hero card</strong> and three normal cards. This is the rule: one hero, three normal, mixed visual types, mixed registers. The hero reads as the anchor without crowding out the others.</div>
+    <div class="cards-row">
+      <article class="card featured-hero">
+        <div class="strip v-gradmark">
+          <span class="gm-label">Start here · 01</span>
+        </div>
+        <div class="content">
+          <div class="kicker">SELECTED WORK · HERO</div>
+          <h3><a class="card-link" href="#">Planner App<span class="arrow">→</span></a></h3>
+          <p class="desc">A GTD personal planner built around persistent SMS reminders, UTC-safe scheduling, and spend-protected AI coaching.</p>
+          <ul class="tags"><li>TYPESCRIPT</li><li>GTD</li></ul>
+        </div>
+      </article>
+      <article class="card">
+        <div class="strip v-screenshot"><div class="photo"></div></div>
+        <div class="content">
+          <div class="kicker">SELECTED WORK · 02</div>
+          <h3><a class="card-link" href="#">The Weekly<span class="arrow">→</span></a></h3>
+          <p class="desc">Coles recipes become a single consolidated shopping trolley. POC in three weekends.</p>
+          <ul class="tags"><li>REACT</li><li>POC</li></ul>
+        </div>
+      </article>
+      <article class="card writing">
+        <div class="strip v-numeral"><div class="num">04</div></div>
+        <div class="content">
+          <div class="kicker">ESSAY · LESSONS</div>
+          <h3><a class="card-link" href="#">Four guardrails that saved the budget<span class="arrow">→</span></a></h3>
+          <p class="desc">Killswitch, budget cap, idempotency, rollback. Why each layer is non-negotiable.</p>
+          <ul class="tags"><li>postmortem</li><li>lessons</li></ul>
+        </div>
+      </article>
+      <article class="card writing">
+        <div class="strip v-monogram"><div class="mono">R/W</div></div>
+        <div class="content">
+          <div class="kicker">NOTE · FRAGMENT</div>
+          <h3><a class="card-link" href="#">Read-write reciprocity<span class="arrow">→</span></a></h3>
+          <p class="desc">Writing as the thing that forces you to understand what you were claiming.</p>
+          <ul class="tags"><li>notes</li></ul>
+        </div>
+      </article>
+    </div>
+  </div>
+
+  <table class="compare">
+    <thead>
+      <tr>
+        <th>Option</th>
+        <th>Where the gradient lives</th>
+        <th>Strip freedom</th>
+        <th>Strength</th>
+        <th>Good for</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="opt">F1 · Gradient border</td>
+        <td class="desc">Perimeter</td>
+        <td class="desc good">Any visual type</td>
+        <td class="verdict mid">Light</td>
+        <td class="desc">Any featured card where strip content needs to do the talking. Plays well with screenshot and diagram.</td>
+      </tr>
+      <tr>
+        <td class="opt">F2 · Gradient kicker pill</td>
+        <td class="desc">Content (kicker label)</td>
+        <td class="desc good">Any visual type</td>
+        <td class="verdict bad">Lightest</td>
+        <td class="desc">Featured-tagging without perimeter weight. Subtle — might read as "just a label style" at distance.</td>
+      </tr>
+      <tr>
+        <td class="opt">F3 · Gradient-mark strip</td>
+        <td class="desc">Strip (fills the whole slot)</td>
+        <td class="desc bad">None — the strip IS the gradient</td>
+        <td class="verdict good">Strong</td>
+        <td class="desc">Featured cards where no specific imagery earned the slot. Reserved — not a "no screenshot available" fallback.</td>
+      </tr>
+      <tr class="pick">
+        <td class="opt">F4 · Hero (border + strip)</td>
+        <td class="desc">Perimeter + strip</td>
+        <td class="desc bad">None</td>
+        <td class="verdict good">Maximum</td>
+        <td class="desc">The single anchor card on the landing grid. At most one per page. The clearest "start here" the system allows.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="recommend">
+    <h2>Recommendation</h2>
+    <p>
+      <strong>Ship all four as available treatments, but apply them with a fixed rule</strong>. The rule has two parts:
+    </p>
+    <ol>
+      <li><strong>Default featured treatment is F1 (gradient border)</strong>. It leaves the strip open to any visual type, so the author's content choice isn't overridden by the featured signal. This is what every non-hero featured card gets — <code>/projects</code> index hero, <code>/writing</code> index hero, related-work footer anchors.</li>
+      <li><strong>F4 (hero) is reserved for the landing 2×2's anchor card</strong>. At most one per page, and only on the landing grid — never inside a flat index. F3 on its own is never used directly by an author; it only exists as the strip half of F4.</li>
+    </ol>
+    <p>
+      <strong>F2 (gradient kicker pill) drops out.</strong> Two reasons: it's too subtle to carry a featured signal on its own at a glance, and it introduces a second role for the kicker label that conflicts with the kicker's existing job (index number, type label). One more element is one more thing to maintain — and F1 already covers the "light featured" case better.
+    </p>
+    <p>
+      <strong>Why this works.</strong> F1 plays with every visual type (author keeps control of the imagery slot), F4 is the unambiguous hero (one per page, impossible to confuse with "just a featured card"), and the gradient-mark strip never leaks out of F4 context — which is exactly the discipline Q1 was reaching for. The gradient stays rare and meaningful. Every time a reader sees it, it's saying "this is the one."
+    </p>
+    <p>
+      Implementation in the Card component: add an optional prop <code>featured?: "border" | "hero"</code> (default: none). The <code>"hero"</code> variant forces the strip to the gradient-mark type regardless of what imagery was passed — the component ignores the other imagery props when <code>featured === "hero"</code>. This means the author can't accidentally combine F4 with a screenshot; the combination is either hero treatment or normal treatment, nothing in between.
+    </p>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section>
+  <div class="kicker">§3 · decisions locked</div>
+  <h2>Card spec freeze items</h2>
+  <p class="lede">
+    With typography unified and featured treatments defined, both open questions from v4 can lock. The card component spec is now a complete design — everything below ships into the Card component's prop surface.
+  </p>
+
+  <div class="locked">
+    <h2>Locked</h2>
+
+    <div class="decision">
+      <h3><span class="tag">Q1</span> Gradient-mark is reserved for featured cards only</h3>
+      <p>
+        The gradient-mark strip type (<code>v-gradmark</code>) is no longer part of the author's default-content pool. It cannot be picked for a regular card — not for palette-subject writing posts, not for "nothing else fits" cases, not as a fallback. The default pool is <strong>five visual types</strong>: screenshot, diagram, numeral, icon, monogram. Gradient-mark only appears as the strip half of the <strong>F4 hero treatment</strong>, and F4 is capped at one per page on the landing grid only.
+      </p>
+      <p>
+        <strong>Why stricter than the original recommendation.</strong> Keeping gradient-mark available for palette-subject writing posts ("Royal Tonal in twelve steps") looked reasonable, but it creates two authorship contexts for the gradient (featured cards + "my post is about colour") and those two contexts will drift — the line between "about colour" and "mentions colour" is not defensible. Reserving it to a single context (featured hero treatment, one per page) makes the rule mechanical: <em>the gradient marks the hero, nothing else</em>. Palette-subject writing posts use whatever visual type fits (typically numeral or diagram), and if one of them happens to earn the hero slot on the <code>/writing</code> index, the gradient shows up through F4 — not through a separate authorship permission.
+      </p>
+    </div>
+
+    <div class="decision">
+      <h3><span class="tag">Q2</span> M5 / M6 live in the Screenshot helper, not the Card API</h3>
+      <p>
+        The <code>Card</code> component's imagery surface stays small: <code>kind: "screenshot" | "diagram" | "numeral" | "icon" | "monogram"</code>. The M5 (meta split) and M6 (detail zoom) variants are composition decisions inside the <code>&lt;Screenshot&gt;</code> helper, not sub-types on <code>Card</code>. The helper signature:
+      </p>
+      <p>
+        <code>&lt;Screenshot src="..." variant="detail" | "meta-split" eyebrow? num? /&gt;</code>
+      </p>
+      <p>
+        Default is <code>variant="detail"</code> (M6). M5 is explicit opt-in — the author types <code>variant="meta-split"</code> when they want anchor treatment. This makes M6 the common case (zero effort) and keeps M5's "max one per grid" rule a deliberate choice at the call site, not an accident. The hierarchy rule lives in the style guide and is enforced by review, since it's a page-level constraint TS can't check anyway.
+      </p>
+      <p>
+        <strong>Why not sub-types on Card.</strong> The main argument for sub-typing was compile-time misuse prevention — but the constraint we'd be enforcing ("max one M5 per grid") is about page composition, not component use. TS can't express "at most one instance in this map call" without turning the Card surface into something much more complicated. Keeping Card's surface simple means M5/M6 can evolve (new variants, retired variants) without a Card breaking change. The composition decision stays in the component that implements it.
+      </p>
+    </div>
+
+    <div class="decision">
+      <h3><span class="tag">Typography</span> Geist sans for all centred marks</h3>
+      <p>
+        Numeral: Geist 500, 120px, tight tracking, tabular lining nums. Monogram: Geist 500, 72px, slightly looser tracking. Icon: lucide stroke-width 2.25 at 88px. All three marks share the shared shell from v4 (same background, padding, grid texture, register tint). Fraunces stays on headings and long-form prose — it is not used for UI marks anywhere in the card system.
+      </p>
+    </div>
+
+    <div class="decision">
+      <h3><span class="tag">Featured</span> Two treatments: F1 (border) and F4 (hero)</h3>
+      <p>
+        <code>featured?: "border" | "hero"</code> on the Card component. <strong>F1 "border"</strong> adds the gradient perimeter and leaves strip content untouched — any visual type is valid. <strong>F4 "hero"</strong> forces the strip to gradient-mark regardless of the imagery props passed, and is capped at one per page on the landing grid only. F2 (kicker pill) and F3 (strip-only) are dropped from the API surface.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section>
+  <div class="kicker">§4 · next</div>
+  <h2>Card spec freezes, foundation work resumes</h2>
+  <p class="lede">
+    If v5 locks, the card component spec is frozen. The next work on the critical path is not a card iteration — it's <strong>chunk 4a.4</strong>, the workspace-wide writing and imagery style guide at <code>.claude/rules/writing-style.md</code>. Foundation work (4a.4 → 4a.5 → 4a.6) still gates chunk 4b.
+  </p>
+  <p class="lede">
+    The card component gets built in <strong>chunk 4c.1</strong> alongside the case study layout mockups. By then the spec is stable, the decisions are locked, and the component can be written straight from this doc — no more live iteration. The iteration trail (v1 → v5) will be preserved for the eventual design-system case study, where "here's what we rejected at each step and why" becomes the spine of the narrative.
+  </p>
+  <div class="note">
+    <strong>To confirm before this locks.</strong> Three items, all small: (1) Geist 500 visual weight — too light at 120px, or right? If too light, v6 bumps to Geist 600 and lucide stroke to 2.5. (2) F1 border thickness — 1.5px currently, could be 1px (subtler) or 2px (louder). (3) F4 gradient-mark label placement — bottom-left "Start here · 01" as shown, or drop the label entirely and let the border + gradient carry it alone. Your call on all three.
+  </div>
+</section>
+
+</body>
+</html>
