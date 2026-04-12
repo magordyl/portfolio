@@ -233,6 +233,7 @@ export function renderTranscript(transcript, options = {}) {
 // globals.css source of truth.
 
 export const SHARED_CSS = `
+/* ── Token layer ─────────────────────────────────────── */
 .chat-transcript {
   --royal-1:  #0E0F1C;
   --royal-2:  #121428;
@@ -250,9 +251,10 @@ export const SHARED_CSS = `
   --ink-dim:   #9C968A;
   --ink-faint: #5E584F;
 
-  background: var(--royal-3);
-  border: 1px solid var(--royal-6);
-  border-radius: 8px;
+  /* Spec: royal-950 background, 12px radius, 24px padding */
+  background: var(--royal-1);
+  border: 1px solid var(--royal-4);
+  border-radius: 12px;
   padding: 1.5rem;
   font-family: 'Geist Variable', 'Geist', -apple-system, system-ui, sans-serif;
   font-size: 0.9375rem;
@@ -260,23 +262,35 @@ export const SHARED_CSS = `
   color: var(--ink);
 }
 
+/* ── Annotation note ─────────────────────────────────── */
 .chat-transcript .transcript-note {
   font-family: 'Geist Mono', monospace;
   font-size: 0.75rem;
   color: var(--ink-dim);
-  border-left: 2px solid var(--royal-7);
+  border-left: 2px solid var(--royal-6);
   padding: 0.25rem 0 0.25rem 0.75rem;
   margin-bottom: 1.25rem;
   font-style: italic;
 }
 
+/* ── Turn container ──────────────────────────────────── */
 .chat-transcript .turns {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 0;
 }
 
-/* ── Sender header ────────────────────────────────────── */
+/* Hairline separator between turns (spec: 1px royal-900) */
+.chat-transcript .turn + .turn,
+.chat-transcript .turn + details.turn,
+.chat-transcript details.turn + .turn,
+.chat-transcript details.turn + details.turn {
+  border-top: 1px solid var(--royal-3);
+  padding-top: 1.25rem;
+  margin-top: 1.25rem;
+}
+
+/* ── Sender header ───────────────────────────────────── */
 .chat-transcript .sender {
   display: flex;
   align-items: center;
@@ -299,28 +313,40 @@ export const SHARED_CSS = `
   height: 14px;
 }
 
+/* Dylan: subtle warm badge */
 .chat-transcript .badge--dylan {
-  background: var(--royal-4);
+  background: var(--royal-3);
   color: var(--royal-11);
-  border: 1px solid var(--royal-7);
+  border: 1px solid var(--royal-5);
 }
 
+/* Claude: brighter brand badge */
 .chat-transcript .badge--claude {
-  background: var(--royal-7);
-  color: var(--royal-12);
+  background: var(--royal-5);
+  color: var(--royal-10);
   border: 1px solid var(--royal-8);
 }
 
+/* Distinct sender label colours per spec */
 .chat-transcript .sender-label {
   font-family: 'Geist Mono', monospace;
   font-size: 0.6875rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  color: var(--ink-dim);
   font-weight: 500;
 }
 
-/* ── Turn body ────────────────────────────────────────── */
+/* Dylan: royal-300 (mapped to royal-11, warm accent) */
+.chat-transcript .turn--user .sender-label {
+  color: var(--royal-11);
+}
+
+/* Claude: royal-500 (mapped to royal-8, core brand accent) */
+.chat-transcript .turn--assistant .sender-label {
+  color: var(--royal-8);
+}
+
+/* ── Turn body ───────────────────────────────────────── */
 .chat-transcript .turn {
   border: none;
   margin: 0;
@@ -347,18 +373,23 @@ export const SHARED_CSS = `
   margin-bottom: 0.25rem;
 }
 
+.chat-transcript .turn-body strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
 .chat-transcript .turn-body code {
   font-family: 'Geist Mono', monospace;
   font-size: 0.85em;
-  background: var(--royal-2);
+  background: var(--royal-3);
   color: var(--royal-11);
   padding: 0.1em 0.35em;
   border-radius: 3px;
 }
 
 .chat-transcript .turn-body pre {
-  background: var(--royal-1);
-  border: 1px solid var(--royal-6);
+  background: var(--royal-2);
+  border: 1px solid var(--royal-4);
   border-radius: 6px;
   padding: 0.75rem 1rem;
   overflow-x: auto;
@@ -371,25 +402,25 @@ export const SHARED_CSS = `
   color: var(--ink);
 }
 
-/* ── H1 horizontal layout: sender on row above body ───── */
+/* ── H1 horizontal layout: sender on row above body ──── */
 .chat-transcript--h1 .turn {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-/* ── H2 vertical layout: sender in narrow left gutter ──── */
+/* ── H2 vertical layout: sender in narrow left gutter ── */
 .chat-transcript--h2 .turn {
   display: grid;
-  grid-template-columns: 96px 1fr;
-  gap: 1rem;
+  grid-template-columns: 80px 1fr;
+  gap: 0.75rem;
   align-items: start;
 }
 
 .chat-transcript--h2 .sender {
   flex-direction: column;
   align-items: flex-start;
-  gap: 0.375rem;
+  gap: 0.25rem;
   padding-top: 0.125rem;
 }
 
@@ -398,19 +429,13 @@ export const SHARED_CSS = `
 }
 .chat-transcript--h2 details.turn > summary {
   display: grid;
-  grid-template-columns: 96px 1fr auto;
-  gap: 1rem;
+  grid-template-columns: 80px 1fr auto;
+  gap: 0.75rem;
   align-items: start;
 }
 .chat-transcript--h2 details.turn > .turn-body {
-  grid-column: 2 / -1;
-  padding-left: calc(96px + 1rem);
-  margin-top: 0.5rem;
-}
-
-/* Override: in H2, the turn-body inside a details should align with the summary's body column */
-.chat-transcript--h2 details.turn[open] > .turn-body {
-  padding-left: calc(96px + 1rem);
+  padding-left: calc(80px + 0.75rem);
+  margin-top: 0.75rem;
 }
 
 @media (max-width: 640px) {
@@ -428,18 +453,12 @@ export const SHARED_CSS = `
   }
 }
 
-/* ── Collapsible turn styling ─────────────────────────── */
-.chat-transcript details.turn,
-.chat-transcript details.headline-section {
-  border: 1px solid var(--royal-6);
-  border-radius: 6px;
+/* ── Collapsible turns (plan / skill / research) ─────── */
+.chat-transcript details.turn {
   background: var(--royal-2);
-  padding: 0.75rem 1rem;
-}
-
-.chat-transcript details.turn[open],
-.chat-transcript details.headline-section[open] {
-  background: var(--royal-2);
+  border: 1px solid var(--royal-4);
+  border-radius: 8px;
+  padding: 0.875rem 1rem;
 }
 
 .chat-transcript details > summary {
@@ -455,41 +474,47 @@ export const SHARED_CSS = `
 }
 
 .chat-transcript .summary-label {
+  font-family: 'Geist Mono', monospace;
   font-style: italic;
-  color: var(--royal-11);
+  color: var(--royal-9);
   flex: 1;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
 }
 
 .chat-transcript .chevron {
   display: inline-flex;
-  color: var(--ink-dim);
-  transition: transform 0.15s ease;
+  color: var(--ink-faint);
+  transition: transform 0.2s ease;
   flex-shrink: 0;
 }
 
 .chat-transcript .chevron svg {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
 }
 
 .chat-transcript details[open] > summary .chevron {
   transform: rotate(180deg);
 }
 
-.chat-transcript details.turn > .turn-body {
-  margin-top: 0.75rem;
-  padding-top: 0.75rem;
-  border-top: 1px solid var(--royal-6);
+.chat-transcript details[open] > summary {
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--royal-4);
 }
+
+/* Kind-specific left accent on collapsed summaries */
+.chat-transcript .turn--plan > summary     { border-left: 2px solid var(--royal-10); padding-left: 0.75rem; }
+.chat-transcript .turn--skill > summary    { border-left: 2px solid var(--royal-8);  padding-left: 0.75rem; }
+.chat-transcript .turn--research > summary { border-left: 2px solid var(--royal-9);  padding-left: 0.75rem; }
 
 /* ── Headline turn sections ──────────────────────────── */
 .chat-transcript .headline-heading {
   font-family: 'Fraunces', Georgia, serif;
-  font-size: 1.125rem;
+  font-size: 1rem;
   font-weight: 500;
-  color: var(--ink);
-  margin: 1rem 0 0.5rem;
+  color: var(--royal-12);
+  margin: 1rem 0 0.375rem;
   letter-spacing: -0.01em;
 }
 
@@ -497,11 +522,35 @@ export const SHARED_CSS = `
   margin-top: 0;
 }
 
-.chat-transcript .headline-section {
-  margin-bottom: 0.75rem;
+.chat-transcript details.headline-section {
+  background: transparent;
+  border: none;
+  border-left: 1px solid var(--royal-4);
+  border-radius: 0;
+  padding: 0 0 0 0.875rem;
+  margin: 0 0 0.75rem;
 }
 
-/* ── Tool-call strip ──────────────────────────────────── */
+.chat-transcript details.headline-section > summary {
+  font-size: 0.8125rem;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
+}
+
+.chat-transcript details.headline-section[open] > summary {
+  border-bottom: none;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.25rem;
+}
+
+.chat-transcript details.headline-section .summary-label {
+  font-family: 'Geist Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--ink-faint);
+}
+
+/* ── Tool-call strip ─────────────────────────────────── */
+/* Spec: Geist Mono caption size, royal-700 */
 .chat-transcript .tools {
   display: flex;
   flex-wrap: wrap;
@@ -512,15 +561,10 @@ export const SHARED_CSS = `
 .chat-transcript .tool {
   font-family: 'Geist Mono', monospace;
   font-size: 0.6875rem;
-  color: var(--royal-11);
-  background: rgba(59, 91, 219, 0.1);
-  border: 1px solid var(--royal-7);
+  color: var(--royal-7);
+  background: transparent;
+  border: 1px solid var(--royal-4);
   border-radius: 3px;
-  padding: 0.15rem 0.4rem;
+  padding: 0.125rem 0.4rem;
 }
-
-/* ── Kind-specific accents ────────────────────────────── */
-.chat-transcript .turn--plan summary     { border-left: 2px solid var(--royal-10); padding-left: 0.5rem; margin-left: -0.5rem; }
-.chat-transcript .turn--skill summary    { border-left: 2px solid var(--royal-11); padding-left: 0.5rem; margin-left: -0.5rem; }
-.chat-transcript .turn--research summary { border-left: 2px solid var(--royal-9);  padding-left: 0.5rem; margin-left: -0.5rem; }
 `;

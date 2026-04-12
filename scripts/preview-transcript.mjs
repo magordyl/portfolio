@@ -53,17 +53,17 @@ mkdirSync(previewDir, { recursive: true });
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
-function loadDraft(slug) {
-  const path = join(draftsDir, `${slug}.json`);
-  if (!existsSync(path)) {
-    console.error(`Error: no draft found at ${path}`);
+function loadTranscript(slug) {
+  const draftFile = join(draftsDir, `${slug}.json`);
+  const publishedFile = join(projectRoot, 'src', 'content', 'transcripts', `${slug}.json`);
+  const path = existsSync(draftFile) ? draftFile : existsSync(publishedFile) ? publishedFile : null;
+  if (!path) {
+    console.error(`Error: no transcript found for "${slug}" in drafts/ or published/`);
     process.exit(1);
   }
-  const draft = JSON.parse(readFileSync(path, 'utf8'));
-  // Repair pre-fix drafts on the fly. Bookmarks captured before the classifier
-  // landed have tool-only turns and no `kind` fields — normalise so they render.
-  draft.turns = classifyAll(mergeToolOnlyTurns(draft.turns || []));
-  return draft;
+  const data = JSON.parse(readFileSync(path, 'utf8'));
+  data.turns = classifyAll(mergeToolOnlyTurns(data.turns || []));
+  return data;
 }
 
 function listDrafts() {
@@ -206,7 +206,7 @@ function openInBrowser(filePath) {
 // ── Single-slug mode: render all 4 variants ────────────────────────────────
 
 function renderSingleSlug(slug) {
-  const draft = loadDraft(slug);
+  const draft = loadTranscript(slug);
   const title = draft.title || slug;
   const css = renderTranscript(draft, { variant: 'a-h1' }).css;
 
@@ -241,7 +241,7 @@ function renderBatch() {
     const parts = [];
     let css = '';
     for (const slug of slugs) {
-      const draft = loadDraft(slug);
+      const draft = loadTranscript(slug);
       const rendered = renderTranscript(draft, { variant });
       css = rendered.css;
       parts.push(`<div class="batch-label">${escapeHtml(slug)}</div>${rendered.html}`);
