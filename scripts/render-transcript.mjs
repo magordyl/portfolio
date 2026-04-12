@@ -90,12 +90,26 @@ function renderMarkdown(text) {
       continue;
     }
 
-    // Numbered list
+    // Numbered list (handles multi-line items with continuation + blank-line gaps)
     if (/^\s*\d+\.\s+/.test(line)) {
       const items = [];
-      while (i < lines.length && /^\s*\d+\.\s+/.test(lines[i])) {
-        items.push(lines[i].replace(/^\s*\d+\.\s+/, ''));
-        i++;
+      while (i < lines.length) {
+        if (/^\s*\d+\.\s+/.test(lines[i])) {
+          items.push(lines[i].replace(/^\s*\d+\.\s+/, ''));
+          i++;
+          while (i < lines.length && lines[i].trim() && !/^\s*\d+\.\s+/.test(lines[i]) && !/^#{1,6}\s+/.test(lines[i]) && !/^\s*[-*]\s+/.test(lines[i]) && !/^```/.test(lines[i])) {
+            items[items.length - 1] += ' ' + lines[i].trim();
+            i++;
+          }
+        } else if (!lines[i].trim()) {
+          if (i + 1 < lines.length && /^\s*\d+\.\s+/.test(lines[i + 1])) {
+            i++;
+          } else {
+            break;
+          }
+        } else {
+          break;
+        }
       }
       blocks.push(`<ol>${items.map(it => `<li>${renderInline(it)}</li>`).join('')}</ol>`);
       continue;
