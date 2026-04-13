@@ -43,31 +43,48 @@ Set up a pre-commit hook at `.git/hooks/pre-commit` that runs `npm run check`.
 
 Astro uses `@tailwindcss/vite` (Vite plugin), NOT `@astrojs/tailwind`. The `astro add tailwind` command sets this up automatically. No `tailwind.config.mjs` needed — tokens live as CSS variables in `globals.css`. If you need Tailwind utility classes for token values, add `@theme { --text-hero: 4.5rem; }` blocks inside `globals.css`.
 
-## Current Status (2026-04-13)
+## Current Status (2026-04-14)
 
-**Last session (2026-04-13 late) — Evolution showcase plan for the-weekly case study.**
+**Last session (2026-04-14) — ChatTranscript design locked + new colour-rationalisation gate.**
 
-Designed a decision-led "evolution showcase" for the-weekly case study: three live interactive versions of the-weekly at different commits (POC / design overhaul / current), embedded as a tab switcher under Lesson 2 of the case study. Full plan at `plans/the-weekly-evolution-showcase.md`. Chunk 4d scope in `plans/portfolio-implementation.md` updated to include the `<VersionedEmbed>` component and three Cloudflare Workers deploys.
+The `<ChatTranscript>` design is frozen. Canonical artefact: `plans/portfolio-stitch-assets/chat-transcript-explorer-v3.html` (iteration trail preserved as v1 → v2 → v3). Selected variant: **royal-3 hairline, full-block accent line, flat expander**. Role swap locked in favour of Option B (Dylan = violet, Claude = royal). Commit `c733595` on `main`.
 
-Key implementation details locked:
-- Three Workers at `the-weekly-v{1,2,3}.magordyl.workers.dev`, built from git worktrees at commits `50e79ad` / `473227c` / `ae5bae7`. No password.
-- `<VersionedEmbed>` keeps all three iframes mounted and toggles visibility (never swaps `src`) so each iframe preserves its own page state across tab switches.
-- Decision captions per stage, not "got better at design". Placeholders drafted; Dylan rewrites pre-publish.
+Features baked into the spec (all documented in `portfolio-implementation.md` chunk 4c.1 + `portfolio-imagery-standards.md` frame-spec table):
+- Gradient border (`--grad-rv`) on `--royal-1` inner, 12px radius.
+- Grouping: consecutive same-role turns share one badge + continuity line.
+- Cluster expander: runs of 3+ consecutive tool-heavy Claude turns merge into one expander with a synthesised heading (e.g. the 40-render Stitch batch = 21 turns → 1 cluster).
+- Wrap-up pill: trailing directive sentences ("reply with your answers…") stay visible outside the expander.
+- Two pill colours only (`high` / `bg`), word-boundary-trimmed titles with 2-line clamp, native `<details>` (zero framework JS), `pre-wrap` tool input, underlined `--royal-11` "full input" link.
+- Content filters in the renderer (not in source JSON): context-compaction turns + slash-command invocations are dropped.
 
-**Prior session (2026-04-13 earlier) — Plan amendments (no code).**
-- Added `<ProjectTimeline>` component to chunk 4c.1 — linear timeline with milestone vs pivot nodes, data from new optional `timeline` frontmatter field on projects schema. To be explored in case-study-v1/v2 design explorers.
-- Converted `workspace-audit` from a case-study project to a writing topic. Scrubbed from chunk 2 placeholder list, chunk 4b word-count targets, chunk 5 deliverables. Created `plans/writing-topics/claude-workspace-audit.md` with candidate thesis and four supporting arguments. Added to `plans/writing-topics/INDEX.md`. The `src/content/projects/workspace-audit.mdx` placeholder file still exists and should be removed next time chunk 2 is touched.
-- Added new **chunk 7 — Design system showcase page** (renumbered existing retrofit chunk to chunk 8). `/design-system` route rendering actual components (not screenshots), footer-linked not in main nav. Design explorer first (`plans/portfolio-assets/design-system-showcase.html`). Gate: after chunk 6 ships so the component inventory is complete.
-- Added an open design question to chunk 4c.1 about `<ChatTranscript>` sender colour emphasis — explore both Claude-prominent (current intent) and Dylan-prominent in the case study design explorers before locking. Rationale: if Claude's turns visually dominate, the portfolio's signal hierarchy inverts.
+**Design-tokens wiring (done this session):**
+- `src/styles/globals.css` — added `--violet-8..12` and `--grad-rv`.
+- `design.tokens.ts` — added `palette.violet` and `palette.gradients.royalViolet` with scope-to-ChatTranscript comments (any new usage requires design review).
+
+**New chunk 4c.0 — component colour-role rationalisation (gate before 4c.1 opens).**
+
+The ChatTranscript pill churn (four colours → two) surfaced that components reach into the raw 17-colour scale ad hoc. Added a mandatory gate before 4c.1 builds more components. Six sub-steps:
+1. Audit every raw-scale reference (inventory → `plans/portfolio-colour-audit.md`).
+2. Define per-component variant allowlists (tags ≤ 4, kickers ≤ 2, dots ≤ 3, borders ≤ 3, expander pills ≤ 2 — locked).
+3. Add role tokens to `globals.css` + `design.tokens.ts` (roles reference raw scale; components reference roles only).
+4. Migrate existing chunk-3 components (`CaseStudyCard`, `BuildLogTicker`, `KickerLabel`, tag rendering). Acceptance: `git grep 'var(--royal-' src/components` returns empty.
+5. Document in `portfolio-design-tokens.md` (new "Component variant allowlists" section) + mirror summary in `.claude/rules/design-system.md`.
+6. Gate check: `npm run check` passes on main before 4c.1 starts.
+
+**Prior sessions context still live:**
+- `<ProjectTimeline>` component still scoped into 4c.1; will now be built against rationalised tokens.
+- `<VersionedEmbed>` + three Workers deploys still in 4d. Plan at `plans/the-weekly-evolution-showcase.md`.
+- `src/content/projects/workspace-audit.mdx` placeholder still needs removing next time chunk 2 is touched.
 
 **Next priorities (session order):**
-1. **4d (continued)** — Dylan writes prose for each section against the locked structure in `plans/the-weekly-case-study-draft.md`. Then iterate (2-iteration hard stop), build the MDX, update frontmatter (dates, live URL, tldr rewrite).
-2. **4c.1** — case study design explorers; now must also include `<ProjectTimeline>` samples and both sender-colour options for `<ChatTranscript>`.
-3. **4c.2-4c.5** — remaining page layout explorers (/projects index, /writing, /log, /404+/privacy)
+1. **4c.0** — component colour-role rationalisation (new gate). Produces the role-token layer that 4c.1 and 4d components will use.
+2. **4d (continued)** — Dylan writes prose for each section against the locked structure in `plans/the-weekly-case-study-draft.md`.
+3. **4c.1** — case study design explorers; now building `<ChatTranscript>`, `<ProjectTimeline>`, sample transcripts against the rationalised tokens.
+4. **4c.2-4c.5** — remaining page layout explorers (/projects index, /writing, /log, /404+/privacy).
 
-**Deployed** — Cloudflare Pages, `magordyl/portfolio` (`main` branch). Live at `dylan-portfolio.magordyl.workers.dev`.
+**Deployed** — Cloudflare Pages / Workers, `magordyl/portfolio` (`main` branch). Live at `dylan-portfolio.magordyl.workers.dev`.
 
-**Chunks remaining:** 4c.1 (with new timeline + transcript-colour explorations), 4c.2-4c.5, 4d, 5, 5.5, 5.6, 6, 7 (new showcase page), 8 (was chunk 7 retrofit).
+**Chunks remaining:** 4c.0 (new gate), 4c.1, 4c.2-4c.5, 4d, 5, 5.5, 5.6, 6, 7 (showcase page), 8 (design-system retrofit, opportunistic).
 
 ## Implementation Plan
 
