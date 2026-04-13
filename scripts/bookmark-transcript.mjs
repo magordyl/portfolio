@@ -1,16 +1,21 @@
 #!/usr/bin/env node
 /**
  * bookmark-transcript.mjs
- * Captures the last N turns from the active Claude session as a transcript draft.
+ * Captures conversation turns from a Claude session as a transcript draft.
  *
  * Usage:
- *   node scripts/bookmark-transcript.mjs --slug <slug> [--note "<note>"] [--back <N>] [--extend]
+ *   node scripts/bookmark-transcript.mjs --slug <slug> [options]
  *
  * Options:
- *   --slug <slug>    Required. Kebab-case identifier (e.g. "card-layout-decision")
- *   --note "<note>"  Optional annotation in your voice
- *   --back <N>       Number of turns to capture (default: 6)
- *   --extend         Append to existing draft instead of overwriting
+ *   --slug <slug>      Required. Kebab-case identifier (e.g. "card-layout-decision")
+ *   --note "<note>"    Optional annotation in your voice
+ *   --back <N>         Number of turns to capture (default: 6) — IGNORED if --from is set
+ *   --extend           Append to existing draft instead of overwriting
+ *   --session <path>   Explicit JSONL session file (default: most-recent active session)
+ *   --from "<text>"    Start capture at first assistant message containing this text
+ *   --until "<text>"   Stop capture before first message containing this text
+ *   --full-tools       Capture full tool_use input objects as `toolCalls` array
+ *                      (in addition to label-only `collapsedTools`)
  */
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
@@ -31,31 +36,49 @@ const projectRoot = join(__dirname, '..');
 const { values: args } = parseArgs({
   args: process.argv.slice(2),
   options: {
-    slug:   { type: 'string' },
-    note:   { type: 'string', default: '' },
-    back:   { type: 'string', default: '6' },
-    extend: { type: 'boolean', default: false },
+    slug:        { type: 'string' },
+    note:        { type: 'string', default: '' },
+    back:        { type: 'string' },
+    extend:      { type: 'boolean', default: false },
+    session:     { type: 'string' },
+    from:        { type: 'string' },
+    until:       { type: 'string' },
+    'full-tools':{ type: 'boolean', default: false },
   },
   strict: true,
 });
 
 if (!args.slug) {
   console.error('Error: --slug is required');
-  console.error('Usage: node scripts/bookmark-transcript.mjs --slug <slug> [--note "<note>"] [--back <N>] [--extend]');
+  console.error('Usage: node scripts/bookmark-transcript.mjs --slug <slug> [options]');
   process.exit(1);
 }
 
-const slug   = args.slug;
-const note   = args.note || '';
-const back   = parseInt(args.back, 10);
-const extend = args.extend;
+const slug      = args.slug;
+const note      = args.note || '';
+const backRaw   = args.back;
+const extend    = args.extend;
+const sessionArg = args.session;
+const fromText  = args.from || null;
+const untilText = args.until || null;
+const fullTools = args['full-tools'];
+
+// Require an explicit range mode — no silent default. --extend bypasses this
+// because it finds new turns by timestamp.
+if (!fromText && backRaw === undefined && !extend) {
+  console.error('Error: must specify one of --from "<text>" (range mode) or --back <N> (count mode).');
+  console.error('Decide the range from the conversation context. See the bookmark SKILL.md.');
+  process.exit(1);
+}
+
+const back = backRaw !== undefined ? parseInt(backRaw, 10) : 6; // fallback used only by --extend path
 
 if (!/^[a-z0-9-]+$/.test(slug)) {
   console.error('Error: slug must be kebab-case (lowercase letters, numbers, hyphens only)');
   process.exit(1);
 }
 
-if (isNaN(back) || back < 1) {
+if (backRaw !== undefined && (isNaN(back) || back < 1)) {
   console.error('Error: --back must be a positive integer');
   process.exit(1);
 }
@@ -69,17 +92,26 @@ if (existsSync(publishedPath)) {
   process.exit(1);
 }
 
-// ── Locate active session + parse ───────────────────────────────────────────
+// ── Locate session + parse ──────────────────────────────────────────────────
 
-let mostRecent;
-try {
-  mostRecent = findActiveSession();
-} catch (err) {
-  console.error(`Error: ${err.message}`);
-  process.exit(1);
+let sessionPath;
+if (sessionArg) {
+  if (!existsSync(sessionArg)) {
+    console.error(`Error: --session file not found: ${sessionArg}`);
+    process.exit(1);
+  }
+  sessionPath = sessionArg;
+} else {
+  try {
+    sessionPath = findActiveSession().path;
+  } catch (err) {
+    console.error(`Error: ${err.message}`);
+    process.exit(1);
+  }
 }
 
-const events = parseSessionEvents(mostRecent.path);
+const events = parseSessionEvents(sessionPath);
+const toolResultMap = buildToolResultMap(events);
 
 // ── Helpers (bookmark-specific) ─────────────────────────────────────────────
 
@@ -103,31 +135,104 @@ function labelToolUse(name, input = {}) {
 
 function extractAssistantContent(ev) {
   const content = ev.message?.content;
-  if (!Array.isArray(content)) return { text: '', collapsedTools: [] };
+  if (!Array.isArray(content)) return { text: '', collapsedTools: [], toolCalls: [] };
 
   const textParts = [];
   const collapsedTools = [];
+  const toolCalls = [];
 
   for (const block of content) {
     if (block.type === 'text' && block.text?.trim()) {
       textParts.push(block.text.trim());
     } else if (block.type === 'tool_use') {
       collapsedTools.push(labelToolUse(block.name, block.input));
+      if (fullTools) toolCalls.push({ name: block.name, input: block.input ?? {} });
     }
   }
 
-  return { text: textParts.join('\n\n'), collapsedTools };
+  return { text: textParts.join('\n\n'), collapsedTools, toolCalls };
+}
+
+function eventContainsText(ev, needle) {
+  if (!needle) return false;
+  const content = ev.message?.content;
+  if (typeof content === 'string') return content.includes(needle);
+  if (Array.isArray(content)) {
+    return content.some(b => (b.type === 'text' && b.text?.includes(needle)));
+  }
+  return false;
+}
+
+/**
+ * Build a map: tool_use_id → result blob.
+ * Tool results live in user events with content array containing tool_result blocks.
+ */
+function buildToolResultMap(allEvents) {
+  const map = new Map();
+  for (const ev of allEvents) {
+    if (ev.type !== 'user') continue;
+    const content = ev.message?.content;
+    if (!Array.isArray(content)) continue;
+    for (const block of content) {
+      if (block.type === 'tool_result' && block.tool_use_id) {
+        map.set(block.tool_use_id, block.content);
+      }
+    }
+  }
+  return map;
+}
+
+/**
+ * For a Stitch generate_screen_from_text result, extract the bits we care about:
+ * Stitch's rewritten prompt + the screen title. Skip the giant design-system markdown.
+ */
+function summariseStitchResult(rawContent) {
+  let parsed;
+  if (typeof rawContent === 'string') {
+    try { parsed = JSON.parse(rawContent); } catch { return null; }
+  } else {
+    parsed = rawContent;
+  }
+  if (!parsed || !parsed.outputComponents) return null;
+  const out = { rewrittenPrompts: [], commentary: [] };
+  for (const comp of parsed.outputComponents) {
+    if (comp.design?.screens) {
+      for (const screen of comp.design.screens) {
+        if (screen.prompt) out.rewrittenPrompts.push({
+          title: screen.title || 'untitled',
+          prompt: screen.prompt,
+        });
+      }
+    }
+    if (comp.text) out.commentary.push(comp.text);
+  }
+  if (out.rewrittenPrompts.length === 0 && out.commentary.length === 0) return null;
+  return out;
 }
 
 // ── Build turn list ──────────────────────────────────────────────────────────
 
 const allRealTurns = events.filter(ev => isRealUserTurn(ev) || isAssistantTurn(ev));
 
-// If --extend, use timestamp of existing draft's _capturedAt to find new turns
-let candidateTurns = allRealTurns;
 const draftPath = join(projectRoot, 'src', 'content', 'transcripts', 'drafts', `${slug}.json`);
 
-if (extend && existsSync(draftPath)) {
+let candidateTurns;
+
+if (fromText) {
+  // Range mode: from first turn containing fromText, until first turn after that containing untilText
+  const startIdx = allRealTurns.findIndex(ev => eventContainsText(ev, fromText));
+  if (startIdx === -1) {
+    console.error(`Error: --from text not found in any turn: "${fromText}"`);
+    process.exit(1);
+  }
+  let endIdx = allRealTurns.length;
+  if (untilText) {
+    const u = allRealTurns.findIndex((ev, i) => i > startIdx && eventContainsText(ev, untilText));
+    if (u !== -1) endIdx = u;
+  }
+  candidateTurns = allRealTurns.slice(startIdx, endIdx);
+  console.log(`  Range: turn ${startIdx + 1} to ${endIdx} (${candidateTurns.length} turns) of ${allRealTurns.length}`);
+} else if (extend && existsSync(draftPath)) {
   const existing = JSON.parse(readFileSync(draftPath, 'utf8'));
   if (existing._capturedAt) {
     const lastCaptureMs = new Date(existing._capturedAt).getTime();
@@ -156,11 +261,36 @@ for (const ev of candidateTurns) {
     const text = redact(extractUserText(ev));
     if (text) rawTurns.push({ role: 'user', text });
   } else if (isAssistantTurn(ev)) {
-    const { text, collapsedTools } = extractAssistantContent(ev);
+    const { text, collapsedTools, toolCalls } = extractAssistantContent(ev);
     const redactedText = redact(text);
     if (redactedText || collapsedTools.length > 0) {
       const turn = { role: 'assistant', text: redactedText };
       if (collapsedTools.length > 0) turn.collapsedTools = collapsedTools.map(redact);
+      if (toolCalls.length > 0) {
+        // Redact strings inside the input objects (deep)
+        const deepRedact = (v) => {
+          if (typeof v === 'string') return redact(v);
+          if (Array.isArray(v)) return v.map(deepRedact);
+          if (v && typeof v === 'object') {
+            const out = {};
+            for (const [k, val] of Object.entries(v)) out[k] = deepRedact(val);
+            return out;
+          }
+          return v;
+        };
+        // Look up tool_use_id → result for Stitch calls; attach summarised result
+        const toolUseBlocks = (ev.message?.content || []).filter(b => b.type === 'tool_use');
+        turn.toolCalls = toolCalls.map((tc, i) => {
+          const entry = { name: tc.name, input: deepRedact(tc.input) };
+          if (tc.name === 'mcp__stitch__generate_screen_from_text') {
+            const id = toolUseBlocks[i]?.id;
+            const raw = id ? toolResultMap.get(id) : null;
+            const summary = raw ? summariseStitchResult(raw) : null;
+            if (summary) entry.result = deepRedact(summary);
+          }
+          return entry;
+        });
+      }
       rawTurns.push(turn);
     }
   }

@@ -97,7 +97,6 @@ if (!Array.isArray(draft.turns)) {
   errors.push('"turns" must be an array');
 } else {
   if (draft.turns.length < 2)  errors.push(`too few turns: ${draft.turns.length} (minimum 2)`);
-  if (draft.turns.length > 8)  errors.push(`too many turns: ${draft.turns.length} (maximum 8)`);
 
   draft.turns.forEach((t, i) => {
     if (!['user', 'assistant'].includes(t.role)) errors.push(`turn ${i}: invalid role "${t.role}"`);

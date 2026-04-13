@@ -60,8 +60,13 @@ const transcripts = defineCollection({
         kind: z.enum(['verbatim', 'headline', 'plan', 'skill', 'research']).optional(),
         summary: z.string().optional(),
         collapsedTools: z.array(z.string()).optional(),
+        toolCalls: z.array(z.object({
+          name: z.string(),
+          input: z.record(z.string(), z.any()).optional(),
+          result: z.any().optional(),
+        })).optional(),
       })
-    ).min(2).max(8),
+    ).min(2),
   }),
 });
 

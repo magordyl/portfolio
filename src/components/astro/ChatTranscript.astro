@@ -146,13 +146,58 @@ function turnMode(turn: Turn): 'verbatim' | 'collapsed' | 'headline' {
           </div>
 
           <div class="turn-body">
-            {/* Tool-call labels */}
+            {/* Tool-call labels (compact summary) */}
             {turn.collapsedTools && turn.collapsedTools.length > 0 && (
               <ul class="turn-tools" aria-label="Tool calls">
                 {turn.collapsedTools.map(tool => (
                   <li class="turn-tool">{tool}</li>
                 ))}
               </ul>
+            )}
+
+            {/* Tool-call detail expanders (when --full-tools captured the input) */}
+            {turn.toolCalls && turn.toolCalls.length > 0 && (
+              <div class="turn-tool-details" aria-label="Tool call details">
+                {turn.toolCalls.map((tc, idx) => {
+                  const isStitch = tc.name === 'mcp__stitch__generate_screen_from_text';
+                  const summaryLabel = isStitch
+                    ? `Stitch generate · ${tc.result?.rewrittenPrompts?.[0]?.title ?? 'screen'} (#${idx + 1})`
+                    : `${tc.name} (#${idx + 1})`;
+                  return (
+                    <details class="tool-call">
+                      <summary class="tool-call-summary">
+                        <span class="tool-call-name">{summaryLabel}</span>
+                        <span class="turn-section-chevron" set:html={chevronSvg} />
+                      </summary>
+                      <div class="tool-call-body">
+                        {isStitch && tc.input?.prompt ? (
+                          <>
+                            <p class="tool-call-label">Dylan's prompt</p>
+                            <pre class="tool-call-pre">{tc.input.prompt}</pre>
+                            {tc.result?.rewrittenPrompts?.length > 0 && (
+                              <>
+                                <p class="tool-call-label">Stitch's rewritten prompt</p>
+                                <pre class="tool-call-pre">{tc.result.rewrittenPrompts[0].prompt}</pre>
+                              </>
+                            )}
+                            {tc.result?.commentary?.length > 0 && (
+                              <>
+                                <p class="tool-call-label">Stitch's commentary</p>
+                                <pre class="tool-call-pre">{tc.result.commentary.join('\n\n')}</pre>
+                              </>
+                            )}
+                          </>
+                        ) : (
+                          <>
+                            <p class="tool-call-label">Input</p>
+                            <pre class="tool-call-pre">{JSON.stringify(tc.input ?? {}, null, 2)}</pre>
+                          </>
+                        )}
+                      </div>
+                    </details>
+                  );
+                })}
+              </div>
             )}
 
             {/* Verbatim: render text directly */}
@@ -456,5 +501,66 @@ function turnMode(turn: Turn): 'verbatim' | 'collapsed' | 'headline' {
     text-align: center;
     margin: var(--space-4) 0 0;
     letter-spacing: 0.08em;
+  }
+
+  /* Tool-call detail expanders */
+  .turn-tool-details {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    margin: var(--space-2) 0;
+  }
+  .tool-call {
+    border: 1px solid var(--royal-6);
+    border-radius: 4px;
+    background: var(--royal-2);
+  }
+  .tool-call[open] {
+    background: var(--royal-3);
+  }
+  .tool-call-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    padding: var(--space-1) var(--space-2);
+    cursor: pointer;
+    list-style: none;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--ink-faint);
+  }
+  .tool-call-summary::-webkit-details-marker { display: none; }
+  .tool-call-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .tool-call-body {
+    padding: var(--space-2);
+    border-top: 1px solid var(--royal-6);
+  }
+  .tool-call-label {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin: var(--space-2) 0 var(--space-1);
+  }
+  .tool-call-label:first-child { margin-top: 0; }
+  .tool-call-pre {
+    background: var(--royal-1);
+    border: 1px solid var(--royal-5);
+    border-radius: 2px;
+    padding: var(--space-2);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    line-height: 1.5;
+    color: var(--ink);
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+    margin: 0;
   }
 </style>

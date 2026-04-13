@@ -50,7 +50,8 @@ export function classifyTurn(turn) {
 
 export function mergeToolOnlyTurns(turns) {
   const out = [];
-  let pending = null;
+  let pending = null;          // collapsedTools strings
+  let pendingCalls = null;     // toolCalls objects
 
   for (const turn of turns) {
     const isToolOnly =
@@ -63,15 +64,19 @@ export function mergeToolOnlyTurns(turns) {
       const prev = out[out.length - 1];
       if (prev && prev.role === 'assistant') {
         prev.collapsedTools = [...(prev.collapsedTools || []), ...turn.collapsedTools];
+        if (turn.toolCalls?.length) prev.toolCalls = [...(prev.toolCalls || []), ...turn.toolCalls];
       } else {
         pending = [...(pending || []), ...turn.collapsedTools];
+        if (turn.toolCalls?.length) pendingCalls = [...(pendingCalls || []), ...turn.toolCalls];
       }
       continue;
     }
 
     if (pending && turn.role === 'assistant') {
       turn.collapsedTools = [...pending, ...(turn.collapsedTools || [])];
+      if (pendingCalls) turn.toolCalls = [...pendingCalls, ...(turn.toolCalls || [])];
       pending = null;
+      pendingCalls = null;
     }
     out.push(turn);
   }
