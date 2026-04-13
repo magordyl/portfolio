@@ -41,7 +41,8 @@ Ten chunks to ship v1 (1–3 complete, then 4a → 4b → 4c → 4d → 5 → 5.
 
 - `src/content/config.ts` — projects, writing, log schemas (from `plans/portfolio-architecture.md`)
 - `content/projects/the-weekly.mdx` — placeholder frontmatter + TL;DR only (no case study body yet — that's chunk 4)
-- `content/projects/planner-app.mdx`, `workspace-audit.mdx`, `portfolio.mdx` — same (placeholder only)
+- `content/projects/planner-app.mdx`, `portfolio.mdx` — same (placeholder only)
+- ~~`workspace-audit.mdx`~~ — converted to a writing topic (see `plans/writing-topics/claude-workspace-audit.md`); remove this placeholder if it exists
 - `content/writing/welcome.mdx` — single placeholder post
 - `content/log/*.mdx` — 5 real log entries from the past week (reconstructed from DIARY.md across projects)
 - `astro check` must pass (validates schema references)
@@ -287,7 +288,8 @@ Adjust the scaffold until every signal has a home and every section earns its pl
 ### Step 4b.3 — Word count targets
 
 - **Full case studies** (the-weekly, planner-poc, planner-v1): 400–600 words body
-- **Lightweight case studies** (workspace-audit, portfolio itself): 200–350 words body
+- **Lightweight case studies** (portfolio itself): 200–350 words body
+- ~~workspace-audit~~ — writing topic, not a case study (see `plans/writing-topics/claude-workspace-audit.md`)
 - Each section gets a target band — writer knows when they're over budget
 - **Transcript embeds count as 50 words against the section budget regardless of actual turn length.** This prevents embeds from being used to pad word counts while still discouraging over-embedding — a section with 3 transcripts loses 150 words of its prose budget, which is usually the whole section.
 
@@ -328,7 +330,21 @@ This is the most important layout in the portfolio. It needs to:
 - Lives at `src/components/ChatTranscript.astro`. Sibling to `Screenshot.astro`.
 - Zero client-side JS — static render, no interactivity. No expand/collapse on tool calls (they're always collapsed per 4a.3).
 
+**`<ProjectTimeline>` component — explore in 4c.1 design explorer:**
+- A linear horizontal (desktop) / vertical (mobile) timeline showing key milestones and pivot points for a project.
+- Each node is a highlighted point: label + short descriptor. Nodes can be marked as milestone (standard) or pivot (visually distinct — e.g. filled vs outlined, or accent colour).
+- Reads data from frontmatter (`timeline` array field in the projects schema — `date`, `label`, `type: 'milestone' | 'pivot'`). Static render, no JS.
+- Design exploration goal: keep it simple. No fancy animation, no branches. The interest is in the data, not the chrome.
+- Include at least one `<ProjectTimeline>` in both `case-study-v1.html` and `case-study-v2.html` design explorers using placeholder data from the-weekly build log.
+- Lives at `src/components/ProjectTimeline.astro`. Add `timeline` as an optional array field to the `projects` Zod schema (chunk 2 will need a minor update — add it then).
+
 **Sample transcripts in the design explorers:** both `case-study-v1.html` and `case-study-v2.html` must render at least one `inline` transcript and one `breakout` transcript using placeholder turns (e.g. from an early portfolio session, bookmarked via 4a.6). This is how we pick the layout — on how the transcripts read in context, not in isolation.
+
+**Open design question — sender colour emphasis:** Currently the intent is for Claude's turns to use the more prominent colour treatment. This should be evaluated against the portfolio's purpose: the site is Dylan's portfolio, and the narrative frames Claude as the tool, Dylan as the thinker. If Claude's turns visually dominate, that inverts the signal. Explore both options in the design explorers before locking:
+- **Option A (current intent):** Claude's turns prominent (e.g. higher-contrast background or accent colour), Dylan's turns recessed (e.g. plain or muted treatment)
+- **Option B (swapped):** Dylan's turns prominent, Claude's turns recessed
+
+Test against the actual reading experience — does the reader's eye follow the right thread? The goal is to show Dylan's thinking is the foreground, Claude's responses the scaffolding. Pick the option that makes that hierarchy feel natural, not forced. Document the rejected option in the design trail.
 
 Produce 2 layout options, pick one. Save both (`case-study-v1.html`, `case-study-v2.html`) — rejected options are part of the design trail.
 
@@ -395,11 +411,11 @@ Second draft. Iterate until both template and case study feel right. **Hard stop
 
 ## Chunk 5 — Remaining case studies applied to template
 
-**Deliverable:** planner-app (full), workspace-audit (lightweight), portfolio itself (lightweight) — all using the locked template and layout.
+**Deliverable:** planner-app (full), portfolio itself (lightweight) — all using the locked template and layout.
 
 - Write `content/projects/planner-app.mdx` — full case study, 400–600 words
-- Write `content/projects/workspace-audit.mdx` — lightweight, 200–350 words, meta-toned
 - Write `content/projects/portfolio.mdx` — lightweight, meta, "this site is also a case study"
+- ~~workspace-audit~~ — converted to a writing topic, not a case study; see `plans/writing-topics/claude-workspace-audit.md`
 - Source imagery for each per 4a.3 standards
 - `/projects` index page built from the 4c.2 mockup
 - Bidirectional cross-links: case studies link to related writing posts; writing posts auto-render ProjectReferenceCard
@@ -537,11 +553,56 @@ User rewrites in voice. Iterate. Same 2-iteration hard stop.
 
 ---
 
-## Chunk 7 — Design system retrofit (post-launch, optional)
+## Chunk 7 — Design system showcase page (post-launch)
+
+**Deliverable:** `/design-system` page — a live reference for the portfolio's Royal Tonal colour palette, typography scale, and all built UI components. Portfolio-only (not publicly linked from nav), but publicly accessible as a URL. Useful for sharing with collaborators, referencing during development, and as a portfolio signal in itself.
+
+**Gate:** Chunk 6 must be shipped to production. The showcase documents the final component set — running it before chunk 5 closes means the component inventory is incomplete.
+
+### Step 7.1 — Inventory
+
+Before building, enumerate everything the showcase needs to document:
+- All colour roles (Royal Tonal scale + semantic aliases from `globals.css`)
+- Typography scale: all `--text-*` slots rendered with Fraunces / Geist / Geist Mono at their intended sizes, weights, and use contexts
+- All components built across chunks 3–6 (`CaseStudyCard`, `BuildLogTicker`, `KickerLabel`, `ChatTranscript`, `ProjectTimeline`, `Screenshot`, `ProjectReferenceCard`, any shadcn components adopted)
+- Spacing scale (8-value: 4, 8, 12, 16, 24, 32, 48, 64)
+- Border radius tokens
+- Icon stroke width
+
+### Step 7.2 — Page design
+
+Self-contained HTML design explorer first (`plans/portfolio-assets/design-system-showcase.html`) to settle on the page structure before implementing in Astro. The explorer should feel like a real reference page, not a dev tool — it's part of the portfolio.
+
+Structure:
+- **Colour** — full Royal Tonal palette swatches with hex/HSL values and role names (royal-0 through royal-10 + semantic aliases). Group: scale vs semantic.
+- **Typography** — each type slot rendered at size with label (slot name, font family, size, weight, use context). At least: `--text-hero`, `--text-display`, `--text-heading`, `--text-body`, `--text-small`, `--text-caption`, `--text-code`.
+- **Components** — one section per component, showing the component in its natural state with a brief one-line description of its role. Where a component has variants (e.g. `ChatTranscript` inline vs breakout, `ProjectTimeline` milestone vs pivot nodes), show both.
+- **Spacing** — visual scale strip showing all 8 values with their px labels.
+
+### Step 7.3 — Build
+
+- `src/pages/design-system.astro` — static Astro page, no dynamic data
+- Sections import and render actual components from `src/components/` — not screenshots or code snippets. The showcase is live, not documented.
+- Colour swatches generated from CSS custom properties (read at runtime via JS or hardcoded from `globals.css` — either is fine)
+- `npm run check` passes
+
+**Note on linking:** do NOT add this to the main nav. It's a dev/portfolio reference. Add a footer link in `PageFooter.astro` — small, unobtrusive, discoverable but not primary navigation.
+
+**Acceptance:**
+- `/design-system` renders on production
+- All colours, type slots, spacing values, and components are present and accurate
+- `npm run check` passes
+- No broken component renders or layout overflows
+
+**Commit:** `portfolio: design system showcase page`
+
+---
+
+## Chunk 8 — Design system retrofit (post-launch, optional)
 
 **Deliverable:** Portfolio's Royal Tonal tokens extracted into a `design.tokens.ts` that conforms to the workspace-wide schema. Zero visual change.
 
-**Gate:** Chunk 6 must be shipped to production first. Do NOT attempt this during v1 build.
+**Gate:** Chunk 6 must be shipped to production first. Do NOT attempt this during v1 build. (Chunk 7, the showcase page, can run in parallel — no dependency between them.)
 
 **Prerequisites:**
 - Workspace-root `design-system/` scaffold exists (see `plans/design-system-implementation.md` chunk 1).
@@ -579,7 +640,8 @@ User rewrites in voice. Iterate. Same 2-iteration hard stop.
 - **Chunk 5.5** — writing posts: 1–2 sessions (brainstorm + 3 drafts + iterate)
 - **Chunk 5.6** — /about: 1 session (focused one-off, research + scaffold + mockup + draft + iterate)
 - **Chunk 6** — secondary pages + deploy: 1 session (mostly plumbing now that content exists)
-- **Chunk 7** — design-system retrofit: 0.5 session, opportunistic
+- **Chunk 7** — design system showcase: 0.5–1 session (inventory + explorer + Astro page)
+- **Chunk 8** — design-system retrofit: 0.5 session, opportunistic
 
 **Total: ~3–4 weeks of sessions** for v1 (chunks 4a–6). Longer than the original 1–2 week estimate — the content-first restructure and the additions (imagery standards, diary audit, writing posts, /about as its own chunk) materially expand scope but also materially raise the quality ceiling.
 

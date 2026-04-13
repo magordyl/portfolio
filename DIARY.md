@@ -1,5 +1,19 @@
 # Development Diary
 
+## 2026-04-13 — Plan amendments: timeline visual, workspace-audit reframe, design-system showcase
+
+Four changes to the implementation plan, no code. The interesting one was the workspace-audit conversion. It was originally scoped as a lightweight case study in chunk 5 — 200–350 words, meta-toned, "this site is also a case study"-adjacent. Thinking about it as a case study never felt right. There's no product artefact at its core; the "thing built" is the rules/hooks/memory/skills configuration, which doesn't photograph. The signal it carries is *thinking* about how to configure Claude Code intentionally, not shipping. That's a writing post, not a case study.
+
+Converting it meant scrubbing it from three places in the plan (chunk 2 placeholder list, chunk 4b word-count targets, chunk 5 deliverables) and spinning up `plans/writing-topics/claude-workspace-audit.md` with a candidate thesis: "the workspace configuration is product design for an audience of one." Four supporting arguments, including "the rules file is load-bearing, not decorative" and "skills are the interface." This also slots cleanly next to the `workflow-evolution-series` — could become its sub-post 1 (engineering/architecture) if the series ships as a bundle.
+
+The `<ProjectTimeline>` addition is straightforward: linear horizontal/vertical timeline with milestone vs pivot nodes, data from a new optional `timeline` frontmatter field. Added to chunk 4c.1 alongside the existing `<ChatTranscript>` so both components get explored in the same round of case-study design explorers. Added a `timeline` field note to chunk 2's Zod schema update list.
+
+The `<ChatTranscript>` colour-emphasis question is the one worth flagging for later. Current intent has Claude's turns visually prominent. If Claude dominates the transcript visually in a portfolio case study, the signal hierarchy inverts — the portfolio is Dylan's thinking, with Claude as the tool; a Claude-dominant transcript reads as "look what Claude did." Added an open-design-question block to chunk 4c.1 requiring both options (Claude-prominent and Dylan-prominent) to be rendered in the case study design explorers before the component is locked. Cheapest fix: explore in-context, not in isolation.
+
+Added a new **chunk 7 — design system showcase page** and renumbered the retrofit chunk to 8. The showcase page renders actual components rather than screenshots, so it stays accurate as components change. Design explorer first, footer-linked not in main nav. Gate: after chunk 6 ships so the inventory is complete.
+
+---
+
 ## 2026-04-12 — Chunk 4d: the-weekly case study structure locked
 
 The first real case study structure is locked, and it immediately deviated from the template. The-weekly was planned as a standard product case study (Design + Architecture + Decisions middle zone). The interview surfaced a better story: this is a "learning to ship with Claude Code" piece, where the product is the vehicle.

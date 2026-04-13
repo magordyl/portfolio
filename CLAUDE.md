@@ -43,26 +43,26 @@ Set up a pre-commit hook at `.git/hooks/pre-commit` that runs `npm run check`.
 
 Astro uses `@tailwindcss/vite` (Vite plugin), NOT `@astrojs/tailwind`. The `astro add tailwind` command sets this up automatically. No `tailwind.config.mjs` needed — tokens live as CSS variables in `globals.css`. If you need Tailwind utility classes for token values, add `@theme { --text-hero: 4.5rem; }` blocks inside `globals.css`.
 
-## Current Status (2026-04-12)
+## Current Status (2026-04-13)
 
-**Last session (2026-04-12) — Chunk 4d: case study structure and interview for the-weekly.**
+**Last session (2026-04-13) — Plan amendments (no code).**
 
-**What was done this session:**
-- In-depth interview with Dylan capturing origin story, learning arc, product philosophy, and hiring-manager signal
-- Agreed case study structure: "learning to ship with Claude Code" framing, product as vehicle
-- Section structure locked: Problem (2 beats: product insight + why build now), Decisions (3: front-end only, TDD, opinionated UX), Outcome (product-focused, no Claude Code mention), Lessons (2: never touched code, skipped design)
-- Middle zone: Decisions only (no Architecture, no Design section). No transcript embeds. Screenshots deferred.
-- Structure + full interview context saved to `plans/the-weekly-case-study-draft.md` (commit `3dee29e`)
+**What was done this session (portfolio side):**
+- Added `<ProjectTimeline>` component to chunk 4c.1 — linear timeline with milestone vs pivot nodes, data from new optional `timeline` frontmatter field on projects schema. To be explored in case-study-v1/v2 design explorers.
+- Converted `workspace-audit` from a case-study project to a writing topic. Scrubbed from chunk 2 placeholder list, chunk 4b word-count targets, chunk 5 deliverables. Created `plans/writing-topics/claude-workspace-audit.md` with candidate thesis and four supporting arguments. Added to `plans/writing-topics/INDEX.md`. The `src/content/projects/workspace-audit.mdx` placeholder file still exists and should be removed next time chunk 2 is touched.
+- Added new **chunk 7 — Design system showcase page** (renumbered existing retrofit chunk to chunk 8). `/design-system` route rendering actual components (not screenshots), footer-linked not in main nav. Design explorer first (`plans/portfolio-assets/design-system-showcase.html`). Gate: after chunk 6 ships so the component inventory is complete.
+- Added an open design question to chunk 4c.1 about `<ChatTranscript>` sender colour emphasis — explore both Claude-prominent (current intent) and Dylan-prominent in the case study design explorers before locking. Rationale: if Claude's turns visually dominate, the portfolio's signal hierarchy inverts.
 
 **Next priorities (session order):**
 1. **4d (continued)** — Dylan writes prose for each section against the locked structure in `plans/the-weekly-case-study-draft.md`. Then iterate (2-iteration hard stop), build the MDX, update frontmatter (dates, live URL, tldr rewrite).
-2. **4c.2-4c.5** — remaining page layout explorers (/projects index, /writing, /log, /404+/privacy)
+2. **4c.1** — case study design explorers; now must also include `<ProjectTimeline>` samples and both sender-colour options for `<ChatTranscript>`.
+3. **4c.2-4c.5** — remaining page layout explorers (/projects index, /writing, /log, /404+/privacy)
 
 **Deployed** — Cloudflare Pages, `magordyl/portfolio` (`main` branch). Live at `dylan-portfolio.magordyl.workers.dev`.
 
-**Chunks remaining:** 4c.2-4c.5, 4d, 5, 5.5, 5.6, 6.
+**Chunks remaining:** 4c.1 (with new timeline + transcript-colour explorations), 4c.2-4c.5, 4d, 5, 5.5, 5.6, 6, 7 (new showcase page), 8 (was chunk 7 retrofit).
 
 ## Implementation Plan
 
-Full plan: `plans/portfolio-implementation.md` (chunks 1–3 complete, then 4a → 4b → 4c → 4d → 5 → 5.5 → 5.6 → 6). Chunk 7 (design-system retrofit) was pulled forward — `design.tokens.ts` now exists. The remaining chunk 7 work (emitter script, generated globals.css) is optional post-launch.
+Full plan: `plans/portfolio-implementation.md` (chunks 1–3 complete, then 4a → 4b → 4c → 4d → 5 → 5.5 → 5.6 → 6 → 7 → 8). Chunk 7 (design system showcase page) was added this session. Chunk 8 (was chunk 7, design-system retrofit) remains opportunistic post-launch.
 Current status tracked in `DIARY.md`.
