@@ -313,6 +313,87 @@ Adjust the scaffold until every signal has a home and every section earns its pl
 
 Same approach as the homepage design explorer — self-contained HTML files in `plans/portfolio-assets/`, inlined CSS, fonts from Google Fonts CDN, zero build step. Saved to the permanent portfolio plans folder so they survive the session and can be linked from a case study later.
 
+### Step 4c.0 — Component colour-role rationalisation (gate before 4c.1)
+
+**Context.** The portfolio's palette has ~17 distinct colour tokens (royal-1..12 + violet-8..12), and components have been reaching into that raw scale ad hoc. The ChatTranscript v3 design alone introduced four different pill treatments before collapsing to two, and retroactively highlighted the same inconsistency elsewhere — KickerLabel uses `--royal-11`, tags use a different pairing, BuildLogTicker status dots pick yet another combination. With ~15 colours available and no per-component allowlists, each new component drifts further from the system. This gate fixes that before 4c.1 builds three more components (`<ChatTranscript>`, `<ProjectTimeline>`, `<VersionedEmbed>`) against the uncontrolled palette.
+
+**Deliverable.** A role-based token layer on top of the raw scale + per-component variant allowlists + a migration pass of existing chunk-3 components. The raw `--royal-*` / `--violet-*` scale stays as the implementation substrate; components must reference role tokens, never raw scale directly.
+
+#### Step 4c.0.1 — Audit existing colour usage
+
+Grep every `.astro`, `.tsx`, and CSS file for `var(--royal-*)`, `var(--violet-*)`, raw hex values, and HSL triples. Produce an inventory in `plans/portfolio-colour-audit.md`:
+- Each usage site (file:line)
+- The role it's playing (border, bg, label, active-state, status, kicker, etc.)
+- Whether the pairing is reused anywhere else or is a one-off
+
+Acceptance: the audit identifies every raw-scale reference outside `globals.css` and `design.tokens.ts`. Any usage that can't be named a role is flagged as drift.
+
+#### Step 4c.0.2 — Define per-component variant allowlists
+
+For every component category, define the **allowlist of variants** — no more than 3-4 per category — and the exact token pairing each variant uses. A component asking for a variant outside its allowlist is a design decision, not a token pick, and goes back through the rationalisation gate.
+
+Starter set (refine during the audit; this is the shape, not the final list):
+
+**Tags / pills** (≤ 4 variants):
+- `default` — muted bg pill for taxonomy labels (e.g. "case study", "writing post"). `--ink-dim` fg on `--royal-4` border, transparent bg.
+- `active` — selected / current state. `--royal-11` fg on `--royal-8` border, `rgba(59, 91, 219, 0.08)` bg.
+- `signal` — rare "note this" accent (reserved, used sparingly — e.g. "new" on a writing post). `--violet-11` fg on `--violet-8` border.
+- `status` — reserved for the one status slot the portfolio needs (e.g. "shipped" / "draft" / "archived" on case studies). Single colour, muted register. Not a rainbow.
+
+**Kickers** (≤ 2 variants):
+- `default` — `--royal-11`, Geist Mono, uppercase, letter-spacing 0.12em. The one true kicker.
+- `signal` — `--violet-11` equivalent, for writing / thinking-mode content only. Same typography.
+
+**Status dots / indicators** (≤ 3 variants):
+- `neutral` — `--ink-dim`
+- `active` — `--royal-10`
+- `attention` — `--violet-10` (reserved, used when the item is a pivot / decision moment — see BuildLogTicker.thinking)
+
+**Borders & dividers** (≤ 3 roles):
+- `hairline` — `--royal-3` (in-component separators, list rows)
+- `border` — `--royal-7` (card edges, input outlines)
+- `strong` — `--royal-8` (focused / active outlines)
+
+**Expander pills** (inside `<ChatTranscript>`, ≤ 2 variants — already locked in 4c.1 spec):
+- `high` — plan / skill / research / reply / cluster. `--royal-11` on `--royal-8` border.
+- `bg` — tool calls. `--ink-dim` on `--royal-4` border.
+
+#### Step 4c.0.3 — Add role tokens to `globals.css`
+
+Introduce a new role-token block in `globals.css` **below** the raw scale and semantic aliases. Naming: `--tag-default-fg`, `--tag-active-fg`, `--kicker-fg`, `--dot-neutral`, `--border-hairline`, etc. Components reference these, never `--royal-*` directly.
+
+Mirror the additions in `design.tokens.ts` under a new `roles` export so tooling / future component library work can introspect them without parsing CSS.
+
+#### Step 4c.0.4 — Migrate existing components
+
+Update every chunk-3 component (`CaseStudyCard`, `BuildLogTicker`, `KickerLabel`, tag rendering, anything else the audit surfaces) to reference role tokens only. A raw-scale reference outside `globals.css` and `design.tokens.ts` is now a build-time failure — add a lint rule if practical, else a grep-based check into `npm run check`.
+
+Acceptance: `git grep 'var(--royal-' src/components` and `git grep 'var(--violet-' src/components` both return empty. Only `src/styles/globals.css` and `design.tokens.ts` touch the raw scale.
+
+#### Step 4c.0.5 — Document the rules
+
+New section in `plans/portfolio-design-tokens.md` titled **Component variant allowlists**. Structure:
+- Table per component category (tags, kickers, dots, borders, expander pills)
+- For each variant: role name, token pairing, usage examples, "do not use for" counter-examples
+- A **hard rule**: introducing a new variant requires updating this doc first. No ad-hoc pairings in components.
+
+Mirror a one-paragraph summary in `.claude/rules/design-system.md` (workspace rule file) so future sessions load it automatically.
+
+#### Step 4c.0.6 — Gate check
+
+Before chunk 4c.1 opens:
+- Audit doc exists and is complete
+- Role tokens are in `globals.css` and `design.tokens.ts`
+- Existing components are migrated
+- Allowlists are documented
+- `npm run check` passes on main
+
+`<ChatTranscript>`, `<ProjectTimeline>`, `<VersionedEmbed>` (4c.1, 4c.1, 4d) must all be built against the rationalised token layer — the v3 ChatTranscript design maps cleanly onto the proposed variant set, but the implementation step should pick up the role-token names, not the raw scale that v3.html currently uses.
+
+**Commit:** `portfolio: rationalise colour tokens with per-component variant allowlists`
+
+---
+
 ### Step 4c.1 — Case study page layout (primary focus)
 
 This is the most important layout in the portfolio. It needs to:
@@ -323,12 +404,63 @@ This is the most important layout in the portfolio. It needs to:
 - Work on mobile without degrading the reading experience
 - End with a clear "next" artefact (related writing post or next case study)
 
-**`<ChatTranscript>` component — built here in 4c.1:**
-- Two display modes: `inline` (prose-column width, routine decisions) and `breakout` (extends into the right margin on desktop, for pivotal moments). Mobile collapses breakout → inline width.
-- Full frame spec (background, radius, padding, sender label typography, turn separator, tool-call label style, annotation margin note) is locked in 4a.3. Component implements it exactly — no per-page overrides.
-- Reads transcript data from the `transcripts` content collection (built in 4a.6). Usage: `<ChatTranscript id="the-weekly-pivot" mode="breakout" />`.
-- Lives at `src/components/ChatTranscript.astro`. Sibling to `Screenshot.astro`.
-- Zero client-side JS — static render, no interactivity. No expand/collapse on tool calls (they're always collapsed per 4a.3).
+**`<ChatTranscript>` component — locked design, built here in 4c.1:**
+
+Design locked via `plans/portfolio-stitch-assets/chat-transcript-explorer-v3.html` (2026-04-14). Iteration trail lives at v1 → v2 → v3 in the same folder; v3 is the canonical spec. Selected variant: **royal-3 hairline + full-block accent + flat expander**.
+
+*Frame:*
+- Outer container: royal → violet gradient border (`--grad-rv`) on `--royal-1` inner, 12px radius, padding `24px 16px` desktop.
+- Role swap from the original 4a.3 spec: **Dylan wears violet, Claude wears royal** (resolves the open Option A/B question below in favour of Option B). Rationale: Dylan is the thinker, Claude the tool — violet gives Dylan the signal-colour register; royal keeps Claude in the chrome palette.
+- Full accent line on every block: 2px border-left in violet (Dylan) or royal (Claude), `--royal-10` / `--violet-10`.
+- Hairlines between turns and between blocks: 1px in `--royal-3`.
+
+*Grouping:*
+- Consecutive same-role turns form a single **block**. One badge + role label at the top of each block, turns stacked under the continuity line. No repeated icon per turn.
+- Claude badge: `--royal-4` bg, `--royal-10` icon, `--royal-7` border. Dylan badge: `violet-8` bg at 15% alpha, `--violet-10` icon, `--violet-8` border.
+- Icons: lucide `user` (Dylan), lucide robot-glyph (Claude). Role text label mandatory alongside the icon (WCAG 1.4.1 — see `portfolio-design-tokens.md` §3).
+
+*Expanders (progressive disclosure — uses native `<details>/<summary>`, no framework JS):*
+- Four input shapes trigger an expander: `kind: 'plan' | 'skill' | 'research'`, a `summary` field, or any turn with `toolCalls` or `collapsedTools`.
+- Default chrome is **flat** — no card background, 2px `--royal-4` left stripe, 12px padding-left. Card chrome is an option but not the default.
+- Two pill colours only: `high` (`--royal-11` on `--royal-8` border) for plan/skill/research/reply/cluster; `bg` (`--ink-dim` on `--royal-4` border) for tool calls.
+- Heading sourcing (in order): `summary` field → first H1–H3 in turn body → first prose line. Word-boundary trimmed at 120 chars, CSS `-webkit-line-clamp: 2` as safety.
+- Default-open only for `kind: 'plan'` turns under 1200 chars. Everything else collapsed.
+- Wrap-up directives at the end of a Claude turn ("reply with your answers", "ready for your review", etc.) are detected by a trailing-sentence regex and pulled out of the expander into an always-visible pill below it (`--royal-2` bg, `--royal-10` left stripe).
+
+*Cluster expander (tool-call consolidation):*
+- Runs of **3 or more** consecutive Claude turns that each have tool calls AND short prose (<600 chars) merge into a single cluster expander.
+- Synthesized heading describes what was done (not how): "Claude used Google Stitch MCP and shell tools to generate all 40 renders across 10 design directions and download the comparison assets". The `clusterHeading` function pattern-matches tool names (stitch / shell) and run length to author a purposeful line; manual override via a `clusterTitle` field on the first turn if the heuristic is wrong.
+- Cluster body renders each member turn separated by a hairline, with its own prose + tool call list. One click reveals everything in the run.
+
+*Tool call rendering:*
+- Each tool call: mono name in `--royal-11`, input preview truncated to 180 chars on `--royal-1` background.
+- `full input` affordance styled as an underlined `--royal-11` link (violet-11 on hover / when open), NOT plain text.
+- Expanded input uses `white-space: pre-wrap; word-break: break-word;` — no horizontal scrollbar, lines wrap inside the container.
+
+*Content filters (applied by renderer, not by editing the source transcript):*
+- Drop user turns that match the context-compaction pattern (`/^This session is being continued/`).
+- Drop user turns that match slash-command invocations (`<command-name>/bookmark</command-name>` etc.).
+- Filters keep the source JSON verbatim (non-destructive) while hiding the mechanical noise from the rendered artefact.
+
+*Two display modes (mode prop):*
+- `inline` — prose-column width, for routine decisions. ≤ 8 turns recommended.
+- `breakout` — extends into the right margin on desktop for pivotal moments. Mobile collapses to inline width. ≤ 8 turns, one per case study max.
+
+*File:* `src/components/ChatTranscript.astro`. Sibling to `Screenshot.astro`. Reads from the `transcripts` content collection built in 4a.6.
+
+*Implementation checklist:*
+1. Port the v3 renderer JS to an Astro component. The markdown pass (currently via CDN `marked`) moves to a build-time dependency — `npm install marked`, import it at the top of the `.astro` frontmatter.
+2. Add violet tokens (done 2026-04-14): `--violet-8..12` and `--grad-rv` in `globals.css`; `violet` and `gradients.royalViolet` in `design.tokens.ts`.
+3. Write the component in three layers: frame (gradient border + header), block renderer (grouping + badge + continuity line), turn renderer (plain | expander | cluster). Keep the cluster-heading synthesiser as a pure function so it can be unit-tested.
+4. Extend the transcript Zod schema (`src/content.config.ts`) with the optional fields the renderer relies on: `kind?: 'plan' | 'skill' | 'research' | 'headline'`, `summary?: string`, `toolCalls?: ToolCall[]`, `collapsedTools?: string[]`, `clusterTitle?: string`.
+5. Test with the `planner-stitch-batch-40-renders` transcript — it exercises every shape (kind variants, tool calls, cluster merging, filtered turns, wrap-up extraction). Visual parity with v3 is the acceptance bar.
+6. Add a component story in the future `/design-system` showcase page (chunk 7): one inline mode + one breakout mode, using the same planner-stitch transcript.
+
+*Acceptance:*
+- Renders the planner-stitch transcript with visual parity to v3.html (winning variant: full-block accent, flat expander, royal-3 hairlines).
+- Zero client-side JS emitted — everything is static HTML with `<details>` for progressive disclosure.
+- Mobile (<640px) collapses to single column with icon + label on one row, accent line moves to block left edge at `--s2` padding.
+- WCAG 1.4.1 compliant: role labels are never hidden, icon + label + colour work together (colour alone is never the differentiator).
 
 **`<ProjectTimeline>` component — explore in 4c.1 design explorer:**
 - A linear horizontal (desktop) / vertical (mobile) timeline showing key milestones and pivot points for a project.
@@ -340,11 +472,7 @@ This is the most important layout in the portfolio. It needs to:
 
 **Sample transcripts in the design explorers:** both `case-study-v1.html` and `case-study-v2.html` must render at least one `inline` transcript and one `breakout` transcript using placeholder turns (e.g. from an early portfolio session, bookmarked via 4a.6). This is how we pick the layout — on how the transcripts read in context, not in isolation.
 
-**Open design question — sender colour emphasis:** Currently the intent is for Claude's turns to use the more prominent colour treatment. This should be evaluated against the portfolio's purpose: the site is Dylan's portfolio, and the narrative frames Claude as the tool, Dylan as the thinker. If Claude's turns visually dominate, that inverts the signal. Explore both options in the design explorers before locking:
-- **Option A (current intent):** Claude's turns prominent (e.g. higher-contrast background or accent colour), Dylan's turns recessed (e.g. plain or muted treatment)
-- **Option B (swapped):** Dylan's turns prominent, Claude's turns recessed
-
-Test against the actual reading experience — does the reader's eye follow the right thread? The goal is to show Dylan's thinking is the foreground, Claude's responses the scaffolding. Pick the option that makes that hierarchy feel natural, not forced. Document the rejected option in the design trail.
+**Sender colour emphasis — resolved 2026-04-14 (Option B).** Dylan wears violet, Claude wears royal. Rationale: the portfolio frames Dylan as the thinker and Claude as the tool; the signal colour (violet) belongs with the thinker, and royal is the chrome palette. Rejected Option A (Claude prominent) would have inverted the signal. Design trail: `chat-transcript-explorer-v1.html` (initial) → `v2.html` (multi-tier expanders, wrong role colours) → `v3.html` (locked spec, role swap, grouping, clustering).
 
 Produce 2 layout options, pick one. Save both (`case-study-v1.html`, `case-study-v2.html`) — rejected options are part of the design trail.
 

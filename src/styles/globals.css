@@ -25,6 +25,18 @@
   --royal-11: #A5B4FF;
   --royal-12: #D5DCFA;
 
+  /* Violet Signal — 5-step secondary accent, used only for Dylan's turns in
+     <ChatTranscript> (the one place the design needs two distinct registers). */
+  --violet-8:  #8C3BDB;
+  --violet-9:  #9D4DE8;
+  --violet-10: #B47CFF;
+  --violet-11: #C89BFF;
+  --violet-12: #E6D4FF;
+
+  /* Signature gradient — royal → violet diagonal, used on <ChatTranscript>
+     and any container that needs the "this is the showcase" border treatment. */
+  --grad-rv: linear-gradient(135deg, var(--royal-8) 0%, var(--violet-8) 100%);
+
   /* Ink — off-white text scale */
   --ink:       #E6E2D9;
   --ink-dim:   #9C968A;

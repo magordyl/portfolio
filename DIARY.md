@@ -1,5 +1,25 @@
 # Development Diary
 
+## 2026-04-14 — ChatTranscript design locked, tokens wired
+
+The component design is now fixed, captured in `plans/portfolio-stitch-assets/chat-transcript-explorer-v3.html`. The iteration trail survives as v1 → v2 → v3 in the same folder; v3 is canonical. The selected variant is royal-3 hairline + full-block accent line + flat expander.
+
+The Option A vs B question on chunk 4c.1 is closed in favour of B — Dylan wears violet, Claude wears royal. This is the single instance in the whole portfolio where the two-register palette does work: the site frames Dylan as the thinker and Claude as the tool, so the signal colour (violet) belongs with the thinker and the chrome colour (royal) with the tool. Everywhere else the palette remains monochromatic royal. The v2 version (violet on Claude) looked attractive because violet is the prettier colour, but it inverted the portfolio's hierarchy — which is exactly the failure mode flagged when the question was added to the plan.
+
+The interesting work during this session was not picking variants but killing nested complexity. v2 had four pill colours, multi-level expanders with single-child children, mid-word heading truncations, and `<details>` elements that scrolled horizontally for long tool inputs. Each of these needed its own rule, and each rule had to earn the cognitive cost. What shipped: two pill colours (`high` and `bg`), one heading source with word-boundary trim and a CSS 2-line clamp, pre-wrap on all tool-input boxes, and — the one new invention — a cluster expander that merges runs of 3+ consecutive tool-heavy Claude turns into a single collapsed group with a heading that describes what was done, not how. The 40-render batch transcript collapses from 21 turn expanders to a single cluster expander, which is the only way a reader will ever open it.
+
+The violet signal tokens (`--violet-8..12`) and the `--grad-rv` gradient token were planned in `portfolio-design-tokens.md` but never added to `globals.css` or `design.tokens.ts`. Fixed now — both files carry the five violet steps and the gradient. The design.tokens.ts exports them under `palette.violet` and `palette.gradients.royalViolet` with comments pinning the intended use to `<ChatTranscript>` only; any future use needs design review so the palette doesn't drift back toward a generic dual-register system.
+
+The implementation checklist for the Astro component is in `plans/portfolio-implementation.md` chunk 4c.1 alongside the locked spec. Six steps: port the v3 renderer, move marked from CDN to a build-time dep, build in frame / block / turn layers, extend the Zod schema with the optional fields, visual-parity test against the planner-stitch transcript, and add a story to the chunk 7 showcase page. The cluster-heading synthesiser stays a pure function so it can be unit-tested — the synthesis logic is currently hard-coded for Stitch runs and falls back to a generic "N tool calls across M turns" line, which is fine for now but will want a `clusterTitle` override field on transcripts when a real case study needs a sharper heading.
+
+Frame-spec table in `portfolio-imagery-standards.md` was fully rewritten. The old table described an older, simpler design (sans-only typography, no grouping, no expanders, no gradient border). It is now accurate. The WCAG 1.4.1 rule in `portfolio-design-tokens.md` §3 still applies — role labels stay mandatory on every block — but the typography-split-for-accessibility argument is superseded by the icon + label + colour layering, which carries role identity even in greyscale.
+
+Next touch: port the renderer during chunk 4c.1 implementation. No urgency; the design is frozen.
+
+The ChatTranscript pill churn (four colours → two) surfaced a system-level problem: components reach into the raw 17-colour scale ad hoc, and each new component drifts further. Added **chunk 4c.0 — component colour-role rationalisation** as a gate before 4c.1 opens. Deliverable is a role-token layer on top of the raw scale plus per-component variant allowlists (tags ≤ 4, kickers ≤ 2, dots ≤ 3, borders ≤ 3, expander pills ≤ 2), a migration of existing chunk-3 components, and a rule that raw `--royal-*` / `--violet-*` references outside `globals.css` become a build-time failure. The discipline this forces is the same one that made the ChatTranscript design work: decide what the variants mean, and refuse new ones without going through the gate.
+
+---
+
 ## 2026-04-13 — Evolution showcase planned for the-weekly case study
 
 The-weekly case study draft (locked 2026-04-12) asserts in Lesson 2 that "skipping design was the biggest mistake" and that the design workflow has been iterated on several times since. That's a claim in prose with no evidence. An evolution showcase — three live, interactive versions of the-weekly at distinct commits, embedded as a tab switcher under Lesson 2 — turns the assertion into visible proof. The reader watches the arc themselves.

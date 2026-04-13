@@ -276,21 +276,27 @@ Built in chunk 4c.1 alongside the layout mockups. Two display modes, selected vi
 | Per case study or essay | Up to 2 | Up to 2 |
 | Mobile behaviour | Unchanged | Collapses to prose-column width, same as inline |
 
-Shared frame values:
+Shared frame values (locked 2026-04-14 via `plans/portfolio-stitch-assets/chat-transcript-explorer-v3.html`):
 
 | Property | Value | Reason |
 |---|---|---|
-| Background | `var(--color-royal-950)` (darker than screenshot frame) | Distinct visual register — "this is a different medium" |
-| Outer radius | 12px | Slightly tighter than screenshot's 16px, reads as "dialogue box" not "photo" |
-| Padding | 24px all sides | Room for sender labels without feeling cramped |
-| Sender label font | Geist Mono at caption size | Consistent with captions elsewhere |
-| User sender label | "Dylan" in Royal Tonal 300 | Warm accent, slightly lighter than body |
-| Assistant sender label | "Claude" in Royal Tonal 500 | Core brand accent — anchor colour of the palette |
-| Turn separator | 1px hairline in Royal Tonal 900 | Quiet, not a box-in-box |
-| Turn text font | Geist (sans body) at body size | Readable, not "chat bubble" styled |
-| Tool-call label | Geist Mono at caption size, Royal Tonal 700 | Visibly lesser — "this happened but it's not the point" |
-| Annotation margin note | Geist Mono at caption size, italic, Royal Tonal 400 | Hand-written feel without an actual handwriting font |
-| Max height | None — transcripts are never scroll-trapped | Scroll-within-scroll is a UX failure |
+| Outer frame | Royal → violet gradient border (`--grad-rv`) on `--royal-1` inner, 1px transparent border with `padding-box` / `border-box` layering | Signature "this is the showcase" register; gradient distinguishes the component from plain cards |
+| Outer radius | 12px | Reads as "dialogue box" not "photo frame" |
+| Padding | 24px top/bottom, 16px sides | Tight enough for mobile, loose enough for the sender gutter |
+| Block gutter | 64px | Houses the sender badge + role label; collapses on mobile |
+| Block gap | 8px | Design system spacing scale (4/8/12/16/24/32/48/64) |
+| Turn / block hairline | 1px `--royal-3` | Quiet separator; darker than original spec — lighter `--royal-7` tested and rejected as too loud |
+| Sender badge | 26px circle; Dylan = violet-tinted bg + `--violet-10` icon + `--violet-8` border; Claude = `--royal-4` bg + `--royal-10` icon + `--royal-7` border | Colour-swap from original intent — Dylan in signal register, Claude in chrome |
+| Role label | Geist Mono 11px, uppercase, letter-spacing 0.14em; Dylan = `--violet-11`, Claude = `--royal-11` | Mandatory on every block (WCAG 1.4.1, see `portfolio-design-tokens.md` §3) |
+| Continuity line | 2px `border-left` on the whole block (full-block variant); violet for Dylan, royal for Claude | Single visual marker per block rather than per turn — lets consecutive turns read as one beat |
+| Turn text font | Geist sans at 0.9375rem body size | Same family for both roles; identity is carried by icon + label + colour, not font split |
+| Expander chrome | Flat (no card): 2px `--royal-4` left stripe, 12px padding-left | Card variant available as an override; the default is flat to keep Claude's content from visually dominating Dylan's |
+| Expander pill colours | Two only: `high` (`--royal-11` fg on `--royal-8` border) for plan / skill / research / reply / cluster; `bg` (`--ink-dim` fg on `--royal-4` border) for tool calls | Earlier four-colour scheme (v2) was inconsistent and noisy |
+| Cluster expander | Triggers when 3+ consecutive Claude turns each have tool calls + short prose (<600 chars); one expander, authored heading describing what was done | Avoids a wall of per-turn expanders in tool-heavy runs (e.g. the 40-render batch = 21 turns → 1 cluster) |
+| Wrap-up pill | Always-visible strip below a Claude expander when the turn ends with a directive sentence ("reply with your answers...") — `--royal-2` bg, `--royal-10` left stripe | Keeps the closing ask visible without forcing an expander click |
+| Annotation note | Geist Mono caption, italic, `--ink-dim` on a `--royal-6` left stripe | Hand-written feel, appears once at the top of the transcript |
+| Max height | None | Scroll-within-scroll is a UX failure |
+| Client-side JS | Zero — native `<details>/<summary>` only | Progressive disclosure works without framework JS and is fully keyboard-accessible |
 
 ### MDX usage pattern
 

@@ -1,0 +1,786 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ChatTranscript — Multi-tier Expanders & Colour Swap</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    /* Royal Tonal (from design-explorer.html) */
+    --royal-1:  #0E0F1C;
+    --royal-2:  #121428;
+    --royal-3:  #181B36;
+    --royal-4:  #1E2346;
+    --royal-5:  #252C58;
+    --royal-6:  #2D366C;
+    --royal-7:  #364280;
+    --royal-8:  #3B5BDB;
+    --royal-9:  #4D6DE8;
+    --royal-10: #6C85FF;
+    --royal-11: #A5B4FF;
+    --royal-12: #D5DCFA;
+
+    --surface: #0E0F1C;
+    --ink: #e6e2d9;
+    --ink-dim: #9c968a;
+    --ink-faint: #5e584f;
+    --border: #222444;
+
+    --radius: 8px;
+    --radius-sm: 4px;
+
+    --font-sans: 'Geist', -apple-system, system-ui, sans-serif;
+    --font-serif: 'Fraunces', Georgia, serif;
+    --font-mono: 'Geist Mono', ui-monospace, monospace;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--surface);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 72px 48px 120px; }
+
+  /* Doc header */
+  .doc-header { margin-bottom: 48px; border-bottom: 1px solid var(--border); padding-bottom: 40px; }
+  .doc-header .kicker { font-size: 11px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--royal-11); margin-bottom: 18px; }
+  .doc-header h1 { font-family: var(--font-serif); font-weight: 400; font-size: 60px; line-height: 1.02; letter-spacing: -0.02em; margin: 0 0 16px; }
+  .doc-header p { color: var(--ink-dim); max-width: 720px; margin: 0 0 10px; font-size: 15.5px; }
+
+  h2.section {
+    font-family: var(--font-sans); font-size: 11px; font-weight: 600;
+    letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-dim);
+    margin: 72px 0 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border);
+  }
+  h2.section:first-of-type { margin-top: 40px; }
+
+  .lede { color: var(--ink-dim); max-width: 720px; margin: 0 0 32px; font-size: 14.5px; line-height: 1.65; }
+
+  /* Changes checklist */
+  .changes { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-bottom: 48px; }
+  .chg { border: 1px solid var(--border); border-left: 2px solid var(--royal-10); border-radius: var(--radius-sm); padding: 16px 20px; background: #121428; }
+  .chg .chg-kick { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--royal-11); margin-bottom: 6px; }
+  .chg h3 { font-family: var(--font-serif); font-size: 18px; font-weight: 500; margin: 0 0 6px; letter-spacing: -0.005em; }
+  .chg p { margin: 0; font-size: 13.5px; color: var(--ink-dim); line-height: 1.55; }
+
+  /* Decision callouts */
+  .decide { border-left: 2px solid var(--royal-11); background: rgba(165, 180, 255, 0.04); padding: 14px 20px; margin: 28px 0 20px; border-radius: 0 var(--radius-sm) var(--radius-sm) 0; max-width: 720px; }
+  .decide .d-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--royal-11); margin-bottom: 6px; }
+  .decide p { margin: 0; font-size: 13.5px; color: var(--ink); }
+  .decide strong { color: var(--royal-12); font-weight: 500; }
+
+  /* ─────────────────────────────────────────────────────── */
+  /* TRANSCRIPT — the actual preview                         */
+  /* ─────────────────────────────────────────────────────── */
+
+  .transcript {
+    background: var(--royal-3);
+    border: 1px solid var(--royal-5);
+    border-radius: var(--radius);
+    padding: 32px;
+    font-size: 14px;
+  }
+  .transcript-note {
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-style: italic;
+    color: var(--ink-dim);
+    margin: 0 0 24px;
+    line-height: 1.55;
+    padding: 10px 14px;
+    background: var(--royal-2);
+    border-radius: var(--radius-sm);
+    border-left: 2px solid var(--royal-7);
+  }
+
+  .transcript-turns {
+    list-style: none; margin: 0; padding: 0;
+    display: flex; flex-direction: column; gap: 20px;
+  }
+
+  /* Turn: gutter + body grid */
+  .turn {
+    display: grid;
+    grid-template-columns: 44px 1fr;
+    gap: 14px;
+    align-items: start;
+    padding: 14px 16px 14px 10px;
+    border-radius: var(--radius-sm);
+    position: relative;
+  }
+
+  /* COLOUR SWAP: Dylan prominent, Claude recessed */
+  .turn--user {
+    background: linear-gradient(90deg, rgba(165, 180, 255, 0.07), rgba(165, 180, 255, 0) 60%);
+    border-left: 2px solid var(--royal-11);
+  }
+  .turn--claude {
+    background: transparent;
+    border-left: 2px solid var(--royal-5);
+  }
+
+  .turn-gutter {
+    display: flex; flex-direction: column; align-items: center; gap: 6px; padding-top: 2px;
+  }
+  .turn-icon {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .turn--user .turn-icon {
+    background: var(--royal-11); color: var(--royal-1);
+    box-shadow: 0 0 0 3px rgba(165, 180, 255, 0.18);
+  }
+  .turn--claude .turn-icon {
+    background: var(--royal-4); color: var(--royal-9);
+    border: 1px solid var(--royal-5);
+  }
+  .turn-icon svg { display: block; }
+
+  .turn-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: lowercase;
+    line-height: 1;
+  }
+  .turn--user .turn-label { color: var(--royal-12); font-weight: 500; }
+  .turn--claude .turn-label { color: var(--ink-faint); }
+
+  .turn-body { min-width: 0; }
+
+  /* Verbatim text (user's question, short replies) */
+  .turn-text {
+    font-family: var(--font-sans);
+    font-size: 14px; line-height: 1.65; color: var(--ink);
+  }
+  .turn--user .turn-text { color: var(--royal-12); font-size: 14.5px; }
+  .turn-text p { margin: 0 0 0.5rem; }
+  .turn-text p:last-child { margin: 0; }
+  .turn-text code {
+    font-family: var(--font-mono); font-size: 0.85em;
+    background: var(--royal-2); color: var(--royal-11);
+    padding: 0.1em 0.35em; border-radius: 3px;
+  }
+
+  /* ─────────────────────────────────────────────────────── */
+  /* TIER 1 — Turn headline (always visible, 1-line summary) */
+  /* ─────────────────────────────────────────────────────── */
+
+  .turn-headline {
+    list-style: none;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 12px;
+    padding: 4px 2px;
+    user-select: none;
+  }
+  .turn-headline::-webkit-details-marker { display: none; }
+
+  .headline-text {
+    flex: 1;
+    font-family: var(--font-serif);
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--ink);
+    letter-spacing: -0.005em;
+    line-height: 1.4;
+  }
+  .headline-meta {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    flex-shrink: 0;
+  }
+
+  /* Prominent Lucide chevron chip — applied consistently at all tiers */
+  .chev {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--royal-4);
+    color: var(--royal-11);
+    border: 1px solid var(--royal-6);
+    transition: transform 0.2s ease, background 0.2s ease;
+    flex-shrink: 0;
+  }
+  details[open] > summary .chev { transform: rotate(180deg); background: var(--royal-6); }
+
+  .chev svg { display: block; width: 14px; height: 14px; }
+
+  /* Tier 1 body padding */
+  .turn-body-expanded { padding-top: 14px; }
+
+  /* ─────────────────────────────────────────────────────── */
+  /* TIER 2 — Sections / tool-call groups                    */
+  /* ─────────────────────────────────────────────────────── */
+
+  .section-list {
+    display: flex; flex-direction: column;
+    gap: 8px;
+    margin-top: 4px;
+  }
+  .tier2 {
+    background: var(--royal-2);
+    border: 1px solid var(--royal-5);
+    border-radius: var(--radius-sm);
+  }
+  .tier2-summary {
+    list-style: none; cursor: pointer;
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 14px; user-select: none;
+  }
+  .tier2-summary::-webkit-details-marker { display: none; }
+  .tier2[open] > .tier2-summary { border-bottom: 1px solid var(--royal-4); }
+
+  .tier2-title {
+    flex: 1;
+    font-family: var(--font-serif);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--royal-12);
+    letter-spacing: var(--ls-title, normal);
+  }
+  .tier2-kind {
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--royal-10);
+    padding: 2px 7px;
+    border: 1px solid var(--royal-6);
+    border-radius: 2px;
+    background: var(--royal-3);
+  }
+  .tier2-body {
+    padding: 14px 16px 16px;
+    font-family: var(--font-sans);
+    font-size: 13.5px;
+    color: var(--ink);
+    line-height: 1.65;
+  }
+  .tier2-body p { margin: 0 0 0.5rem; }
+  .tier2-body p:last-child { margin: 0; }
+  .tier2-body ul, .tier2-body ol { margin: 0 0 0.5rem; padding-left: 1.2rem; }
+  .tier2-body li { margin-bottom: 0.25rem; }
+  .tier2-body strong { color: var(--ink); font-weight: 600; }
+  .tier2-body code {
+    font-family: var(--font-mono); font-size: 0.85em;
+    background: var(--royal-3); color: var(--royal-11);
+    padding: 0.1em 0.35em; border-radius: 3px;
+  }
+
+  .tier2-body table { width: 100%; border-collapse: collapse; font-size: 12.5px; margin: 0 0 0.5rem; }
+  .tier2-body th, .tier2-body td {
+    padding: 6px 10px;
+    text-align: left;
+    border-bottom: 1px solid var(--royal-4);
+    vertical-align: top;
+  }
+  .tier2-body th { color: var(--royal-11); font-weight: 500; font-family: var(--font-mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em; }
+
+  /* ─────────────────────────────────────────────────────── */
+  /* TIER 3 — Individual tool calls / sub-items              */
+  /* ─────────────────────────────────────────────────────── */
+
+  .tier3 {
+    background: var(--royal-1);
+    border: 1px solid var(--royal-5);
+    border-radius: var(--radius-sm);
+    margin-top: 8px;
+  }
+  .tier3:first-child { margin-top: 0; }
+  .tier3-summary {
+    list-style: none; cursor: pointer;
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 12px; user-select: none;
+  }
+  .tier3-summary::-webkit-details-marker { display: none; }
+  .tier3[open] > .tier3-summary { border-bottom: 1px solid var(--royal-4); }
+
+  .tier3-name {
+    flex: 1;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--royal-12);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .tier3-name .mcp { color: var(--royal-10); }
+  .tier3-name .arg { color: var(--ink-dim); }
+
+  .tier3-idx {
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    color: var(--ink-faint);
+    background: var(--royal-3);
+    padding: 2px 6px;
+    border-radius: 2px;
+  }
+
+  .tier3-body {
+    padding: 12px 14px 14px;
+  }
+
+  /* Stitch formatter */
+  .sp-group { margin: 0 0 14px; }
+  .sp-group:last-child { margin: 0; }
+  .sp-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--royal-11);
+    margin: 0 0 6px;
+  }
+
+  .sp-block {
+    border-left: 2px solid var(--royal-6);
+    padding: 4px 0 4px 14px;
+    margin: 0 0 12px;
+  }
+  .sp-block:last-child { margin: 0; }
+  .sp-block-title {
+    font-family: var(--font-sans);
+    font-size: 11.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--royal-11);
+    margin: 0 0 4px;
+  }
+  .sp-block-note {
+    font-family: var(--font-sans);
+    font-size: 12.5px;
+    color: var(--ink-dim);
+    font-style: italic;
+    margin: 0 0 6px;
+  }
+  .sp-block ul { margin: 0 0 0 4px; padding-left: 16px; }
+  .sp-block li {
+    font-family: var(--font-sans);
+    font-size: 13px;
+    color: var(--ink);
+    line-height: 1.55;
+    margin-bottom: 3px;
+  }
+  .sp-block li strong { color: var(--royal-12); font-weight: 600; }
+
+  .sp-intro {
+    font-family: var(--font-sans);
+    font-size: 13px;
+    color: var(--ink);
+    margin: 0 0 10px;
+    line-height: 1.55;
+  }
+
+  .hex {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-family: var(--font-mono); font-size: 11.5px;
+    color: var(--royal-11);
+    background: rgba(165,180,255,0.06);
+    padding: 1px 6px; border-radius: 2px;
+  }
+  .hex-swatch {
+    width: 10px; height: 10px; border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.15);
+  }
+
+  .sp-pre {
+    background: var(--royal-2);
+    border: 1px solid var(--royal-5);
+    border-radius: 3px;
+    padding: 10px 12px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.55;
+    color: var(--ink);
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+    margin: 0;
+  }
+
+  .sp-commentary {
+    background: rgba(77, 109, 232, 0.05);
+    border-left: 2px solid var(--royal-9);
+    padding: 10px 14px;
+    border-radius: 0 3px 3px 0;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    color: var(--ink);
+    line-height: 1.6;
+  }
+  .sp-commentary p { margin: 0 0 0.4rem; }
+  .sp-commentary p:last-child { margin: 0; }
+  .sp-commentary strong { color: var(--royal-12); font-weight: 600; }
+
+  /* Footer + tier key */
+  .key { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 16px; }
+  .key-card { border: 1px solid var(--border); background: var(--royal-2); border-radius: var(--radius-sm); padding: 14px 16px; }
+  .key-card .k-tag {
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--royal-11); margin-bottom: 6px;
+  }
+  .key-card h4 { font-family: var(--font-serif); font-size: 15px; font-weight: 500; margin: 0 0 4px; }
+  .key-card p { font-size: 12.5px; color: var(--ink-dim); margin: 0; line-height: 1.5; }
+
+  .footer-note { margin-top: 96px; padding-top: 24px; border-top: 1px solid var(--border); color: var(--ink-faint); font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="doc-header">
+    <div class="kicker">ChatTranscript · amended component</div>
+    <h1>Three-tier expanders, swapped colours</h1>
+    <p>Amended spec for <code style="font-family:var(--font-mono);font-size:13px;background:#1a1914;padding:2px 6px;border-radius:2px;color:var(--ink)">ChatTranscript.astro</code>. Single variant — no alternatives. Rendered against the <em>planner-stitch-batch-40-renders</em> transcript because it exercises every turn shape: short user reply, long multi-section Claude plan, and tool-call-heavy Claude turn with Stitch MCP prompts.</p>
+  </header>
+
+  <h2 class="section">Changes</h2>
+
+  <div class="changes">
+    <div class="chg">
+      <div class="chg-kick">01 · colour</div>
+      <h3>Swap Dylan ↔ Claude</h3>
+      <p>Dylan's turns now get the prominent treatment (bright royal-11 icon on recessed ring, left-accent border, brighter body colour). Claude recessed to a neutral ring with a dim gutter. Reader's eye lands on Dylan's thinking first; Claude reads as scaffolding.</p>
+    </div>
+    <div class="chg">
+      <div class="chg-kick">02 · expanders</div>
+      <h3>Three tiers, not one</h3>
+      <p>Tier 1 — turn headline (1-line summary). Tier 2 — sections (markdown headings) or tool-call group. Tier 3 — individual tool call body or section body. Every tier uses the same Lucide chevron chip.</p>
+    </div>
+    <div class="chg">
+      <div class="chg-kick">03 · chevron</div>
+      <h3>Prominent Lucide chip</h3>
+      <p>Chevron lives in a 26px circular chip (royal-4 background, royal-11 stroke). Rotates 180° on open, deepens to royal-6. Previously a bare 16px icon — too easy to miss.</p>
+    </div>
+    <div class="chg">
+      <div class="chg-kick">04 · stitch prompts</div>
+      <h3>Structured prompt formatter</h3>
+      <p>Stitch MCP prompts parse <code style="font-family:var(--font-mono);font-size:11.5px;background:rgba(165,180,255,0.06);color:var(--royal-11);padding:1px 5px;border-radius:2px">UPPERCASE BLOCK/ROW/LIST</code> as sub-headings, indent bullets as lists, chip hex values with a colour swatch. The result reads; raw <code>pre</code> didn't.</p>
+    </div>
+  </div>
+
+  <div class="decide">
+    <div class="d-label">Decision to make</div>
+    <p><strong>Tier-1 headline source.</strong> Option A: authored <code style="font-family:var(--font-mono);font-size:12px;color:var(--royal-11)">summary</code> field on each turn, hand-written at bookmark time. Option B: auto-extract the first sentence of the turn. Option A reads better but adds per-turn authoring cost; Option B always works. My default is A with B as fallback when <code style="font-family:var(--font-mono);font-size:12px;color:var(--royal-11)">summary</code> is absent.</p>
+  </div>
+
+  <div class="decide">
+    <div class="d-label">Decision to make</div>
+    <p><strong>Default-open tier 2.</strong> Should tier-2 sections auto-expand when the parent tier-1 is opened? Expanding makes reading flow naturally; keeping collapsed lets the reader scan sections first. Default recommendation: collapsed — the reader chose to expand tier 1, they can choose again.</p>
+  </div>
+
+  <h2 class="section">Live preview</h2>
+
+  <p class="lede">Three turns from the <em>planner-stitch-batch-40-renders</em> session. Click any chevron chip to expand. All tiers default collapsed.</p>
+
+  <aside class="transcript" aria-label="Chat transcript: Planner stitch batch 40 renders">
+
+    <p class="transcript-note">Hero example for <em>design-process-evolution</em> article: 40 mockups generated via Stitch MCP from 10 directions × 4 screens. Both Dylan's prompts and Stitch's rewritten prompts visible in expanders.</p>
+
+    <ol class="transcript-turns">
+
+      <!-- ───────────────────────────────────────────────── -->
+      <!-- TURN 1 — Claude, long headline-mode turn          -->
+      <!-- ───────────────────────────────────────────────── -->
+      <li class="turn turn--claude">
+        <div class="turn-gutter">
+          <div class="turn-icon" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
+          </div>
+          <span class="turn-label">claude</span>
+        </div>
+        <div class="turn-body">
+          <details>
+            <summary class="turn-headline">
+              <span class="headline-text">Chunk 11b — Gate 0: three things to approve, edit, or swap</span>
+              <span class="headline-meta">3 sections</span>
+              <span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>
+            </summary>
+            <div class="turn-body-expanded">
+              <div class="section-list">
+
+                <details class="tier2">
+                  <summary class="tier2-summary">
+                    <span class="tier2-kind">§ 1</span>
+                    <span class="tier2-title">The four screens</span>
+                    <span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>
+                  </summary>
+                  <div class="tier2-body">
+                    <p>The exploration generates 4 screens × 10 directions = 40 renders. The screens are:</p>
+                    <ul>
+                      <li><strong>D1</strong> — Today + Week dashboard (core daily view)</li>
+                      <li><strong>D3</strong> — Weekly review wizard (Sunday recap + assign habits)</li>
+                      <li><strong>D2</strong> — Daily review (per-day confirm/defer/skip)</li>
+                      <li><strong>B1</strong> — Create task form (one-off vs habit)</li>
+                    </ul>
+                    <p><strong>Question 1:</strong> Keep all four? Drop any? Add any?</p>
+                  </div>
+                </details>
+
+                <details class="tier2">
+                  <summary class="tier2-summary">
+                    <span class="tier2-kind">§ 2</span>
+                    <span class="tier2-title">The ten directions</span>
+                    <span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>
+                  </summary>
+                  <div class="tier2-body">
+                    <p>Each direction is one aesthetic thesis about what the app is. The rendered screens are deliberately more opinionated than the final design will be — picking an extreme helps reveal which direction you can actually live with.</p>
+                    <table>
+                      <thead><tr><th>#</th><th>Slug</th><th>Pitch</th><th>Plain-language summary</th></tr></thead>
+                      <tbody>
+                        <tr><td>1</td><td><code>calm-spacious</code></td><td>"do less, finish everything"</td><td>Lots of whitespace, quiet type, unhurried feel</td></tr>
+                        <tr><td>2</td><td><code>dense-power-user</code></td><td>"see everything, decide fast"</td><td>Tight rows, many items on screen, minimal chrome</td></tr>
+                        <tr><td>3</td><td><code>celebration-forward</code></td><td>"finishing feels great"</td><td>Streak chips big and loud, review opens with celebration</td></tr>
+                        <tr><td>4</td><td><code>editorial-magazine</code></td><td>"your planner as a weekly magazine about you"</td><td>Large serif titles, literary feel, metadata as bylines</td></tr>
+                        <tr><td>5</td><td><code>terminal-system</code></td><td>"the planner as developer tool"</td><td>Heavy monospace, TUI aesthetic, grid alignment</td></tr>
+                        <tr><td>6</td><td><code>card-based</code></td><td>"tactile, physical metaphors"</td><td>Every task is a card with rounded corners and shadow</td></tr>
+                      </tbody>
+                    </table>
+                    <p style="color:var(--ink-faint);font-size:12px;margin-top:8px">…4 more rows elided for this preview.</p>
+                  </div>
+                </details>
+
+                <details class="tier2">
+                  <summary class="tier2-summary">
+                    <span class="tier2-kind">§ 3</span>
+                    <span class="tier2-title">The review axis</span>
+                    <span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>
+                  </summary>
+                  <div class="tier2-body">
+                    <p>When you come back to 40 renders, what are you actually evaluating? This shapes the comparison artefact I build.</p>
+                    <p><strong>Question 3:</strong> The review axis.</p>
+                    <ul>
+                      <li><strong>a)</strong> Default — "which direction could I live with daily, and which makes the strongest portfolio case study"</li>
+                      <li><strong>b)</strong> Livability only — purely "which one would I use every day"</li>
+                      <li><strong>c)</strong> Case study only — "which one tells the richest story in the portfolio"</li>
+                      <li><strong>d)</strong> Custom — tell me</li>
+                    </ul>
+                  </div>
+                </details>
+
+              </div>
+            </div>
+          </details>
+        </div>
+      </li>
+
+      <!-- ───────────────────────────────────────────────── -->
+      <!-- TURN 2 — Dylan, verbatim (short)                  -->
+      <!-- ───────────────────────────────────────────────── -->
+      <li class="turn turn--user">
+        <div class="turn-gutter">
+          <div class="turn-icon" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <span class="turn-label">dylan</span>
+        </div>
+        <div class="turn-body">
+          <div class="turn-text"><p>1a 2a 3d which is best for a productionised app with 100s-10000s of users</p></div>
+        </div>
+      </li>
+
+      <!-- ───────────────────────────────────────────────── -->
+      <!-- TURN 3 — Claude, tool-call-heavy (Stitch MCP)     -->
+      <!-- ───────────────────────────────────────────────── -->
+      <li class="turn turn--claude">
+        <div class="turn-gutter">
+          <div class="turn-icon" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
+          </div>
+          <span class="turn-label">claude</span>
+        </div>
+        <div class="turn-body">
+          <details>
+            <summary class="turn-headline">
+              <span class="headline-text">Design system created — generating D1 Today fidelity render (Gemini 3.1 Pro)</span>
+              <span class="headline-meta">2 tools</span>
+              <span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>
+            </summary>
+            <div class="turn-body-expanded">
+
+              <div class="tier2-body" style="padding:0 0 12px;">
+                <p>Stitch stripped my <code>typography</code> and <code>spacing</code> maps from the response — that confirms the enum-only path, which means <strong>Inter Tight override didn't stick</strong>. Display will render in plain Inter. I'll flag this in the Gate 1 approval message.</p>
+              </div>
+
+              <div class="section-list">
+
+                <!-- Tier 3: tool call #1 - Stitch generate (with formatted prompt) -->
+                <details class="tier3" open>
+                  <summary class="tier3-summary">
+                    <span class="tier3-idx">#1</span>
+                    <span class="tier3-name"><span class="mcp">mcp__stitch__</span>generate_screen_from_text <span class="arg">· D1 Today fidelity render</span></span>
+                    <span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>
+                  </summary>
+                  <div class="tier3-body">
+
+                    <!-- Dylan's prompt (formatted) -->
+                    <div class="sp-group">
+                      <p class="sp-label">Dylan's prompt</p>
+                      <p class="sp-intro">Mobile planner app screen, 390px wide, Today view.</p>
+
+                      <div class="sp-block">
+                        <p class="sp-block-title">Header block</p>
+                        <p class="sp-block-note">top of screen, 20px horizontal frame padding</p>
+                        <ul>
+                          <li>Large display title <strong>"Thursday"</strong> in heavy bold sans (Inter Tight 700, 34px, letter-spacing −0.022em, line-height 1.05)</li>
+                          <li>Beneath the title, the date <strong>"24 APRIL"</strong> in small uppercase metadata (Inter 500, 11px, tracking 0.1em, muted grey <span class="hex"><span class="hex-swatch" style="background:#6E6A60"></span>#6E6A60</span>)</li>
+                          <li>Top-right: circular menu icon (lucide "menu", stroke 2, 20px, <span class="hex"><span class="hex-swatch" style="background:#28241F"></span>#28241F</span>)</li>
+                        </ul>
+                      </div>
+
+                      <div class="sp-block">
+                        <p class="sp-block-title">Streak row</p>
+                        <p class="sp-block-note">below header, 14px gap</p>
+                        <ul>
+                          <li>Rounded pill chip, spring-green light tint <span class="hex"><span class="hex-swatch" style="background:#E2F6EC"></span>#E2F6EC</span>, flame icon (lucide "flame", <span class="hex"><span class="hex-swatch" style="background:#17AC6F"></span>#17AC6F</span>) on the left, text <strong>"×5 day streak"</strong> (Inter 500, 13px)</li>
+                          <li>The pill is the <strong>only</strong> element using spring-green on this screen — the celebration accent.</li>
+                        </ul>
+                      </div>
+
+                      <div class="sp-block">
+                        <p class="sp-block-title">Task list</p>
+                        <p class="sp-block-note">section heading "TODAY" in Inter Tight 700, 15px; 5 task rows</p>
+                        <ul>
+                          <li>Each row: 12px top/bottom padding, flex horizontal, centre-aligned.</li>
+                          <li>Left: circular checkbox (22px, 1.5px outline <span class="hex"><span class="hex-swatch" style="background:#B5B0A5"></span>#B5B0A5</span>; filled <span class="hex"><span class="hex-swatch" style="background:#255F3F"></span>#255F3F</span> with white check when done)</li>
+                          <li>Middle: task title (Inter 500, 15px, line-height 1.45, <span class="hex"><span class="hex-swatch" style="background:#28241F"></span>#28241F</span>; muted + strikethrough if done)</li>
+                          <li>Right: optional time (Inter 500, 12px, tabular-nums, muted) — e.g. "07:30"</li>
+                          <li>Five tasks: Morning run · Team standup · Review PR feedback · Lunch with Sarah · Read 20 pages</li>
+                        </ul>
+                      </div>
+
+                      <div class="sp-block">
+                        <p class="sp-block-title">Floating action button</p>
+                        <p class="sp-block-note">bottom-right, above tab bar</p>
+                        <ul>
+                          <li>56px circle, solid forest-green <span class="hex"><span class="hex-swatch" style="background:#255F3F"></span>#255F3F</span></li>
+                          <li>Typographic "+" in Inter Tight 500, 28px, white</li>
+                          <li>No shadow (design system locks flat surfaces)</li>
+                        </ul>
+                      </div>
+
+                      <div class="sp-block">
+                        <p class="sp-block-title">Bottom tab bar</p>
+                        <p class="sp-block-note">fixed 72px, warm-paper bg, 1px top border <span class="hex"><span class="hex-swatch" style="background:#DDDAD1"></span>#DDDAD1</span></p>
+                        <ul>
+                          <li>Four equal tabs: <strong>Today</strong> (active) · <strong>Week</strong> · <strong>Review</strong> · <strong>Profile</strong></li>
+                          <li>Icons 24px lucide, stroke 2. Labels Inter 500, 10px, UPPERCASE, tracking 0.1em.</li>
+                          <li>Active tab uses forest-green <span class="hex"><span class="hex-swatch" style="background:#255F3F"></span>#255F3F</span>; inactive <span class="hex"><span class="hex-swatch" style="background:#6E6A60"></span>#6E6A60</span>.</li>
+                        </ul>
+                      </div>
+
+                      <div class="sp-block">
+                        <p class="sp-block-title">Global</p>
+                        <ul>
+                          <li>Canvas <span class="hex"><span class="hex-swatch" style="background:#FAF7EF"></span>#FAF7EF</span> (warm paper)</li>
+                          <li>All type Inter / Inter Tight (no serif, no mono)</li>
+                          <li>Monochromatic forest-green palette; spring-green only on the streak pill</li>
+                          <li>Flat surfaces, rounded corners 12px on grouped surfaces, 50% on circles</li>
+                        </ul>
+                      </div>
+                    </div>
+
+                    <!-- Stitch's rewritten prompt (also formatted, collapsed by default) -->
+                    <details class="tier3" style="background:var(--royal-2);margin-top:10px;">
+                      <summary class="tier3-summary">
+                        <span class="tier3-idx">rewritten</span>
+                        <span class="tier3-name"><span class="arg">Stitch's rewritten prompt — "Today Planner View"</span></span>
+                        <span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>
+                      </summary>
+                      <div class="tier3-body">
+                        <p class="sp-intro">A mobile planner app screen, 390px wide, Today view. Canvas <span class="hex"><span class="hex-swatch" style="background:#FAF7EF"></span>#FAF7EF</span>.</p>
+                        <div class="sp-block">
+                          <p class="sp-block-title">Header block</p>
+                          <ul>
+                            <li>"Thursday" — Inter Tight 700, 34px, <span class="hex"><span class="hex-swatch" style="background:#255F3F"></span>#255F3F</span></li>
+                            <li>Date "24 APRIL" — Inter 500, 11px, <span class="hex"><span class="hex-swatch" style="background:#6E6A60"></span>#6E6A60</span></li>
+                            <li>Menu icon top-right, 20px, <span class="hex"><span class="hex-swatch" style="background:#28241F"></span>#28241F</span></li>
+                          </ul>
+                        </div>
+                        <p style="font-size:12px;color:var(--ink-faint);margin:8px 0 0">Stitch preserved structure and colours but stripped the typography/spacing maps — fidelity gap noted in turn body.</p>
+                      </div>
+                    </details>
+
+                    <!-- Commentary -->
+                    <details class="tier3" style="background:var(--royal-2);">
+                      <summary class="tier3-summary">
+                        <span class="tier3-idx">notes</span>
+                        <span class="tier3-name"><span class="arg">Stitch's commentary</span></span>
+                        <span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>
+                      </summary>
+                      <div class="tier3-body">
+                        <div class="sp-commentary">
+                          <p>I've designed the "Today" view for your mobile planner app.</p>
+                          <p><strong>Typography & layout:</strong> bold "Thursday" header with date and menu icon, using Inter / Inter Tight as requested.</p>
+                          <p><strong>Visual feedback:</strong> clear task list with "Today" and "Later" sections. Completed tasks are struck through with filled green checkboxes; incomplete tasks feature muted outlines.</p>
+                          <p><strong>Brand accents:</strong> forest-green monochromatic palette maintained throughout, with the spring-green streak pill as the sole celebration accent.</p>
+                        </div>
+                      </div>
+                    </details>
+
+                  </div>
+                </details>
+
+                <!-- Tier 3: tool call #2 - PowerShell download -->
+                <details class="tier3">
+                  <summary class="tier3-summary">
+                    <span class="tier3-idx">#2</span>
+                    <span class="tier3-name">PowerShell <span class="arg">· download render · Invoke-WebRequest → 00-fidelity-test.png (90 KB)</span></span>
+                    <span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>
+                  </summary>
+                  <div class="tier3-body">
+                    <p class="sp-label">Command</p>
+                    <pre class="sp-pre">New-Item -Path "~/Documents/Claude code\planner-app\plans\v1-redesign\stitch-layouts" -ItemType Directory -Force | Out-Null
+Invoke-WebRequest -Uri "https://lh3.googleusercontent.com/aida/…s=0" `
+                  -OutFile "~/Documents/…\stitch-layouts\00-fidelity-test.png"
+Get-Item "~/…\00-fidelity-test.png" | Select-Object Name, Length</pre>
+                    <p style="font-size:12px;color:var(--ink-faint);margin:8px 0 0">Per workspace rule: never share lh3.googleusercontent.com URLs directly — download locally first.</p>
+                  </div>
+                </details>
+
+              </div>
+            </div>
+          </details>
+        </div>
+      </li>
+
+    </ol>
+  </aside>
+
+  <h2 class="section">Tier key</h2>
+
+  <div class="key">
+    <div class="key-card">
+      <div class="k-tag">Tier 1</div>
+      <h4>Turn headline</h4>
+      <p>One-line serif summary + chevron chip + tier-2 count. Always visible. One per turn.</p>
+    </div>
+    <div class="key-card">
+      <div class="k-tag">Tier 2</div>
+      <h4>Section / tool group</h4>
+      <p>Markdown <code style="font-family:var(--font-mono);font-size:11.5px;color:var(--royal-11)">##</code> heading, or the tool-call group. Labelled with § or tool count.</p>
+    </div>
+    <div class="key-card">
+      <div class="k-tag">Tier 3</div>
+      <h4>Section body / tool call</h4>
+      <p>Individual tool call body, or the full section markdown. Leaf nodes — no further nesting.</p>
+    </div>
+  </div>
+
+  <p class="footer-note">
+    Amends <code style="background:#1a1914;padding:2px 6px;border-radius:2px;color:var(--ink);font-family:var(--font-mono)">src/components/astro/ChatTranscript.astro</code>. Source transcript: <code style="background:#1a1914;padding:2px 6px;border-radius:2px;color:var(--ink);font-family:var(--font-mono)">src/content/transcripts/planner-stitch-batch-40-renders.json</code>. v1 · 2026-04-13.
+  </p>
+
+</div>
+</body>
+</html>

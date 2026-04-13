@@ -90,6 +90,27 @@ export const palette = {
     dim: '#9C968A',
     faint: '#5E584F',
   },
+  /**
+   * Violet signal — 5-step secondary accent. Used only by <ChatTranscript>
+   * to give Dylan's turns a distinct register from Claude's royal turns.
+   * Do NOT introduce new usages without design review — the whole palette
+   * is otherwise royal-monochrome by design.
+   */
+  violet: {
+    8:  '#8C3BDB',
+    9:  '#9D4DE8',
+    10: '#B47CFF',
+    11: '#C89BFF',
+    12: '#E6D4FF',
+  },
+  /**
+   * Signature gradient — royal → violet diagonal. Used on <ChatTranscript>'s
+   * outer border (via the --grad-rv CSS var in globals.css) and reserved
+   * for any future "this is the showcase" container treatment.
+   */
+  gradients: {
+    royalViolet: 'linear-gradient(135deg, #3B5BDB 0%, #8C3BDB 100%)',
+  },
 } as const;
 
 /**
