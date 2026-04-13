@@ -1,5 +1,17 @@
 # Development Diary
 
+## 2026-04-13 — Evolution showcase planned for the-weekly case study
+
+The-weekly case study draft (locked 2026-04-12) asserts in Lesson 2 that "skipping design was the biggest mistake" and that the design workflow has been iterated on several times since. That's a claim in prose with no evidence. An evolution showcase — three live, interactive versions of the-weekly at distinct commits, embedded as a tab switcher under Lesson 2 — turns the assertion into visible proof. The reader watches the arc themselves.
+
+The narrative frame had to be chosen carefully. "I got better at visual design" is an insight, not an assertion, and banned by the writing-style rules. The decision-led frame works: Stage 1 → 2 was triggered by a colleague's MOB Kitchen suggestion forcing a design audit; Stage 2 → 3 was triggered by realising visual tokens needed to live outside the project, which became the workspace design system. Each caption names the decision, not the result.
+
+Hosting: three Cloudflare Workers (matches the portfolio's own hosting pattern), no password. The-weekly is already on Netlify; new deploys come from git worktrees at the three historical commits so nothing mutates master. One implementation detail mattered more than expected: the three iframes need to keep their own page state across tab switches. If the reader is on ingredient review in Stage 1, switches to Stage 2, then back — they should land on ingredient review, not splash. This rules out swapping `src` on a single iframe (which remounts the document and loses state). Instead: render all three iframes, toggle visibility via the `hidden` attribute, never touch `src` after mount.
+
+Plan saved to `plans/the-weekly-evolution-showcase.md`. Chunk 4d scope updated to include the `<VersionedEmbed>` component and the three Workers deploys. Nothing built yet — the plan executes during 4d alongside the prose rewrite.
+
+---
+
 ## 2026-04-13 — Plan amendments: timeline visual, workspace-audit reframe, design-system showcase
 
 Four changes to the implementation plan, no code. The interesting one was the workspace-audit conversion. It was originally scoped as a lightweight case study in chunk 5 — 200–350 words, meta-toned, "this site is also a case study"-adjacent. Thinking about it as a case study never felt right. There's no product artefact at its core; the "thing built" is the rules/hooks/memory/skills configuration, which doesn't photograph. The signal it carries is *thinking* about how to configure Claude Code intentionally, not shipping. That's a writing post, not a case study.

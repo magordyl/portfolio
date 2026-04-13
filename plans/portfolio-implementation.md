@@ -399,6 +399,7 @@ Second draft. Iterate until both template and case study feel right. **Hard stop
 - `src/layouts/CaseStudyLayout.astro` built against the locked 4c.1 layout
 - `src/pages/projects/[slug].astro` dynamic route
 - Imagery sourced and optimised per 4a.3 standards
+- **Evolution showcase** — `<VersionedEmbed>` component + three Cloudflare Workers deploys (Stages 1/2/3 of the-weekly). Full plan in `plans/the-weekly-evolution-showcase.md`. Renders under Lesson 2 as decision-led visible evidence.
 
 **Acceptance:**
 - the-weekly case study renders on `/projects/the-weekly` and visually matches the 4c.1 mockup

@@ -45,9 +45,16 @@ Astro uses `@tailwindcss/vite` (Vite plugin), NOT `@astrojs/tailwind`. The `astr
 
 ## Current Status (2026-04-13)
 
-**Last session (2026-04-13) — Plan amendments (no code).**
+**Last session (2026-04-13 late) — Evolution showcase plan for the-weekly case study.**
 
-**What was done this session (portfolio side):**
+Designed a decision-led "evolution showcase" for the-weekly case study: three live interactive versions of the-weekly at different commits (POC / design overhaul / current), embedded as a tab switcher under Lesson 2 of the case study. Full plan at `plans/the-weekly-evolution-showcase.md`. Chunk 4d scope in `plans/portfolio-implementation.md` updated to include the `<VersionedEmbed>` component and three Cloudflare Workers deploys.
+
+Key implementation details locked:
+- Three Workers at `the-weekly-v{1,2,3}.magordyl.workers.dev`, built from git worktrees at commits `50e79ad` / `473227c` / `ae5bae7`. No password.
+- `<VersionedEmbed>` keeps all three iframes mounted and toggles visibility (never swaps `src`) so each iframe preserves its own page state across tab switches.
+- Decision captions per stage, not "got better at design". Placeholders drafted; Dylan rewrites pre-publish.
+
+**Prior session (2026-04-13 earlier) — Plan amendments (no code).**
 - Added `<ProjectTimeline>` component to chunk 4c.1 — linear timeline with milestone vs pivot nodes, data from new optional `timeline` frontmatter field on projects schema. To be explored in case-study-v1/v2 design explorers.
 - Converted `workspace-audit` from a case-study project to a writing topic. Scrubbed from chunk 2 placeholder list, chunk 4b word-count targets, chunk 5 deliverables. Created `plans/writing-topics/claude-workspace-audit.md` with candidate thesis and four supporting arguments. Added to `plans/writing-topics/INDEX.md`. The `src/content/projects/workspace-audit.mdx` placeholder file still exists and should be removed next time chunk 2 is touched.
 - Added new **chunk 7 — Design system showcase page** (renumbered existing retrofit chunk to chunk 8). `/design-system` route rendering actual components (not screenshots), footer-linked not in main nav. Design explorer first (`plans/portfolio-assets/design-system-showcase.html`). Gate: after chunk 6 ships so the component inventory is complete.
