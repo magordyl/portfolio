@@ -1,0 +1,38 @@
+{
+  "id": "planner-typography-gate-0",
+  "title": "Planner typography gate 0",
+  "date": "2026-04-13",
+  "context": "",
+  "note": "Gate 0 for chunk 11a: 6 pairings expanded to 10 free-font candidates, caught the 3-font vs workspace rule mismatch, decided to test whether mono earns its slot inside Round 1",
+  "sourceSessionId": "8db3e11a-b14b-4b14-b7b0-486cc40abb81",
+  "turns": [
+    {
+      "role": "assistant",
+      "text": "Going to write `typography-explorer-v1.html` now — ~1500 lines, 10 pairings × 390px frames, shared Today-screen content, dark page chrome matching v4.",
+      "collapsedTools": [
+        "[Read ~/Documents/Claude code\\planner-app\\plans\\v1-redesign\\design-explorer-v4.html]",
+        "[Read ~/Documents/Claude code\\planner-app\\plans\\v1-redesign\\design-explorer-v4.html]",
+        "[Write ~/Documents/Claude code\\planner-app\\plans\\v1-redesign\\typography-explorer-v1.html]",
+        "[Bash: wc -l \"~/Documents/Claude co]"
+      ]
+    },
+    {
+      "role": "assistant",
+      "text": "Rendered. 1577 lines, 10 cells at 390px, v4 frame reused, Forest × Spring palette locked.\n\n**Open in browser:**\n`~/Documents/Claude code\\planner-app\\plans\\v1-redesign\\typography-explorer-v1.html`\n\n**Layout:** 3-col grid at ≥1380px, 2-col medium, 1-col mobile. Each cell has the pairing name rendered in its own display face (so you see the face before you see the frame), three font chips (mono cells green-tinted and labelled \"Manrope + tabular-nums\" etc), the full 390px Today-screen frame, and a contenteditable annotation slot below.\n\n**What to watch for:**\n- The \"Thursday\" display header — this is where editorial vs utilitarian becomes visible.\n- The time column (07:30 / 09:00 / 06:45 / 14:00 / 18:30) — vertical digit alignment in two-font cells tells you whether tabular-nums does the job.\n- The `13 APR · WK 15` meta and section counts in the two-font cells — if they read sloppy, mono earned its slot in that pairing.\n- Row rhythm — DM Serif Display vs Playfair Display will feel very different on the masthead; Instrument Serif and Newsreader are subtle.\n\n**Gotcha to flag:** Google Fonts may take a few seconds to load all 20 families on first open. If a cell shows system-font fallback briefly, hard-refresh. If any face fails entirely on Windows, tell me which cell and I'll check the URL.\n\nReview when ready and tell me the winner, finalists, or (if it goes that way) the none-of-the-above call — I'll render v2 finalists or expand the set accordingly.",
+      "kind": "plan",
+      "summary": "Rendered"
+    },
+    {
+      "role": "user",
+      "text": "<command-message>bookmark</command-message>\n<command-name>/bookmark</command-name>\n<command-args>\"typography exploration for Planner\"</command-args>"
+    },
+    {
+      "role": "assistant",
+      "text": "The argument isn't kebab-case. The distinctive moment in this thread was catching the 3-font default against the workspace's \"2 + optional mono\" rule, then deciding to test whether mono earns its slot inside Round 1 rather than inheriting it.\n\nSuggested slug: **`planner-typography-mono-slot-decision`**\n\nAlternatives:\n- `planner-typography-gate-0`  (scope-focused)\n- `planner-round-1-mono-test`  (outcome-focused)\n- `planner-font-count-rule-catch`  (the Dylan-caught-it moment)\n\nWhich slug, and want to include a short note (optional)? Default `--back 6` should cover the mono decision exchange; say if you want more turns to capture the 6→10 expansion too."
+    },
+    {
+      "role": "user",
+      "text": "planner-typography-gate-0, extend to more turns I want the 6-10 expansion too. This will be a demonstration of the design explorer process for typography"
+    }
+  ]
+}

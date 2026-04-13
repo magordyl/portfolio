@@ -1,0 +1,24 @@
+{
+  "id": "claude-code-builds-custom-gpt",
+  "title": "Claude code builds custom gpt",
+  "date": "2026-04-13",
+  "context": "",
+  "note": "using Claude Code to design and package a ChatGPT custom GPT — cross-tool workflow, revisit after trying it at work",
+  "sourceSessionId": "1b003f62-a579-4985-bc0a-3fdb4d24fd4f",
+  "turns": [
+    {
+      "role": "assistant",
+      "text": "Done. Zip ready at:\n\n`~/Documents/Claude code\\scratch\\process-flow-gpt.zip`\n\nContents: top-level README explaining the A/B choice, plus two self-contained folders. Each folder has `instructions.md` (paste into Instructions field), `mermaid-style-guide.md` + `elicitation-patterns.md` (upload as Knowledge), and a README with 5-minute setup steps. Conversation starters set to your three. Export guidance is in the instructions — the GPT shows it to users in plain language (save image, paste code into mermaid.live, drop into slides/docs) the first time it renders in a conversation.\n\nRecommendation in the top-level README defaults to Option A (mermaid.ink) for cross-client reliability; B is there if you want zero external dependencies.",
+      "collapsedTools": [
+        "[Bash: cp \"~/Documents/Claude code/]",
+        "[Write ~/Documents/Claude code\\scratch\\process-flow-gpt\\README.md]",
+        "[PowerShell]",
+        "[Bash: ls -la \"~/Documents/Claude c]"
+      ]
+    },
+    {
+      "role": "user",
+      "text": "<command-message>bookmark</command-message>\n<command-name>/bookmark</command-name>\n<command-args>Fun example of using claude code to make a chatGPT custom GPT. Also add as a potential writing topic for the future, once I've tried it and reflected on the results</command-args>"
+    }
+  ]
+}
