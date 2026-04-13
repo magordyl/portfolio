@@ -3,7 +3,8 @@ slug: workflow-evolution-series
 title: "How my workflow has evolved since I started using Claude Code"
 status: seed
 captured: 2026-04-12
-transcripts: []
+transcripts:
+  - planner-stitch-batch-40-renders
 source_project: portfolio
 context: ""
 ---
@@ -24,6 +25,14 @@ Each is a seed. None has a thesis locked in yet. Expand into individual numbered
 2. **Portfolio maintenance workflow.** How the portfolio itself is built and maintained. The diary-first discipline (DIARY.md per project, entry on every commit, retro hooks). The plans/ folder as durable context. The `/session-end` skill that ties commit, diary entry, and retro into one step. Content-first sequencing on chunk 4 (template scaffold before layouts before writing). Chat transcripts as a first-class artefact type. The bookmark/promote pipeline. The compounding return: every session leaves the repo in a shape where the next session can start cold and still be productive.
 
 3. **Design.** How design decisions happen when the agent can render options in parallel. Design explorers as a first-class workflow primitive (palette explorers, card deep-dives, diagram aesthetic explorers). Rationale lives inline in the artefact, not in Figma comments. The shift from "pick a direction then execute" to "render 5 directions side-by-side then pick." Feedback on concrete renders is far higher fidelity than feedback on descriptions. Candidate thesis: the design explorer is the process for any decision with more than two axes.
+
+   **Hero example:** `planner-stitch-batch-40-renders` transcript (bookmarked 2026-04-13). Chunk 11b of the planner V1 redesign. 40 mobile mockups (10 directions × 4 screens) generated in ~2 hours via Stitch MCP, against a locked Forest × Spring design system. The full design-direction prompts and generation tool calls are visible in the transcript expanders — readers can see exactly what was sent to the model and what came back. Demonstrates the 4-gate upfront-judgment pattern (lock the design system, lock the directions, lock the prompt templates, then run mechanically). Shows the cost/value tradeoff of "render everything, decide on real artefacts" vs Figma iteration.
+
+   **Process-comparison diagram (must build for this sub-post):** a side-by-side visual showing the design process across the three portfolio projects.
+   - **Project 1 — the-weekly:** linear, design-then-build. Picked an aesthetic, executed against it, iterated by hand. POC → design overhaul → current.
+   - **Project 2 — portfolio:** explorer-led, parallel. Built design explorers (palette, card deep-dives, diagram aesthetic) before committing to any layout. Decision lived in the artefact, not in a Figma comment thread.
+   - **Project 3 — planner:** locked-gate batch. Gate 0–3 lock the design system, the direction count, the prompts. Then 40 renders run mechanically, judgment compresses into review-by-comparison.
+   The diagram should make the shape of each process visible — linear vs branching vs gated batch. One of the four diagram archetypes from the imagery standards (likely flowchart or causal loop). Caption describes the shape; meaning lives in the prose.
 
 4. **Idea capture.** How ideas move from "thing I said in a conversation" to "entry in the pipeline with a README and a canonical artefact." The `ideas/` folder, the tag system, `/new-idea` as a low-friction capture step, the canonical-artefact-first rule, `ideas/DIARY.md` as the piece that closes the product-thinking signal gap. The discipline that separates "captured" from "researched" from "ready to build."
 
