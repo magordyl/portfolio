@@ -1,0 +1,43 @@
+{
+  "id": "the-weekly-evolution-showcase-decision",
+  "title": "The weekly evolution showcase decision",
+  "date": "2026-04-13",
+  "context": "",
+  "note": "hero example for the design-process-evolution sub-post: deciding the evolution showcase frame for the-weekly case study",
+  "sourceSessionId": "569cdee1-021c-46d6-83b3-7f9a4638dc29",
+  "_capturedAt": "2026-04-13T09:12:01.617Z",
+  "turns": [
+    {
+      "role": "assistant",
+      "text": "**Step 9 — summary.**\n\nDesigned the evolution showcase for the-weekly case study: three live interactive versions of the app (POC / design overhaul / current) embedded as a tab switcher under Lesson 2, hosted on three Cloudflare Workers, with per-stage iframe state preserved via `hidden`-toggling (not `src`-swapping). Decision-led captions per stage, not a \"got better at design\" frame.\n\n**Committed:**\n- `portfolio/main` → `9b9e3a4` (plan, chunk 4d scope, CLAUDE.md status, DIARY)\n- `workspace/master` → `533aa50` (learning diary entry)\n\n**Branches open:** none. Portfolio on `main`, workspace on `master`, both pushed.\n\n**Next session:**\n1. Chunk 4c.1 — case study design explorers (with the new `<ProjectTimeline>` + both `<ChatTranscript>` sender-colour variants)\n2. Chunk 4d — prose rewrite + build, including the evolution showcase execution per `plans/the-weekly-evolution-showcase.md`\n3. Two pre-existing transcript drafts still pending in `portfolio/src/content/transcripts/drafts/` — promote / edit / skip when ready\n\n**Pending:** no blockers.\n\n```\n---\n✅ SESSION END COMPLETE — safe to close or clear this session.\n---\n```",
+      "collapsedTools": [
+        "[Bash: cd \"~/Documents/Claude code\"]",
+        "[Bash: cd \"~/Documents/Claude code\"]"
+      ],
+      "kind": "plan",
+      "summary": "Plan (3 steps)"
+    },
+    {
+      "role": "user",
+      "text": "<command-message>bookmark</command-message>\n<command-name>/bookmark</command-name>\n<command-args>this will be the hero example for the article I'm planning to write about how my design process has evolved. Make sure to capture this full conversation, including all of the tool calls to stitch MCP, and the prompts they used. Also add to the plan for this writing article that I want to do a process diagram visual that compares my design process for projects 1, 2, 3 (the-weekly, portfolio, planner)</command-args>"
+    },
+    {
+      "role": "assistant",
+      "text": "Two flags before running:\n\n1. **The Stitch MCP calls aren't in this session.** This conversation was purely about the-weekly evolution showcase planning — no Stitch invocations. The Stitch work happened in earlier sessions (chunk 4c.1 layout ideation, the planner 40-render batch). `/bookmark` only captures from the current session's JSONL. To get those Stitch turns, we'd need to bookmark them separately from those sessions' transcripts (which still exist in `~/.claude/projects/`).\n2. **I'll capture this full session** with a generous `--back` (~14 turns covers the lot), then update the writing topic plan with the diagram comparison ask.\n\nLet me find the existing writing topic for design process evolution if it exists.",
+      "collapsedTools": [
+        "[Bash: ls \"~/Documents/Claude code\\]",
+        "[Read ~/Documents/Claude code\\portfolio\\plans\\writing-topics\\INDEX.md]",
+        "[Read ~/Documents/Claude code\\portfolio\\plans\\writing-topics\\workflow-evolution-series.md]"
+      ],
+      "kind": "plan",
+      "summary": "Two flags before running:"
+    },
+    {
+      "role": "assistant",
+      "text": "Sub-post 3 (Design) is the right home. Updating it with the hero example reference and the process-diagram ask, then bookmarking.",
+      "collapsedTools": [
+        "[Edit ~/Documents/Claude code\\portfolio\\plans\\writing-topics\\workflow-evolution-series.md]"
+      ]
+    }
+  ]
+}
