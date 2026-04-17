@@ -1,5 +1,23 @@
 # Development Diary
 
+## 2026-04-17 — Chunks 4c.0.5 + 4c.1a shipped: /design-system kit + ChatTranscript v3 port
+
+Three commits: `3e68c07` (kit scaffold), `428f905` (plan restructure), `41fac2c` (ChatTranscript port). The kit is now the dev surface every downstream component renders into first, and the first real component — ChatTranscript — landed there against the locked tokens.
+
+The plan restructure earns its own note. Chunk 4c.1 had grown three components deep (ChatTranscript + ProjectTimeline + layout explorers), which meant the commit boundary sat at "all three done" — a bad shape for a component that's 500 lines on its own. Split into 4c.1a (ChatTranscript only) and 4c.1b (layout explorers). ProjectTimeline came out of 4c.1 entirely and moved to a new chunk 7.5 after launch. A timeline is a case-study enhancement, not a shipping prerequisite — leaving a stub slot in the case study layout is fine, retrofitting once the first case study is live is fine. Removing the blocker unsticks the whole case-study track.
+
+The token decision on ChatTranscript was the judgement call worth remembering. v3.html uses identity-carrying colour pairs for Dylan (violet) and Claude (royal) — badges, labels, accent lines. The aggressive reuse option was to bind everything to existing semantic aliases (`--link` for accent, `--fg-subtle` for label, etc.) and accept the coupling. The conservative option was dedicated `--transcript-*` tokens for every surface the component paints. Went conservative: 16 new tokens, each scoped by name to this component, with the allowlist doc naming the raw-scale pair each role resolves to. Cost is 16 lines of boilerplate in `globals.css`. Benefit is that the next transcript-shaped component (build-log drawer, code-review viewer) can reuse `--transcript-*` without accidentally tugging `--link` colour when someone tweaks link hover next quarter.
+
+The allowlist is now empty. That was the acceptance criterion for 4c.0 being done — all migrations converge on role tokens only. The ChatTranscript port was the last file with raw-scale references, migrated in the same commit as the port itself. `scripts/check-raw-colours.mjs` still runs on every `npm run check` as a speed bump against future ad-hoc additions.
+
+One pattern surfaced that wants a workspace rule. Badge icons at 14px inside a 26px circle read anemic at the workspace default `tokens.icons.strokeWidth: 1.5`. The v3.html explorer used `stroke-2` on those icons. The workspace rule says never hardcode stroke-width, which is correct — but didn't address sub-20px icons where 1.5 genuinely doesn't work. Resolved by adding a component-scoped CSS var (`--badge-stroke: 2` on `.badge`, applied via `stroke-width: var(--badge-stroke)`). Override stays inside the component; workspace default stays at 1.5. Proposed addition to `.claude/rules/design-system.md` pending approval.
+
+Cluster synthesis fired correctly on the 21-turn Stitch batch in the planner-stitch-batch-40-renders transcript — merged into one expander with a synthesised heading, wrap-up pill stayed outside. Native `<details>`, zero client JS, build-time markdown via `marked`. `npm run check` green, Cloudflare auto-deploy kicked.
+
+Remaining: 4c.1b (case study layout explorers), then 4c.2–4c.5, then 4d (the-weekly prose). Chunk 7 slimmed to a post-launch curation pass; 7.5 is ProjectTimeline, post-launch.
+
+---
+
 ## 2026-04-17 — Chunk 4c.0 shipped: role tokens, migrations, build-time enforcement
 
 Commit `b19bc72`. The gate the 2026-04-14 entry flagged is now executed. Raw `--royal-*` / `--violet-*` references outside `globals.css`, `design.tokens.ts`, and one allowlisted file now fail `npm run check` via a Node grep script wired before `astro check`. Components reference role tokens only: `--tag-{default,active,signal,status}-{fg,bg,border}`, `--kicker-{default,signal}-fg`, `--dot-{neutral,active,attention}`, `--border-hairline`, `--expander-pill-{high,bg}-{fg,border}`, plus `--link-hover`, `--button-fg`, `--placeholder-bg`, `--placeholder-gradient`.

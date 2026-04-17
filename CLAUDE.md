@@ -45,26 +45,36 @@ Astro uses `@tailwindcss/vite` (Vite plugin), NOT `@astrojs/tailwind`. The `astr
 
 ## Current Status (2026-04-17)
 
-**Last session (2026-04-17 PM) — Chunk 4c.0 shipped: role-token layer + migration + check script.**
+**Last session (2026-04-17 evening) — Chunks 4c.0.5 + 4c.1a shipped: /design-system kit scaffold + ChatTranscript v3 port.**
 
-Commit `b19bc72` on `main` (pushed; Cloudflare Pages auto-deploy kicked off). 12 files, +349/-23. The colour-role rationalisation gate from the prior session is now executed — 4c.1 can open.
+Three commits on `main` (pushed; Cloudflare auto-deploy kicked):
+- `3e68c07` — `/design-system` kit scaffold (tokens, type, spacing, radius, icons, chunk-3 components live-rendered).
+- `428f905` — plan restructure (split 4c.1 → 4c.1a ChatTranscript + 4c.1b layouts; `<ProjectTimeline>` deferred to new post-launch chunk 7.5).
+- `41fac2c` — ChatTranscript v3 port. 9 files, +657/-466.
+
+**ChatTranscript v3 port specifics:**
+- Near-total rewrite of `src/components/astro/ChatTranscript.astro` as an Astro port of `plans/portfolio-stitch-assets/chat-transcript-explorer-v3.html`. Zero client JS (static HTML + native `<details>`). Build-time markdown via `marked` (added as dep).
+- Full design parity with v3.html: gradient royal-violet border on royal-1 inner, 12px radius, block grouping (consecutive same-role turns share one badge + full-block left accent), cluster expander (runs of 3+ consecutive tool-heavy Claude turns merge with a synthesised heading), wrap-up pill (trailing directives stay visible), flat expander as locked default, content filters (compaction + slash-command turns dropped at render). WCAG 1.4.1 satisfied — role labels stay visible at all viewports.
+- 16 new role tokens added (`--transcript-*` family + `--prose-heading-fg`). All scoped; see `plans/portfolio-design-tokens.md` §ChatTranscript for allowlist entries + reuse rationale. Mirrored in `design.tokens.ts` under `roles.transcript` + `roles.prose`.
+- Schema extension: optional `clusterTitle?: string` on transcript turn shape (author override for the synthesised cluster heading; set on the first turn of the run).
+- `check-raw-colours` allowlist is now **empty**. Every component in `src/components`, `src/layouts`, `src/pages` references role tokens only. The allowlist file list in `scripts/check-raw-colours.mjs` can stay as-is (empty `Set`) to serve as a speed bump for future ad-hoc additions.
+- Kit entry: `/design-system` now renders the planner-stitch-batch-40-renders transcript in both `inline` and `breakout` modes. Breakout is a class hook (`mode-breakout`) with no visual divergence yet — case-study layouts in 4c.1b will wire it to extend past the prose column.
+- Build: `npm run check` = 0 errors, 0 warnings, 0 hints. Cluster-heading synthesis verified in built HTML (matched the 21-turn Stitch run).
+
+**Per-component icon stroke pattern (new):** ChatTranscript introduces a component-scoped `--badge-stroke: 2` CSS var for its 14px badge/chevron icons, applied via `stroke-width: var(--badge-stroke)`. The workspace default (1.5) reads anemic at sub-20px sizes. Use this pattern for any future component with icons below 20px; don't raise the workspace default.
+
+**Prior session (2026-04-17 PM) — Chunk 4c.0 shipped: role-token layer + migration + check script.**
+
+Commit `b19bc72` on `main`. 12 files, +349/-23. The colour-role rationalisation gate is executed — 4c.1a has now consumed it (empty allowlist).
 
 What landed:
 - **Audit** at `plans/portfolio-colour-audit.md` enumerates every raw-scale reference outside `globals.css`. Dominant pattern was `--royal-11` as link-hover (6 sites). Other patterns: two placeholder image fills, one WCAG-failing button fg (`--royal-12` on `--royal-8` = 4.17:1, fails AA body at 16px).
 - **Role tokens** in `src/styles/globals.css` + `design.tokens.ts` (new `roles` export) covering all locked allowlists: `--tag-{default,active,signal,status}-{fg,bg,border}`, `--kicker-{default,signal}-fg`, `--dot-{neutral,active,attention}`, `--border-hairline`, `--expander-pill-{high,bg}-{fg,border}`, plus `--link-hover`, `--button-fg`, `--placeholder-bg`, `--placeholder-gradient`.
-- **Migration** of `CaseStudyCard`, `BuildLogTicker`, `PageHeader`, `CaseStudyLayout`, `KickerLabel`, `index.astro`. `ChatTranscript.astro` deferred per session scope decision — role-token migration happens as part of the 4c.1 v3 port (the intermediate migration would be wasted work).
-- **Enforcement** via new `scripts/check-raw-colours.mjs`, wired into `npm run check` as the first step. Blocks raw `--royal-*` / `--violet-*` refs outside `globals.css`, `design.tokens.ts`, and the `ChatTranscript.astro` allowlist entry. Remove that allowlist entry when 4c.1 migrates ChatTranscript.
-- **Allowlist docs** in `plans/portfolio-design-tokens.md` (new "Component variant allowlists" section) with a hard "update-doc-first" rule for new variants. Workspace rule mirrored in `.claude/rules/design-system.md`.
+- **Migration** of `CaseStudyCard`, `BuildLogTicker`, `PageHeader`, `CaseStudyLayout`, `KickerLabel`, `index.astro`. `ChatTranscript.astro` was deferred and migrated in 4c.1a (2026-04-17 evening).
+- **Enforcement** via `scripts/check-raw-colours.mjs`, wired into `npm run check` as the first step.
+- **Allowlist docs** in `plans/portfolio-design-tokens.md` (§Component variant allowlists) with a hard "update-doc-first" rule. Workspace rule mirrored in `.claude/rules/design-system.md`.
 
-Two **visible** changes in this commit (both approved before migration): card tags moved from vivid royal to muted grey (`default` variant, following the plan-locked semantics), and the "Get in touch" button fg moved from `--royal-12` to pure white (WCAG fix, matches the `--button-fg: #FFFFFF` that `portfolio-design-tokens.md` had always specified but `globals.css` had never implemented). Verify on `dylan-portfolio.magordyl.workers.dev` after the auto-deploy.
-
-**Prior session (2026-04-17 AM) — Plan restructure: component kit scaffold moved forward to 4c.0.5.**
-
-Dylan asked where a component-kit page would sit best. Chunk 7 already planned a `/design-system` showcase (post-launch); the restructure moves that scaffold forward to a new step 4c.0.5 (right after the colour rationalisation gate) so the kit doubles as the dev surface for every component built from 4c.1 onward. Each subsequent component chunk (4c.1 `<ChatTranscript>` + `<ProjectTimeline>`; 4d `<VersionedEmbed>`) now has a standing "update the kit" acceptance step. Chunk 7 slimmed to an optional post-launch curation pass. Commit `e8b7280` on `main`.
-
-Rationale: the kit becomes shareable the moment 4c.0.5 ships — well before case study prose lands — and aligns with existing "render before commit" and "extract shell first" workspace rules.
-
-**Prior session (2026-04-14) — ChatTranscript design locked + new colour-rationalisation gate.**
+**Prior session (2026-04-14) — ChatTranscript design locked + colour-rationalisation gate.**
 
 The `<ChatTranscript>` design is frozen. Canonical artefact: `plans/portfolio-stitch-assets/chat-transcript-explorer-v3.html` (iteration trail preserved as v1 → v2 → v3). Selected variant: **royal-3 hairline, full-block accent line, flat expander**. Role swap locked in favour of Option B (Dylan = violet, Claude = royal). Commit `c733595` on `main`.
 
@@ -96,18 +106,17 @@ The ChatTranscript pill churn (four colours → two) surfaced that components re
 - `src/content/projects/workspace-audit.mdx` placeholder still needs removing next time chunk 2 is touched.
 
 **Next priorities (session order):**
-1. **4c.1a** — `<ChatTranscript>` v3 port (the locked 2026-04-14 design). Near-total rewrite of the existing pre-v3 stub against role tokens; removes the last `check-raw-colours` allowlist entry; lands in the kit in both inline + breakout modes. Opens once 4c.0.5 ships.
-2. **4c.1b** — case study page layout explorers (`case-study-v1.html`, `case-study-v2.html`). Uses `<ChatTranscript>` from 4c.1a. No `<ProjectTimeline>` (deferred — see below).
-3. **4c.2-4c.5** — remaining page layout explorers (/projects index, /writing, /log, /404+/privacy).
-4. **4d** — the-weekly case study workshop (prose + case study layout build).
+1. **4c.1b** — case study page layout explorers (`case-study-v1.html`, `case-study-v2.html`). Uses `<ChatTranscript>` from 4c.1a (now shipped). Leaves a stub slot where `<ProjectTimeline>` would sit. This is the next session's work.
+2. **4c.2-4c.5** — remaining page layout explorers (/projects index, /writing, /log, /404+/privacy).
+3. **4d** — the-weekly case study workshop (prose + case study layout build).
 
 **`<ProjectTimeline>` deferred to post-launch (chunk 7.5).** Originally bundled into 4c.1 but removed on 2026-04-17 — a timeline is a case-study enhancement, not a shipping prerequisite. Case study layout explorers leave a stub slot; retrofitting post-launch is acceptable.
 
-**Deployed** — Cloudflare Pages / Workers, `magordyl/portfolio` (`main` branch). Live at `dylan-portfolio.magordyl.workers.dev`.
+**Deployed** — Cloudflare Pages / Workers, `magordyl/portfolio` (`main` branch). Live at `dylan-portfolio.magordyl.workers.dev`. Verify 4c.1a visually on `/design-system` after the auto-deploy (expect: two ChatTranscript demos at the bottom of the Components section, both rendering the 64-turn planner-stitch transcript with the 21-turn cluster expander collapsed by default).
 
-**Chunks remaining:** 4c.1a (ChatTranscript port), 4c.1b (layout explorers), 4c.2-4c.5, 4d, 5, 5.5, 5.6, 6, 7 (showcase polish — slimmed stub), 7.5 (ProjectTimeline — post-launch), 8 (design-system retrofit, opportunistic).
+**Chunks remaining:** 4c.1b (layout explorers), 4c.2-4c.5, 4d, 5, 5.5, 5.6, 6, 7 (showcase polish — slimmed stub), 7.5 (ProjectTimeline — post-launch), 8 (design-system retrofit, opportunistic).
 
 ## Implementation Plan
 
-Full plan: `plans/portfolio-implementation.md` (chunks 1–3 complete, then 4a → 4b → 4c [incl. 4c.0 → 4c.0.5 → 4c.1a → 4c.1b → 4c.2-4c.5] → 4d → 5 → 5.5 → 5.6 → 6 → 7 → 7.5 → 8). Component kit scaffold moved forward to 4c.0.5 on 2026-04-17; chunk 7 slimmed to a post-launch polish stub; `<ProjectTimeline>` split out to new chunk 7.5 (post-launch) on 2026-04-17. Chunk 8 (design-system retrofit) remains opportunistic post-launch.
+Full plan: `plans/portfolio-implementation.md` (chunks 1–3 complete, 4c.0 / 4c.0.5 / 4c.1a complete, then 4c.1b → 4c.2-4c.5 → 4d → 5 → 5.5 → 5.6 → 6 → 7 → 7.5 → 8). Component kit scaffold moved forward to 4c.0.5 on 2026-04-17; chunk 7 slimmed to a post-launch polish stub; `<ProjectTimeline>` split out to new chunk 7.5 (post-launch) on 2026-04-17. Chunk 8 (design-system retrofit) remains opportunistic post-launch.
 Current status tracked in `DIARY.md`.

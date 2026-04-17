@@ -394,7 +394,7 @@ Before chunk 4c.1 opens:
 
 ---
 
-### Step 4c.0.5 — Component kit scaffold (`/design-system`)
+### Step 4c.0.5 — Component kit scaffold (`/design-system`) ✅ COMPLETE (2026-04-17, commit `3e68c07`)
 
 **Context.** A standing reference page for the portfolio's tokens and components. Moved forward from chunk 7 so it doubles as the dev surface for every component built from 4c.1 onward — components land in the kit first, get visual review in situ, then get consumed by case studies. Aligns with the workspace "render before commit" and "extract shell first" rules.
 
@@ -417,7 +417,7 @@ Before chunk 4c.1 opens:
 
 ---
 
-### Step 4c.1a — `<ChatTranscript>` component (locked port)
+### Step 4c.1a — `<ChatTranscript>` component (locked port) ✅ COMPLETE (2026-04-17, commit `41fac2c`)
 
 **Deliverable:** v3-spec `<ChatTranscript>` ported from `chat-transcript-explorer-v3.html` to `src/components/astro/ChatTranscript.astro`, migrated to role tokens, rendering the planner-stitch transcript at visual parity, with both modes (inline + breakout) landed in the `/design-system` kit. The layout explorers and page-level integration move to 4c.1b.
 
