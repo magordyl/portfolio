@@ -138,6 +138,74 @@ All 29 in-system pairings computed with the standard WCAG algorithm. Full result
 
 ---
 
+## Component variant allowlists
+
+**Locked 2026-04-17** as part of chunk 4c.0 (colour-role rationalisation gate). Components reference the role tokens listed here; raw `--royal-*` / `--violet-*` scale references outside `src/styles/globals.css` and `design.tokens.ts` are a build-time failure (enforced by `scripts/check-raw-colours.mjs` in `npm run check`).
+
+**Hard rule.** Introducing a new variant requires updating this section first, then mirroring in `globals.css` and `design.tokens.ts`. No ad-hoc pairings in components.
+
+### Tags — ≤ 4 variants
+
+| Variant | fg | bg | border | Use for | Do not use for |
+|---|---|---|---|---|---|
+| `default` | `--ink-dim` | transparent | `--royal-4` | Passive taxonomy labels on case study cards, project-page tags, writing-post category tags | Selected filter state (use `active`), signalling the current page (use kicker), rare "new" callouts (use `signal`) |
+| `active` | `--royal-11` | `rgba(59, 91, 219, 0.08)` | `--royal-8` | Selected filter pill, "currently viewing" tag in a list, active navigation chip | Decorative taxonomy (use `default`) |
+| `signal` | `--violet-11` | `rgba(140, 59, 219, 0.10)` | `--violet-8` | Rare "note this" accents — e.g. "new" badge on a recent writing post | Routine thinking/writing tags (those just use default with no colour shift) |
+| `status` | `--ink-dim` | transparent | `--royal-7` | Case study status labels (shipped / draft / archived / in-progress) | Adding a second variant per status (it's one muted register, not a rainbow) |
+
+Tokens in `globals.css`: `--tag-default-{fg,bg,border}`, `--tag-active-{fg,bg,border}`, `--tag-signal-{fg,bg,border}`, `--tag-status-{fg,bg,border}`.
+
+### Kickers — ≤ 2 variants
+
+| Variant | fg | Typography | Use for | Do not use for |
+|---|---|---|---|---|
+| `default` | `--royal-11` | Geist Mono, 11px, 500, uppercase, 0.18em tracking | "Selected work", "Build log", "Case Study" card kickers, h2 section labels inside case study body | Writing-post / thinking-mode kickers (use `signal`) |
+| `signal` | `--violet-11` | same | Writing index kickers, essay metadata, thinking-mode callouts | Case study or chrome kickers (use `default`) |
+
+Tokens: `--kicker-default-fg`, `--kicker-signal-fg`.
+
+### Status dots — ≤ 3 variants
+
+| Variant | Colour | Use for |
+|---|---|---|
+| `neutral` | `--ink-dim` | Inert / pending state (e.g. "draft" dot in a build log row) |
+| `active` | `--royal-10` | Normal "currently active" state — live session, running task, shipped project |
+| `attention` | `--violet-10` | Pivot / decision moment — reserved. Used sparingly in the BuildLogTicker for "thinking" entries, and anywhere that wants to mark a reader-should-notice moment |
+
+Tokens: `--dot-neutral`, `--dot-active`, `--dot-attention`.
+
+### Borders — 3 roles
+
+| Role | Colour | Use for |
+|---|---|---|
+| `hairline` | `--royal-3` | In-component separators (list rows, between turns in a transcript, between log entries). Not a container edge. |
+| `border` (semantic alias) | `--royal-7` | Card edges, input outlines, container divisions |
+| `strong` (semantic alias) | `--royal-8` | Focused / active outlines, primary button borders, "this is emphasised" container |
+
+Tokens: `--border-hairline`, plus the existing `--border` / `--border-strong` semantic aliases.
+
+### Expander pills — ≤ 2 variants
+
+Used inside `<ChatTranscript>` expanders to label what's inside (plan / tool calls / skill invocation / cluster). Any component needing a similar label-on-progressive-disclosure pattern uses these too.
+
+| Variant | fg | border | Use for |
+|---|---|---|---|
+| `high` | `--royal-11` | `--royal-8` | High-signal expanders — plan, skill, research, reply, cluster |
+| `bg` | `--ink-dim` | `--royal-4` | Background / chrome expanders — tool-call runs |
+
+Tokens: `--expander-pill-high-{fg,border}`, `--expander-pill-bg-{fg,border}`.
+
+### Other role tokens (not variant families, one value each)
+
+| Token | Value | Use |
+|---|---|---|
+| `--link-hover` | `--royal-11` | Hover colour for any link that uses `--link` as default. One rule, everywhere. |
+| `--button-fg` | `#FFFFFF` | Text colour on `--primary` buttons. Pure white because `--royal-12` fails WCAG AA body (4.17:1) at 16px label sizes. |
+| `--placeholder-bg` | `--royal-3` | Solid fill for placeholder image slots. Removed in chunk 5 when real hero screenshots land. |
+| `--placeholder-gradient` | `linear-gradient(135deg, --royal-3, --royal-5)` | Gradient placeholder fill for card image slots. Removed in chunk 5. |
+
+---
+
 ## Accessibility rules (non-negotiable)
 
 These flow from the audit above. They are project-level rules, not component-level suggestions.

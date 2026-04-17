@@ -9,7 +9,7 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "check": "astro check && astro build",
+    "check": "node scripts/check-raw-colours.mjs && astro check && astro build",
     "test": "echo \"No tests yet\"",
     "astro": "astro"
   },

@@ -122,9 +122,9 @@ const metaParts = [
   .tag {
     font-family: var(--font-sans);
     font-size: var(--text-xs);
-    color: var(--tag-fg);
-    background: var(--tag-bg);
-    border: 1px solid var(--tag-border);
+    color: var(--tag-default-fg);
+    background: var(--tag-default-bg);
+    border: 1px solid var(--tag-default-border);
     border-radius: var(--radius-sm);
     padding: 2px var(--space-2);
   }
@@ -138,13 +138,13 @@ const metaParts = [
   }
 
   .live-link:hover {
-    color: var(--royal-11);
+    color: var(--link-hover);
   }
 
   .hero-image {
     margin-top: var(--space-6);
     aspect-ratio: 16 / 9;
-    background: var(--royal-3);
+    background: var(--placeholder-bg);
     border: 1px solid var(--border);
     border-radius: var(--radius);
     display: flex;
@@ -172,7 +172,7 @@ const metaParts = [
     font-weight: 400;
     letter-spacing: var(--ls-caps);
     text-transform: uppercase;
-    color: var(--kicker);
+    color: var(--kicker-default-fg);
     margin: var(--space-8) 0 var(--space-5);
     padding-top: var(--space-8);
     border-top: 1px solid var(--border);
@@ -202,7 +202,7 @@ const metaParts = [
   }
 
   .body :global(a:hover) {
-    color: var(--royal-11);
+    color: var(--link-hover);
   }
 
   /* Diagram and transcript components get spacing context */

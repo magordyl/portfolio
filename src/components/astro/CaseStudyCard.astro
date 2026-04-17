@@ -53,7 +53,7 @@ const kickerLabel = depth === 'full' ? 'Case Study' : 'Lightweight';
 
   .card-image {
     height: 180px;
-    background: linear-gradient(135deg, var(--royal-3) 0%, var(--royal-5) 100%);
+    background: var(--placeholder-gradient);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -103,9 +103,9 @@ const kickerLabel = depth === 'full' ? 'Case Study' : 'Lightweight';
   .tag {
     font-family: var(--font-sans);
     font-size: var(--text-xs);
-    color: var(--tag-fg);
-    background: var(--tag-bg);
-    border: 1px solid var(--tag-border);
+    color: var(--tag-default-fg);
+    background: var(--tag-default-bg);
+    border: 1px solid var(--tag-default-border);
     border-radius: var(--radius-sm);
     padding: 2px var(--space-2);
     letter-spacing: 0.02em;
@@ -121,6 +121,6 @@ const kickerLabel = depth === 'full' ? 'Case Study' : 'Lightweight';
   }
 
   .card-link:hover {
-    color: var(--royal-11);
+    color: var(--link-hover);
   }
 </style>

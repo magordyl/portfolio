@@ -42,7 +42,9 @@
   --ink-dim:   #9C968A;
   --ink-faint: #5E584F;
 
-  /* Semantic aliases (use these in components) */
+  /* Semantic aliases — structural surfaces, borders, and primary accent.
+     Components reference these for structure; per-component variants use
+     the role tokens below, not the raw scale. */
   --bg:             var(--royal-2);
   --bg-subtle:      var(--royal-3);
   --card:           var(--royal-4);
@@ -52,14 +54,63 @@
   --primary:        var(--royal-8);
   --primary-hover:  var(--royal-9);
   --link:           var(--royal-10);
-  --kicker:         var(--royal-11);
-  --tag-border:     var(--royal-8);
-  --tag-fg:         var(--royal-11);
-  --tag-bg:         rgba(59, 91, 219, 0.08);
   --code-bg:        var(--royal-1);
   --code-keyword:   var(--royal-10);
   --code-string:    var(--royal-11);
   --code-comment:   var(--ink-faint);
+
+  /* ============================================================
+     Role tokens — per-component variants.
+     Allowlisted in plans/portfolio-design-tokens.md §Component variant
+     allowlists. Components MUST reference these, never --royal-* / --violet-*.
+     Adding a new variant requires updating that doc first.
+     ============================================================ */
+
+  /* Link — default lives at --link above; hover is the colour-lift state. */
+  --link-hover:       var(--royal-11);
+
+  /* CTA button foreground on --primary. Pure white because --royal-12 fails
+     WCAG AA body (4.17:1) at 16px label sizes — see portfolio-design-tokens.md
+     §Contrast notes. */
+  --button-fg:        #FFFFFF;
+
+  /* Placeholder surfaces — removed in chunk 5 when real hero screenshots land. */
+  --placeholder-bg:       var(--royal-3);
+  --placeholder-gradient: linear-gradient(135deg, var(--royal-3) 0%, var(--royal-5) 100%);
+
+  /* Tags — 4 variants. */
+  --tag-default-fg:     var(--ink-dim);
+  --tag-default-bg:     transparent;
+  --tag-default-border: var(--royal-4);
+  --tag-active-fg:      var(--royal-11);
+  --tag-active-bg:      rgba(59, 91, 219, 0.08);
+  --tag-active-border:  var(--royal-8);
+  --tag-signal-fg:      var(--violet-11);
+  --tag-signal-bg:      rgba(140, 59, 219, 0.10);
+  --tag-signal-border:  var(--violet-8);
+  --tag-status-fg:      var(--ink-dim);
+  --tag-status-bg:      transparent;
+  --tag-status-border:  var(--royal-7);
+
+  /* Kickers — 2 variants. */
+  --kicker-default-fg:  var(--royal-11);
+  --kicker-signal-fg:   var(--violet-11);
+
+  /* Status dots — 3 variants. */
+  --dot-neutral:    var(--ink-dim);
+  --dot-active:     var(--royal-10);
+  --dot-attention:  var(--violet-10);
+
+  /* Borders — hairline (in-component separators, list rows).
+     --border and --border-strong live as semantic aliases above. */
+  --border-hairline: var(--royal-3);
+
+  /* Expander pills — 2 variants (high-signal vs chrome). Used by
+     ChatTranscript; available to any component that needs the pattern. */
+  --expander-pill-high-fg:     var(--royal-11);
+  --expander-pill-high-border: var(--royal-8);
+  --expander-pill-bg-fg:       var(--ink-dim);
+  --expander-pill-bg-border:   var(--royal-4);
 
   /* ============================================================
      Typography
@@ -156,5 +207,5 @@ a {
 }
 
 a:hover {
-  color: var(--royal-11);
+  color: var(--link-hover);
 }

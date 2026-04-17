@@ -114,6 +114,53 @@ export const palette = {
 } as const;
 
 /**
+ * Role tokens — per-component variants. Components reference these, never
+ * the raw scale. Each role is allowlisted in
+ * plans/portfolio-design-tokens.md §Component variant allowlists. Adding a
+ * new role requires updating that doc first, then mirroring here and in
+ * globals.css.
+ *
+ * Values are resolved hex/rgba strings so tooling can consume them without
+ * CSS resolution; the semantic relationship (role → raw scale slot) lives in
+ * the accompanying comment.
+ */
+export const roles = {
+  link: {
+    hover: palette.royal[11],                           // --link-hover
+  },
+  button: {
+    fg: '#FFFFFF',                                      // --button-fg (NOT royal-12 — WCAG AA body fails)
+  },
+  placeholder: {
+    bg: palette.royal[3],                               // --placeholder-bg
+    gradient: `linear-gradient(135deg, ${palette.royal[3]} 0%, ${palette.royal[5]} 100%)`,
+  },
+  tag: {
+    default: { fg: palette.ink.dim,    bg: 'transparent',              border: palette.royal[4] },
+    active:  { fg: palette.royal[11],  bg: 'rgba(59, 91, 219, 0.08)',  border: palette.royal[8] },
+    signal:  { fg: palette.violet[11], bg: 'rgba(140, 59, 219, 0.10)', border: palette.violet[8] },
+    status:  { fg: palette.ink.dim,    bg: 'transparent',              border: palette.royal[7] },
+  },
+  kicker: {
+    default: palette.royal[11],
+    signal:  palette.violet[11],
+  },
+  dot: {
+    neutral:   palette.ink.dim,
+    active:    palette.royal[10],
+    attention: palette.violet[10],
+  },
+  border: {
+    hairline: palette.royal[3],
+    // default + strong live as semantic aliases (--border, --border-strong) in globals.css
+  },
+  expanderPill: {
+    high: { fg: palette.royal[11], border: palette.royal[8] },
+    bg:   { fg: palette.ink.dim,   border: palette.royal[4] },
+  },
+} as const;
+
+/**
  * Project-specific type scale. Complements the global scale with
  * portfolio-specific named slots (hero, display, case, kicker).
  * These map to --text-* vars in globals.css.
