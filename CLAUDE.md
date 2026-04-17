@@ -45,9 +45,22 @@ Astro uses `@tailwindcss/vite` (Vite plugin), NOT `@astrojs/tailwind`. The `astr
 
 ## Current Status (2026-04-17)
 
-**Last session (2026-04-17) — Plan restructure: component kit scaffold moved forward to 4c.0.5.**
+**Last session (2026-04-17 PM) — Chunk 4c.0 shipped: role-token layer + migration + check script.**
 
-Dylan asked where a component-kit page would sit best. Chunk 7 already planned a `/design-system` showcase (post-launch); the restructure moves that scaffold forward to a new step 4c.0.5 (right after the colour rationalisation gate) so the kit doubles as the dev surface for every component built from 4c.1 onward. Each subsequent component chunk (4c.1 `<ChatTranscript>` + `<ProjectTimeline>`; 4d `<VersionedEmbed>`) now has a standing "update the kit" acceptance step. Chunk 7 slimmed to an optional post-launch curation pass. Edits live on `main` working tree (uncommitted at session end, session-end commit bundles them).
+Commit `b19bc72` on `main` (pushed; Cloudflare Pages auto-deploy kicked off). 12 files, +349/-23. The colour-role rationalisation gate from the prior session is now executed — 4c.1 can open.
+
+What landed:
+- **Audit** at `plans/portfolio-colour-audit.md` enumerates every raw-scale reference outside `globals.css`. Dominant pattern was `--royal-11` as link-hover (6 sites). Other patterns: two placeholder image fills, one WCAG-failing button fg (`--royal-12` on `--royal-8` = 4.17:1, fails AA body at 16px).
+- **Role tokens** in `src/styles/globals.css` + `design.tokens.ts` (new `roles` export) covering all locked allowlists: `--tag-{default,active,signal,status}-{fg,bg,border}`, `--kicker-{default,signal}-fg`, `--dot-{neutral,active,attention}`, `--border-hairline`, `--expander-pill-{high,bg}-{fg,border}`, plus `--link-hover`, `--button-fg`, `--placeholder-bg`, `--placeholder-gradient`.
+- **Migration** of `CaseStudyCard`, `BuildLogTicker`, `PageHeader`, `CaseStudyLayout`, `KickerLabel`, `index.astro`. `ChatTranscript.astro` deferred per session scope decision — role-token migration happens as part of the 4c.1 v3 port (the intermediate migration would be wasted work).
+- **Enforcement** via new `scripts/check-raw-colours.mjs`, wired into `npm run check` as the first step. Blocks raw `--royal-*` / `--violet-*` refs outside `globals.css`, `design.tokens.ts`, and the `ChatTranscript.astro` allowlist entry. Remove that allowlist entry when 4c.1 migrates ChatTranscript.
+- **Allowlist docs** in `plans/portfolio-design-tokens.md` (new "Component variant allowlists" section) with a hard "update-doc-first" rule for new variants. Workspace rule mirrored in `.claude/rules/design-system.md`.
+
+Two **visible** changes in this commit (both approved before migration): card tags moved from vivid royal to muted grey (`default` variant, following the plan-locked semantics), and the "Get in touch" button fg moved from `--royal-12` to pure white (WCAG fix, matches the `--button-fg: #FFFFFF` that `portfolio-design-tokens.md` had always specified but `globals.css` had never implemented). Verify on `dylan-portfolio.magordyl.workers.dev` after the auto-deploy.
+
+**Prior session (2026-04-17 AM) — Plan restructure: component kit scaffold moved forward to 4c.0.5.**
+
+Dylan asked where a component-kit page would sit best. Chunk 7 already planned a `/design-system` showcase (post-launch); the restructure moves that scaffold forward to a new step 4c.0.5 (right after the colour rationalisation gate) so the kit doubles as the dev surface for every component built from 4c.1 onward. Each subsequent component chunk (4c.1 `<ChatTranscript>` + `<ProjectTimeline>`; 4d `<VersionedEmbed>`) now has a standing "update the kit" acceptance step. Chunk 7 slimmed to an optional post-launch curation pass. Commit `e8b7280` on `main`.
 
 Rationale: the kit becomes shareable the moment 4c.0.5 ships — well before case study prose lands — and aligns with existing "render before commit" and "extract shell first" workspace rules.
 

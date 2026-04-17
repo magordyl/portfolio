@@ -1,5 +1,21 @@
 # Development Diary
 
+## 2026-04-17 — Chunk 4c.0 shipped: role tokens, migrations, build-time enforcement
+
+Commit `b19bc72`. The gate the 2026-04-14 entry flagged is now executed. Raw `--royal-*` / `--violet-*` references outside `globals.css`, `design.tokens.ts`, and one allowlisted file now fail `npm run check` via a Node grep script wired before `astro check`. Components reference role tokens only: `--tag-{default,active,signal,status}-{fg,bg,border}`, `--kicker-{default,signal}-fg`, `--dot-{neutral,active,attention}`, `--border-hairline`, `--expander-pill-{high,bg}-{fg,border}`, plus `--link-hover`, `--button-fg`, `--placeholder-bg`, `--placeholder-gradient`.
+
+Three decisions during execution worth the entry. First: `ChatTranscript.astro` already existed with ~35 raw-scale refs from an earlier commit that pre-dates the v3 spec. Migrating it to role tokens now would be rework, because 4c.1 rebuilds the renderer against the v3 HTML explorer anyway. Deferred it by adding a single-file allowlist entry to `check-raw-colours.mjs`, with a comment noting the deletion deadline (when 4c.1 lands the v3 port). The alternative — migrating twice — would have traded real time for the theoretical cleanliness of an empty allowlist.
+
+Second: the audit surfaced that `.tag` on `CaseStudyCard` currently renders in the royal-accented `active` variant — tags are treated as signal. The plan's locked semantics put passive taxonomy labels in the muted `default` variant and reserve `active` for interactive filter state (which hasn't been built yet). Following the plan literally meant a visible change on the live site: cards move from vivid to muted tags. Reverting that by re-scoping `active` to cover passive labels would have been the fast decision; it would also have meant the first component variant change drifted from the spec. Took the plan-literal option and accepted the visible change — the portfolio is dark-mode serene by design, and muted tags are closer to that surface than accented ones.
+
+Third: auditing `PageHeader` exposed a pre-existing WCAG AA body-contrast fail on the "Get in touch" button — `--royal-12` foreground on `--royal-8` background measures 4.17:1, below the 4.5:1 threshold for 16px text. `portfolio-design-tokens.md` had always specified `--button-fg: #FFFFFF`, but `globals.css` never implemented it. The fix was a one-line token addition plus a one-line component change, and it came along for the ride without adding scope. The general shape worth remembering: a colour audit designed for consistency also surfaces accessibility bugs because the same ad-hoc pairings that create inconsistency create contrast failures. One gate, two wins.
+
+One process note. A PowerShell here-string passed through `git commit -m @'...'@` tokenised into separate pathspec arguments — git saw fragmented words as filenames and refused. Fallback that worked: write the message to `.git/COMMIT_EDITMSG_<tag>` with the Write tool, `git commit -F` it, delete the temp file. Added to workspace `CLAUDE.md` under the PowerShell-tool section so the next session doesn't hit the same wall.
+
+Chunk 4c.0 is complete. 4c.0.5 (kit scaffold) and 4c.1 (case study design explorers) can both open now.
+
+---
+
 ## 2026-04-17 — Component kit scaffold moved forward to double as dev surface
 
 Short planning session, one decision worth capturing. Dylan asked where a `/design-system` component kit page — swatches, typography, every component rendered live — would sit best in the existing plan. The straightforward read was chunk 7, where a "design system showcase page" already sat as a post-launch deliverable, inventory-style: enumerate everything after chunk 6 shipped, then build.

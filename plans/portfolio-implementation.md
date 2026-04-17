@@ -313,7 +313,7 @@ Adjust the scaffold until every signal has a home and every section earns its pl
 
 Same approach as the homepage design explorer — self-contained HTML files in `plans/portfolio-assets/`, inlined CSS, fonts from Google Fonts CDN, zero build step. Saved to the permanent portfolio plans folder so they survive the session and can be linked from a case study later.
 
-### Step 4c.0 — Component colour-role rationalisation (gate before 4c.1)
+### Step 4c.0 — Component colour-role rationalisation (gate before 4c.1) ✅ COMPLETE (2026-04-17, commit `b19bc72`)
 
 **Context.** The portfolio's palette has ~17 distinct colour tokens (royal-1..12 + violet-8..12), and components have been reaching into that raw scale ad hoc. The ChatTranscript v3 design alone introduced four different pill treatments before collapsing to two, and retroactively highlighted the same inconsistency elsewhere — KickerLabel uses `--royal-11`, tags use a different pairing, BuildLogTicker status dots pick yet another combination. With ~15 colours available and no per-component allowlists, each new component drifts further from the system. This gate fixes that before 4c.1 builds three more components (`<ChatTranscript>`, `<ProjectTimeline>`, `<VersionedEmbed>`) against the uncontrolled palette.
 
