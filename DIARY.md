@@ -1,5 +1,17 @@
 # Development Diary
 
+## 2026-04-17 — Component kit scaffold moved forward to double as dev surface
+
+Short planning session, one decision worth capturing. Dylan asked where a `/design-system` component kit page — swatches, typography, every component rendered live — would sit best in the existing plan. The straightforward read was chunk 7, where a "design system showcase page" already sat as a post-launch deliverable, inventory-style: enumerate everything after chunk 6 shipped, then build.
+
+The better read was: don't wait. Moving the scaffold forward into a new step 4c.0.5 (right after the colour-role rationalisation gate) turns the kit into the dev surface for every downstream component. `<ChatTranscript>`, `<ProjectTimeline>`, `<VersionedEmbed>` land in the kit *first* — rendered live against the locked tokens — then get consumed by case studies. That matches two existing workspace rules: "render before commit" (components need to be seen against real tokens before they're committed to consumer contexts) and "extract shell first" (the kit *is* the shared shell across all subsequent component work).
+
+Tradeoff is honest: every component chunk now carries an "update the kit" acceptance step, so the kit grows with each commit instead of being built once retroactively. The cost is small; the benefit is that the kit is shareable the moment 4c.0.5 ships — which makes the portfolio partially shareable long before the-weekly prose lands in 4d. Chunk 7 slimmed to an optional post-launch curation pass (narrative captions, repo link, final audit).
+
+Edits to `plans/portfolio-implementation.md` and `CLAUDE.md` done during this session, committed at session-end. No code yet; the scaffold itself happens in a future session after 4c.0 completes.
+
+---
+
 ## 2026-04-14 — ChatTranscript design locked, tokens wired
 
 The component design is now fixed, captured in `plans/portfolio-stitch-assets/chat-transcript-explorer-v3.html`. The iteration trail survives as v1 → v2 → v3 in the same folder; v3 is canonical. The selected variant is royal-3 hairline + full-block accent line + flat expander.

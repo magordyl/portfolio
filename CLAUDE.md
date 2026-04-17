@@ -43,9 +43,15 @@ Set up a pre-commit hook at `.git/hooks/pre-commit` that runs `npm run check`.
 
 Astro uses `@tailwindcss/vite` (Vite plugin), NOT `@astrojs/tailwind`. The `astro add tailwind` command sets this up automatically. No `tailwind.config.mjs` needed — tokens live as CSS variables in `globals.css`. If you need Tailwind utility classes for token values, add `@theme { --text-hero: 4.5rem; }` blocks inside `globals.css`.
 
-## Current Status (2026-04-14)
+## Current Status (2026-04-17)
 
-**Last session (2026-04-14) — ChatTranscript design locked + new colour-rationalisation gate.**
+**Last session (2026-04-17) — Plan restructure: component kit scaffold moved forward to 4c.0.5.**
+
+Dylan asked where a component-kit page would sit best. Chunk 7 already planned a `/design-system` showcase (post-launch); the restructure moves that scaffold forward to a new step 4c.0.5 (right after the colour rationalisation gate) so the kit doubles as the dev surface for every component built from 4c.1 onward. Each subsequent component chunk (4c.1 `<ChatTranscript>` + `<ProjectTimeline>`; 4d `<VersionedEmbed>`) now has a standing "update the kit" acceptance step. Chunk 7 slimmed to an optional post-launch curation pass. Edits live on `main` working tree (uncommitted at session end, session-end commit bundles them).
+
+Rationale: the kit becomes shareable the moment 4c.0.5 ships — well before case study prose lands — and aligns with existing "render before commit" and "extract shell first" workspace rules.
+
+**Prior session (2026-04-14) — ChatTranscript design locked + new colour-rationalisation gate.**
 
 The `<ChatTranscript>` design is frozen. Canonical artefact: `plans/portfolio-stitch-assets/chat-transcript-explorer-v3.html` (iteration trail preserved as v1 → v2 → v3). Selected variant: **royal-3 hairline, full-block accent line, flat expander**. Role swap locked in favour of Option B (Dylan = violet, Claude = royal). Commit `c733595` on `main`.
 
@@ -78,15 +84,16 @@ The ChatTranscript pill churn (four colours → two) surfaced that components re
 
 **Next priorities (session order):**
 1. **4c.0** — component colour-role rationalisation (new gate). Produces the role-token layer that 4c.1 and 4d components will use.
-2. **4d (continued)** — Dylan writes prose for each section against the locked structure in `plans/the-weekly-case-study-draft.md`.
-3. **4c.1** — case study design explorers; now building `<ChatTranscript>`, `<ProjectTimeline>`, sample transcripts against the rationalised tokens.
-4. **4c.2-4c.5** — remaining page layout explorers (/projects index, /writing, /log, /404+/privacy).
+2. **4c.0.5** — `/design-system` kit scaffold (new, 2026-04-17). Moved forward from old chunk 7 so the kit doubles as the dev surface for every component built from 4c.1 onward. Each subsequent component chunk has a standing "update the kit" acceptance step.
+3. **4d (continued)** — Dylan writes prose for each section against the locked structure in `plans/the-weekly-case-study-draft.md`.
+4. **4c.1** — case study design explorers; now building `<ChatTranscript>`, `<ProjectTimeline>`, sample transcripts against the rationalised tokens. Both components land in the kit as part of acceptance.
+5. **4c.2-4c.5** — remaining page layout explorers (/projects index, /writing, /log, /404+/privacy).
 
 **Deployed** — Cloudflare Pages / Workers, `magordyl/portfolio` (`main` branch). Live at `dylan-portfolio.magordyl.workers.dev`.
 
-**Chunks remaining:** 4c.0 (new gate), 4c.1, 4c.2-4c.5, 4d, 5, 5.5, 5.6, 6, 7 (showcase page), 8 (design-system retrofit, opportunistic).
+**Chunks remaining:** 4c.0 (gate), 4c.0.5 (kit scaffold — new), 4c.1, 4c.2-4c.5, 4d, 5, 5.5, 5.6, 6, 7 (showcase polish — slimmed stub), 8 (design-system retrofit, opportunistic).
 
 ## Implementation Plan
 
-Full plan: `plans/portfolio-implementation.md` (chunks 1–3 complete, then 4a → 4b → 4c → 4d → 5 → 5.5 → 5.6 → 6 → 7 → 8). Chunk 7 (design system showcase page) was added this session. Chunk 8 (was chunk 7, design-system retrofit) remains opportunistic post-launch.
+Full plan: `plans/portfolio-implementation.md` (chunks 1–3 complete, then 4a → 4b → 4c [incl. 4c.0 → 4c.0.5 → 4c.1-4c.5] → 4d → 5 → 5.5 → 5.6 → 6 → 7 → 8). Component kit scaffold moved forward to 4c.0.5 on 2026-04-17; chunk 7 slimmed to a post-launch polish stub. Chunk 8 (design-system retrofit) remains opportunistic post-launch.
 Current status tracked in `DIARY.md`.

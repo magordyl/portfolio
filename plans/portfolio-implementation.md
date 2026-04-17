@@ -1,12 +1,12 @@
 # Portfolio — Implementation Plan (Phase 7)
 
-**Status:** In progress. Chunk 3 complete (2026-04-11). Chunk 4 restructured into 4a–4d (content-first), plus new chunks 5.5 (writing posts) and 5.6 (/about one-off) — 2026-04-11. Chunk 4a expanded to include 4a.6 (transcript capture workflow) — 2026-04-12. Chunks 4b and 4c.1 amended to treat verbatim chat transcripts as a first-class artefact type alongside screenshots and diagrams.
+**Status:** In progress. Chunk 3 complete (2026-04-11). Chunk 4 restructured into 4a–4d (content-first), plus new chunks 5.5 (writing posts) and 5.6 (/about one-off) — 2026-04-11. Chunk 4a expanded to include 4a.6 (transcript capture workflow) — 2026-04-12. Chunks 4b and 4c.1 amended to treat verbatim chat transcripts as a first-class artefact type alongside screenshots and diagrams. **2026-04-17:** component kit scaffold moved forward from chunk 7 into new step 4c.0.5 so `/design-system` doubles as the dev surface for every component built from 4c.1 onward; each component chunk now has a standing "update the kit" step. Chunk 7 slimmed to a post-launch polish stub.
 
 **Tailwind v4 gotcha discovered in chunk 1:** `astro add tailwind` installs `@tailwindcss/vite` (Vite plugin) not `@astrojs/tailwind`. No `tailwind.config.mjs` needed. CSS variables in `globals.css` are the token system. References to `tailwind.config.mjs` in this plan are obsolete — skip those sub-steps.
 
 **Astro 6 content collection gotchas discovered in chunk 2:** (1) Config must be at `src/content.config.ts`, not `src/content/config.ts`. (2) Import `z` from `zod` directly, not from `astro:content` (deprecated). (3) Use `z.url()` not `z.string().url()` (deprecated in Zod v4). (4) Every collection must have a `loader` — `glob()` from `astro/loaders` is the standard choice.
 
-Ten chunks to ship v1 (1–3 complete, then 4a → 4b → 4c → 4d → 5 → 5.5 → 5.6 → 6), plus one post-launch cleanup chunk (7). Each chunk is one commit's worth, independently testable, built on the previous. Chunk 4 is split into four sub-chunks following a **content-first sequence**: foundation (style + imagery + diary audit) → content template → layout mockups → case study workshop. Content structure dictates layout, never the reverse.
+Ten chunks to ship v1 (1–3 complete, then 4a → 4b → 4c → 4d → 5 → 5.5 → 5.6 → 6), plus two post-launch chunks (7 showcase polish, 8 design-system retrofit). Each chunk is one commit's worth, independently testable, built on the previous. Chunk 4 is split into four sub-chunks following a **content-first sequence**: foundation (style + imagery + diary audit) → content template → layout mockups → case study workshop. Content structure dictates layout, never the reverse.
 
 ---
 
@@ -394,6 +394,29 @@ Before chunk 4c.1 opens:
 
 ---
 
+### Step 4c.0.5 — Component kit scaffold (`/design-system`)
+
+**Context.** A standing reference page for the portfolio's tokens and components. Moved forward from chunk 7 so it doubles as the dev surface for every component built from 4c.1 onward — components land in the kit first, get visual review in situ, then get consumed by case studies. Aligns with the workspace "render before commit" and "extract shell first" rules.
+
+**Gate.** 4c.0 must be complete. The kit is the first consumer of the role-token layer; raw-scale references inside it are a process failure.
+
+**Scope at 4c.0.5:**
+- `src/pages/design-system.astro` — unlisted route (no nav link yet; public URL, discoverable later via a footer link added in chunk 6).
+- Sections, in order: **Colour** (raw Royal Tonal scale + violet additions + semantic aliases + role tokens from 4c.0, grouped), **Typography** (every `--text-*` slot rendered at size with slot name, family, weight, use context), **Spacing** (8-value visual strip with px labels), **Radius** (each token rendered as a sample), **Icon stroke** (the project's lucide stroke-width rendered on a sample icon set), **Components** (chunk-3 set migrated against role tokens — `CaseStudyCard`, `BuildLogTicker`, `KickerLabel`, tag variants).
+- Each component section: live render imported from `src/components/`, not screenshots. One-line role description. For components with allowlisted variants, render every variant side by side (e.g. tag `default` / `active` / `signal` / `status`).
+
+**Standing rule — "Update the kit":** every chunk that introduces a new component (4c.1 `<ChatTranscript>`, `<ProjectTimeline>`; 4d `<VersionedEmbed>`) must add that component to `design-system.astro` as part of its acceptance. A component shipping to a case study before it ships to the kit is a process failure, not a sequencing nuance. Chunk 7 (post-launch polish) exists only to curate, not to build.
+
+**Acceptance:**
+- `/design-system` renders on the production URL with all six sections (colour, typography, spacing, radius, icon stroke, components) present.
+- Every chunk-3 component renders live inside the kit — not screenshots, not snippets.
+- `git grep 'var(--royal-' src/pages/design-system.astro` and the violet equivalent return empty (the kit obeys its own rules).
+- `npm run check` passes.
+
+**Commit:** `portfolio: /design-system kit scaffold (tokens, type, spacing, chunk-3 components)`
+
+---
+
 ### Step 4c.1 — Case study page layout (primary focus)
 
 This is the most important layout in the portfolio. It needs to:
@@ -454,7 +477,7 @@ Design locked via `plans/portfolio-stitch-assets/chat-transcript-explorer-v3.htm
 3. Write the component in three layers: frame (gradient border + header), block renderer (grouping + badge + continuity line), turn renderer (plain | expander | cluster). Keep the cluster-heading synthesiser as a pure function so it can be unit-tested.
 4. Extend the transcript Zod schema (`src/content.config.ts`) with the optional fields the renderer relies on: `kind?: 'plan' | 'skill' | 'research' | 'headline'`, `summary?: string`, `toolCalls?: ToolCall[]`, `collapsedTools?: string[]`, `clusterTitle?: string`.
 5. Test with the `planner-stitch-batch-40-renders` transcript — it exercises every shape (kind variants, tool calls, cluster merging, filtered turns, wrap-up extraction). Visual parity with v3 is the acceptance bar.
-6. Add a component story in the future `/design-system` showcase page (chunk 7): one inline mode + one breakout mode, using the same planner-stitch transcript.
+6. Add `<ChatTranscript>` to the `/design-system` kit (scaffolded in 4c.0.5) — one inline mode + one breakout mode, using the same planner-stitch transcript. Part of this chunk's acceptance, not deferred.
 
 *Acceptance:*
 - Renders the planner-stitch transcript with visual parity to v3.html (winning variant: full-block accent, flat expander, royal-3 hairlines).
@@ -469,6 +492,7 @@ Design locked via `plans/portfolio-stitch-assets/chat-transcript-explorer-v3.htm
 - Design exploration goal: keep it simple. No fancy animation, no branches. The interest is in the data, not the chrome.
 - Include at least one `<ProjectTimeline>` in both `case-study-v1.html` and `case-study-v2.html` design explorers using placeholder data from the-weekly build log.
 - Lives at `src/components/ProjectTimeline.astro`. Add `timeline` as an optional array field to the `projects` Zod schema (chunk 2 will need a minor update — add it then).
+- Add `<ProjectTimeline>` to the `/design-system` kit (4c.0.5) — one milestone-only variant + one with a pivot node. Part of this chunk's acceptance.
 
 **Sample transcripts in the design explorers:** both `case-study-v1.html` and `case-study-v2.html` must render at least one `inline` transcript and one `breakout` transcript using placeholder turns (e.g. from an early portfolio session, bookmarked via 4a.6). This is how we pick the layout — on how the transcripts read in context, not in isolation.
 
@@ -528,6 +552,7 @@ Second draft. Iterate until both template and case study feel right. **Hard stop
 - `src/pages/projects/[slug].astro` dynamic route
 - Imagery sourced and optimised per 4a.3 standards
 - **Evolution showcase** — `<VersionedEmbed>` component + three Cloudflare Workers deploys (Stages 1/2/3 of the-weekly). Full plan in `plans/the-weekly-evolution-showcase.md`. Renders under Lesson 2 as decision-led visible evidence.
+- Add `<VersionedEmbed>` to the `/design-system` kit (4c.0.5) with a sample embed. Part of this chunk's acceptance.
 
 **Acceptance:**
 - the-weekly case study renders on `/projects/the-weekly` and visually matches the 4c.1 mockup
@@ -682,48 +707,22 @@ User rewrites in voice. Iterate. Same 2-iteration hard stop.
 
 ---
 
-## Chunk 7 — Design system showcase page (post-launch)
+## Chunk 7 — Design system showcase polish (post-launch)
 
-**Deliverable:** `/design-system` page — a live reference for the portfolio's Royal Tonal colour palette, typography scale, and all built UI components. Portfolio-only (not publicly linked from nav), but publicly accessible as a URL. Useful for sharing with collaborators, referencing during development, and as a portfolio signal in itself.
+**Context.** The `/design-system` page was scaffolded in 4c.0.5 and grew incrementally — every component chunk (4c.1, 4d) added its component to the kit as part of its acceptance. By the time chunk 6 ships, the kit is already complete and on production.
 
-**Gate:** Chunk 6 must be shipped to production. The showcase documents the final component set — running it before chunk 5 closes means the component inventory is incomplete.
+This chunk is a post-launch curation pass, not a build. Skip entirely if the kit already reads as portfolio-grade.
 
-### Step 7.1 — Inventory
+**Optional deliverables:**
+- Short narrative intro at the top of `/design-system` framing it as "built with Claude Code" — one paragraph, honest about the human / AI split.
+- Per-component captions noting what was handwritten vs. generated vs. adapted from shadcn.
+- Link to the portfolio repo for component source.
+- Final audit: every `--text-*` slot, every token in `globals.css`, every component in `src/components/` has a matching kit entry. Fix any gaps from incremental drift.
+- Lighthouse pass specific to `/design-system` (it's heavier than other pages).
 
-Before building, enumerate everything the showcase needs to document:
-- All colour roles (Royal Tonal scale + semantic aliases from `globals.css`)
-- Typography scale: all `--text-*` slots rendered with Fraunces / Geist / Geist Mono at their intended sizes, weights, and use contexts
-- All components built across chunks 3–6 (`CaseStudyCard`, `BuildLogTicker`, `KickerLabel`, `ChatTranscript`, `ProjectTimeline`, `Screenshot`, `ProjectReferenceCard`, any shadcn components adopted)
-- Spacing scale (8-value: 4, 8, 12, 16, 24, 32, 48, 64)
-- Border radius tokens
-- Icon stroke width
+**Gate:** Chunk 6 shipped. Kit is already live; this is paint, not build.
 
-### Step 7.2 — Page design
-
-Self-contained HTML design explorer first (`plans/portfolio-assets/design-system-showcase.html`) to settle on the page structure before implementing in Astro. The explorer should feel like a real reference page, not a dev tool — it's part of the portfolio.
-
-Structure:
-- **Colour** — full Royal Tonal palette swatches with hex/HSL values and role names (royal-0 through royal-10 + semantic aliases). Group: scale vs semantic.
-- **Typography** — each type slot rendered at size with label (slot name, font family, size, weight, use context). At least: `--text-hero`, `--text-display`, `--text-heading`, `--text-body`, `--text-small`, `--text-caption`, `--text-code`.
-- **Components** — one section per component, showing the component in its natural state with a brief one-line description of its role. Where a component has variants (e.g. `ChatTranscript` inline vs breakout, `ProjectTimeline` milestone vs pivot nodes), show both.
-- **Spacing** — visual scale strip showing all 8 values with their px labels.
-
-### Step 7.3 — Build
-
-- `src/pages/design-system.astro` — static Astro page, no dynamic data
-- Sections import and render actual components from `src/components/` — not screenshots or code snippets. The showcase is live, not documented.
-- Colour swatches generated from CSS custom properties (read at runtime via JS or hardcoded from `globals.css` — either is fine)
-- `npm run check` passes
-
-**Note on linking:** do NOT add this to the main nav. It's a dev/portfolio reference. Add a footer link in `PageFooter.astro` — small, unobtrusive, discoverable but not primary navigation.
-
-**Acceptance:**
-- `/design-system` renders on production
-- All colours, type slots, spacing values, and components are present and accurate
-- `npm run check` passes
-- No broken component renders or layout overflows
-
-**Commit:** `portfolio: design system showcase page`
+**Commit (if run):** `portfolio: design system showcase polish`
 
 ---
 
