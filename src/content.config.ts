@@ -59,6 +59,7 @@ const transcripts = defineCollection({
         text: z.string(),
         kind: z.enum(['verbatim', 'headline', 'plan', 'skill', 'research']).optional(),
         summary: z.string().optional(),
+        clusterTitle: z.string().optional(),
         collapsedTools: z.array(z.string()).optional(),
         toolCalls: z.array(z.object({
           name: z.string(),

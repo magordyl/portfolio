@@ -158,6 +158,25 @@ export const roles = {
     high: { fg: palette.royal[11], border: palette.royal[8] },
     bg:   { fg: palette.ink.dim,   border: palette.royal[4] },
   },
+  transcript: {
+    frame:  { bg: palette.royal[1] },
+    chrome: { border: palette.royal[4] },
+    dylan: {
+      badge:  { bg: 'rgba(140, 59, 219, 0.15)', icon: palette.violet[10], border: palette.violet[8] },
+      label:  palette.violet[11],
+      accent: palette.violet[10],
+    },
+    claude: {
+      badge:  { bg: palette.royal[4], icon: palette.royal[10], border: palette.royal[7] },
+      label:  palette.royal[11],
+      accent: palette.royal[10],
+    },
+    wrapup:    { accent: palette.royal[10] },
+    fullinput: { fg: palette.royal[11], fgHover: palette.violet[11] },
+  },
+  prose: {
+    headingFg: palette.royal[12],
+  },
 } as const;
 
 /**

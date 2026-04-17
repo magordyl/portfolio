@@ -1,5 +1,6 @@
 ---
 import { getEntry } from 'astro:content';
+import { marked } from 'marked';
 
 interface Props {
   id: string;
@@ -11,556 +12,608 @@ const { id, mode = 'inline' } = Astro.props;
 const entry = await getEntry('transcripts', id);
 if (!entry) throw new Error(`ChatTranscript: no transcript found with id "${id}"`);
 
-const { title, note, turns } = entry.data;
+const { title, note, turns: rawTurns } = entry.data;
 
-// Chevron SVG (lucide chevron-down, 16px) — reused across all expanders
-const chevronSvg = `<svg class="chevron-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>`;
+type Turn = (typeof rawTurns)[number];
+type DispRole = 'dylan' | 'claude';
+interface Block { role: DispRole; turns: Turn[]; }
 
-// ── Rendering helpers ───────────────────────────────────────────────────
+// ── Content filters ─────────────────────────────────────────────────────
+const RX_COMPACTION   = /^This session is being continued from a previous conversation/i;
+const RX_BOOKMARK_CMD = /<command-name>\/bookmark<\/command-name>/i;
 
-type Turn = (typeof turns)[number];
-
-/** Split a long turn's text by ## or ### headings into sections */
-function splitByHeadings(text: string): Array<{ heading: string | null; level: number; body: string }> {
-  const sections: Array<{ heading: string | null; level: number; body: string }> = [];
-  const lines = text.split('\n');
-  let current: { heading: string | null; level: number; body: string } = { heading: null, level: 0, body: '' };
-
-  for (const line of lines) {
-    const m = line.match(/^(#{2,3})\s+(.+)$/);
-    if (m) {
-      if (current.heading !== null || current.body.trim()) sections.push(current);
-      current = { level: m[1].length, heading: m[2].trim(), body: '' };
-    } else {
-      current.body += line + '\n';
-    }
-  }
-  if (current.heading !== null || current.body.trim()) sections.push(current);
-  return sections;
+function shouldFilter(turn: Turn): boolean {
+  const text = turn.text || '';
+  if (turn.role === 'user' && RX_COMPACTION.test(text)) return true;
+  if (turn.role === 'user' && RX_BOOKMARK_CMD.test(text)) return true;
+  return false;
 }
 
-/** Minimal markdown → HTML: paragraphs, **bold**, `code`, bullet lists, code blocks */
-function renderMarkdown(text: string): string {
-  if (!text?.trim()) return '';
-  const blocks: string[] = [];
-  const lines = text.split('\n');
+// ── Markdown → HTML (build-time) ────────────────────────────────────────
+marked.setOptions({ gfm: true, breaks: false });
+function md(text: string): string {
+  return marked.parse(text || '', { async: false }) as string;
+}
+
+function escapeHtml(s: string): string {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+function trimTitle(s: string, max = 100): string {
+  if (!s) return '';
+  s = s.replace(/\s+/g, ' ').trim();
+  if (s.length <= max) return s;
+  const cut = s.slice(0, max);
+  const last = cut.lastIndexOf(' ');
+  return (last > 40 ? cut.slice(0, last) : cut).replace(/[.,;:!?-]+$/, '') + '...';
+}
+
+// ── Wrap-up split ───────────────────────────────────────────────────────
+// Directive sentences ("reply with your answers...", "ready for your review")
+// stay visible as a pill outside any expander.
+const WRAPUP_RX = /(^|\n\n)([^\n]{0,400}(reply with|answer the|ready for your|once approved|when you(?:'re| are) ready|let me know if|ready to start|ready to proceed|give me the word|give the word|ready for review|your call)[^\n]{0,400})\s*$/i;
+
+function splitWrapup(text: string): { main: string; wrapup: string } {
+  if (!text) return { main: '', wrapup: '' };
+  const m = text.match(WRAPUP_RX);
+  if (!m) return { main: text, wrapup: '' };
+  const wrapup = m[2].trim();
+  if (wrapup.length > 360) return { main: text, wrapup: '' };
+  const main = text.slice(0, text.length - m[0].length).trimEnd();
+  return { main, wrapup };
+}
+
+function firstHeading(text: string): string {
+  if (!text) return '';
+  const m = text.match(/^\s*#{1,3}\s+(.+?)\s*$/m);
+  return m ? m[1].replace(/[*_`]/g, '').trim() : '';
+}
+
+function firstProseLine(text: string): string {
+  if (!text) return '';
+  const lines = text.split('\n').map((s) => s.trim()).filter(Boolean);
+  for (const ln of lines) {
+    if (/^[#>*\-]/.test(ln)) continue;
+    return ln.replace(/[*_`]/g, '');
+  }
+  return lines[0] || '';
+}
+
+function toolCount(turn: Turn): number {
+  return (turn.toolCalls?.length) || (turn.collapsedTools?.length) || 0;
+}
+
+function isToolHeavy(turn: Turn): boolean {
+  if (toolCount(turn) === 0) return false;
+  const text = (turn.text || '').trim();
+  return text.length < 600;
+}
+
+// ── Cluster heading synthesis ───────────────────────────────────────────
+// Merges runs of 3+ consecutive tool-heavy Claude turns into one expander
+// with a pattern-matched summary title.
+function clusterHeading(runTurns: Turn[]): string {
+  // Author override on the first turn of the run wins.
+  const override = runTurns[0]?.clusterTitle;
+  if (override) return override;
+
+  const totalCalls = runTurns.reduce((n, t) => n + toolCount(t), 0);
+  const toolNames = new Set<string>();
+  runTurns.forEach((t) => (t.toolCalls || []).forEach((tc) => toolNames.add((tc.name || '').toLowerCase())));
+  const collapsedNames = new Set<string>();
+  runTurns.forEach((t) => (t.collapsedTools || []).forEach((n) => collapsedNames.add(String(n).toLowerCase())));
+
+  const hasStitch = [...toolNames].some((n) => n.includes('stitch')) ||
+                    [...collapsedNames].some((n) => n.includes('stitch'));
+  const hasShell  = [...toolNames].some((n) => /bash|powershell/.test(n)) ||
+                    [...collapsedNames].some((n) => /bash|powershell/.test(n));
+
+  if (hasStitch && runTurns.length >= 15) {
+    return 'Claude used Google Stitch MCP and shell tools to generate all 40 renders across 10 design directions and download the comparison assets';
+  }
+  if (hasStitch && runTurns.length >= 5) {
+    return 'Claude set up the Stitch project and design system, then generated and downloaded the first fidelity render';
+  }
+  if (hasShell && runTurns.length >= 5) {
+    return `Claude ran ${totalCalls} shell and file tools across ${runTurns.length} turns`;
+  }
+  const first = trimTitle(firstProseLine(runTurns[0].text || ''), 80);
+  return `Claude ran ${totalCalls} tool calls across ${runTurns.length} turns - ${first}`;
+}
+
+// ── Tool calls ──────────────────────────────────────────────────────────
+function renderToolCalls(toolCalls: Turn['toolCalls'], collapsedTools: Turn['collapsedTools']): string {
+  if (toolCalls?.length) {
+    return '<div class="toolcalls">' + toolCalls.map((tc) => {
+      const name = tc.name || '(tool)';
+      const input = tc.input ? JSON.stringify(tc.input, null, 2) : '';
+      const preview = input ? (input.length > 180 ? input.slice(0, 180) + '...' : input) : '';
+      const full = (input && input.length > 180)
+        ? `<details class="tc-details"><summary>full input</summary><pre>${escapeHtml(input)}</pre></details>`
+        : '';
+      return '<div class="toolcall">' +
+        `<span class="tc-name">${escapeHtml(name)}</span>` +
+        (preview ? `<span class="tc-preview">${escapeHtml(preview)}</span>` : '') +
+        full +
+        '</div>';
+    }).join('') + '</div>';
+  }
+  if (collapsedTools?.length) {
+    return '<div class="toolcalls">' + collapsedTools.map((t) =>
+      `<div class="toolcall"><span class="tc-name">${escapeHtml(String(t))}</span></div>`
+    ).join('') + '</div>';
+  }
+  return '';
+}
+
+// ── Turn rendering ──────────────────────────────────────────────────────
+const ICON_CHEV = '<svg class="chev-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
+
+function renderClusterExpander(runTurns: Turn[]): string {
+  const totalCalls = runTurns.reduce((n, t) => n + toolCount(t), 0);
+  const heading = trimTitle(clusterHeading(runTurns), 140);
+  const body = runTurns.map((t) =>
+    '<div class="cluster-turn">' +
+      md(t.text || '') +
+      renderToolCalls(t.toolCalls, t.collapsedTools) +
+    '</div>'
+  ).join('');
+
+  return '<div class="turn">' +
+    '<details class="exp">' +
+      '<summary>' +
+        '<span class="exp-kind high">cluster</span>' +
+        `<span class="exp-title">${escapeHtml(heading)}</span>` +
+        `<span class="exp-meta">${totalCalls} calls / ${runTurns.length} turns</span>` +
+        `<span class="chevron">${ICON_CHEV}</span>` +
+      '</summary>' +
+      `<div class="exp-body">${body}</div>` +
+    '</details>' +
+  '</div>';
+}
+
+function renderClaudeTurn(turn: Turn): string {
+  const hasKind = !!turn.kind;
+  const hasTools = toolCount(turn) > 0;
+  const text = turn.text || '';
+  const textLen = text.length;
+  const { main, wrapup } = splitWrapup(text);
+  const isLong = textLen > 500;
+  const plain = !hasKind && !hasTools && !isLong;
+
+  if (plain) {
+    return '<div class="turn">' +
+      `<div class="turn-body">${md(main)}</div>` +
+      (wrapup ? `<div class="wrapup">${md(wrapup)}</div>` : '') +
+    '</div>';
+  }
+
+  const kindLabel = turn.kind || (hasTools ? 'tools' : 'reply');
+  const kindClass = hasTools && !turn.kind ? '' : 'high';
+  const rawTitle = turn.summary || firstHeading(main) || firstProseLine(main) || 'Claude response';
+  const title = trimTitle(rawTitle, 120);
+  const meta = hasTools ? `${toolCount(turn)} tool${toolCount(turn) === 1 ? '' : 's'}` : '';
+  const defaultOpen = (turn.kind === 'plan' && textLen < 1200);
+  const openAttr = defaultOpen ? ' open' : '';
+  const body = md(main) + renderToolCalls(turn.toolCalls, turn.collapsedTools);
+
+  return '<div class="turn">' +
+    `<details class="exp"${openAttr}>` +
+      '<summary>' +
+        `<span class="exp-kind ${kindClass}">${escapeHtml(kindLabel)}</span>` +
+        `<span class="exp-title">${escapeHtml(title)}</span>` +
+        (meta ? `<span class="exp-meta">${escapeHtml(meta)}</span>` : '') +
+        `<span class="chevron">${ICON_CHEV}</span>` +
+      '</summary>' +
+      `<div class="exp-body">${body}</div>` +
+    '</details>' +
+    (wrapup ? `<div class="wrapup">${md(wrapup)}</div>` : '') +
+  '</div>';
+}
+
+function renderDylanTurn(turn: Turn): string {
+  return `<div class="turn"><div class="turn-body">${md(turn.text || '')}</div></div>`;
+}
+
+function renderClaudeTurns(claudeTurns: Turn[]): string {
+  const parts: string[] = [];
   let i = 0;
-
-  while (i < lines.length) {
-    const line = lines[i];
-    // Fenced code block
-    if (/^```/.test(line)) {
-      const codeLines: string[] = [];
-      i++;
-      while (i < lines.length && !/^```/.test(lines[i])) {
-        codeLines.push(lines[i]);
-        i++;
-      }
-      i++;
-      blocks.push(`<pre><code>${escapeHtml(codeLines.join('\n'))}</code></pre>`);
-      continue;
-    }
-    // Bullet list
-    if (/^\s*[-*]\s+/.test(line)) {
-      const items: string[] = [];
-      while (i < lines.length && /^\s*[-*]\s+/.test(lines[i])) {
-        items.push(lines[i].replace(/^\s*[-*]\s+/, ''));
-        i++;
-      }
-      blocks.push(`<ul>${items.map(it => `<li>${renderInline(it)}</li>`).join('')}</ul>`);
-      continue;
-    }
-    // Numbered list
-    if (/^\s*\d+\.\s+/.test(line)) {
-      const items: string[] = [];
-      while (i < lines.length && /^\s*\d+\.\s+/.test(lines[i])) {
-        items.push(lines[i].replace(/^\s*\d+\.\s+/, ''));
-        i++;
-      }
-      blocks.push(`<ol>${items.map(it => `<li>${renderInline(it)}</li>`).join('')}</ol>`);
-      continue;
-    }
-    // Blank line
-    if (!line.trim()) { i++; continue; }
-    // Paragraph
-    const paraLines: string[] = [];
-    while (i < lines.length && lines[i].trim() && !/^```/.test(lines[i]) && !/^\s*[-*]\s+/.test(lines[i]) && !/^\s*\d+\.\s+/.test(lines[i]) && !/^#{2,3}\s+/.test(lines[i])) {
-      paraLines.push(lines[i]);
+  while (i < claudeTurns.length) {
+    let j = i;
+    while (j < claudeTurns.length && isToolHeavy(claudeTurns[j])) j++;
+    if (j - i >= 3) {
+      parts.push(renderClusterExpander(claudeTurns.slice(i, j)));
+      i = j;
+    } else {
+      parts.push(renderClaudeTurn(claudeTurns[i]));
       i++;
     }
-    if (paraLines.length) blocks.push(`<p>${renderInline(paraLines.join(' '))}</p>`);
   }
-  return blocks.join('\n');
+  return parts.join('');
 }
 
-function renderInline(text: string): string {
-  let out = escapeHtml(text);
-  out = out.replace(/`([^`]+)`/g, '<code>$1</code>');
-  out = out.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-  return out;
+// ── Build blocks ────────────────────────────────────────────────────────
+const turns = rawTurns.filter((t) => !shouldFilter(t));
+const blocks: Block[] = [];
+for (const turn of turns) {
+  const r: DispRole = turn.role === 'user' ? 'dylan' : 'claude';
+  const last = blocks[blocks.length - 1];
+  if (last && last.role === r) last.turns.push(turn);
+  else blocks.push({ role: r, turns: [turn] });
 }
 
-function escapeHtml(str: string): string {
-  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
+const totalTurns = blocks.reduce((n, b) => n + b.turns.length, 0);
+const stats = `${totalTurns} turn${totalTurns === 1 ? '' : 's'} / ${blocks.length} block${blocks.length === 1 ? '' : 's'}`;
 
-/** Determine how a turn should render */
-function turnMode(turn: Turn): 'verbatim' | 'collapsed' | 'headline' {
-  if (turn.role === 'user') return 'verbatim';
-  const kind = turn.kind || 'verbatim';
-  if (kind === 'headline') return 'headline';
-  if (kind === 'plan' || kind === 'skill' || kind === 'research') return 'collapsed';
-  return 'verbatim';
-}
+// Pre-render block HTML strings.
+const blockHtml = blocks.map((block) => {
+  const turnsHtml = block.role === 'dylan'
+    ? block.turns.map(renderDylanTurn).join('')
+    : renderClaudeTurns(block.turns);
+  return { role: block.role, turnsHtml };
+});
 ---
 
-<aside class:list={['transcript', `transcript--${mode}`]} aria-label={`Chat transcript: ${title}`}>
-  {note && <p class="transcript-note">{note}</p>}
+<section class:list={['chat-transcript', `mode-${mode}`]}>
+  <article class="transcript dyl-full exp-flat">
+    <header class="t-head">
+      <span class="t-title">{title}</span>
+      <span class="t-stats">{stats}</span>
+    </header>
 
-  <ol class="transcript-turns">
-    {turns.map((turn) => {
-      const isUser = turn.role === 'user';
-      const renderMode = turnMode(turn);
+    {note && <div class="t-note">{note}</div>}
 
-      return (
-        <li class:list={['turn', isUser ? 'turn--user' : 'turn--claude']}>
-          <div class="turn-gutter">
-            <div class="turn-icon" aria-hidden="true">
-              {isUser ? (
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                  <circle cx="12" cy="7" r="4"/>
-                </svg>
-              ) : (
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M12 8V4H8"/>
-                  <rect width="16" height="12" x="4" y="8" rx="2"/>
-                  <path d="M2 14h2"/>
-                  <path d="M20 14h2"/>
-                  <path d="M15 13v2"/>
-                  <path d="M9 13v2"/>
-                </svg>
-              )}
+    <div class="blocks">
+      {blockHtml.map((block) => (
+        <div class={`block block--${block.role}`}>
+          <div class="gutter">
+            <div class="sender">
+              <span class="badge" aria-hidden="true">
+                {block.role === 'dylan' ? (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                ) : (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
+                )}
+              </span>
+              <span class="sender-label">{block.role === 'dylan' ? 'Dylan' : 'Claude'}</span>
             </div>
-            <span class="turn-label">{isUser ? 'Dylan' : 'Claude'}</span>
           </div>
-
-          <div class="turn-body">
-            {/* Tool-call labels (compact summary) */}
-            {turn.collapsedTools && turn.collapsedTools.length > 0 && (
-              <ul class="turn-tools" aria-label="Tool calls">
-                {turn.collapsedTools.map(tool => (
-                  <li class="turn-tool">{tool}</li>
-                ))}
-              </ul>
-            )}
-
-            {/* Tool-call detail expanders (when --full-tools captured the input) */}
-            {turn.toolCalls && turn.toolCalls.length > 0 && (
-              <div class="turn-tool-details" aria-label="Tool call details">
-                {turn.toolCalls.map((tc, idx) => {
-                  const isStitch = tc.name === 'mcp__stitch__generate_screen_from_text';
-                  const summaryLabel = isStitch
-                    ? `Stitch generate · ${tc.result?.rewrittenPrompts?.[0]?.title ?? 'screen'} (#${idx + 1})`
-                    : `${tc.name} (#${idx + 1})`;
-                  return (
-                    <details class="tool-call">
-                      <summary class="tool-call-summary">
-                        <span class="tool-call-name">{summaryLabel}</span>
-                        <span class="turn-section-chevron" set:html={chevronSvg} />
-                      </summary>
-                      <div class="tool-call-body">
-                        {isStitch && tc.input?.prompt ? (
-                          <>
-                            <p class="tool-call-label">Dylan's prompt</p>
-                            <pre class="tool-call-pre">{tc.input.prompt}</pre>
-                            {tc.result?.rewrittenPrompts?.length > 0 && (
-                              <>
-                                <p class="tool-call-label">Stitch's rewritten prompt</p>
-                                <pre class="tool-call-pre">{tc.result.rewrittenPrompts[0].prompt}</pre>
-                              </>
-                            )}
-                            {tc.result?.commentary?.length > 0 && (
-                              <>
-                                <p class="tool-call-label">Stitch's commentary</p>
-                                <pre class="tool-call-pre">{tc.result.commentary.join('\n\n')}</pre>
-                              </>
-                            )}
-                          </>
-                        ) : (
-                          <>
-                            <p class="tool-call-label">Input</p>
-                            <pre class="tool-call-pre">{JSON.stringify(tc.input ?? {}, null, 2)}</pre>
-                          </>
-                        )}
-                      </div>
-                    </details>
-                  );
-                })}
-              </div>
-            )}
-
-            {/* Verbatim: render text directly */}
-            {renderMode === 'verbatim' && (
-              <div class="turn-text" set:html={renderMarkdown(turn.text)} />
-            )}
-
-            {/* Collapsed (plan/skill/research): summary line visible, body in <details> */}
-            {renderMode === 'collapsed' && (
-              <details class="turn-section">
-                <summary class="turn-section-summary">
-                  <span class="turn-section-label">{turn.summary ?? 'Show full reply'}</span>
-                  <span class="turn-section-chevron" set:html={chevronSvg} />
-                </summary>
-                <div class="turn-section-body" set:html={renderMarkdown(turn.text)} />
-              </details>
-            )}
-
-            {/* Headline: each heading visible, section bodies individually collapsible */}
-            {renderMode === 'headline' && (() => {
-              const sections = splitByHeadings(turn.text);
-              return sections.map(sec => {
-                if (!sec.heading) {
-                  // Pre-heading prose — always visible
-                  return <div class="turn-text" set:html={renderMarkdown(sec.body)} />;
-                }
-                const bodyHtml = renderMarkdown(sec.body);
-                if (!bodyHtml) {
-                  // Heading with no body — just show the heading
-                  return <h4 class="turn-heading">{sec.heading}</h4>;
-                }
-                return (
-                  <details class="turn-section">
-                    <summary class="turn-section-summary">
-                      <span class="turn-heading-inline">{sec.heading}</span>
-                      <span class="turn-section-chevron" set:html={chevronSvg} />
-                    </summary>
-                    <div class="turn-section-body" set:html={bodyHtml} />
-                  </details>
-                );
-              });
-            })()}
-          </div>
-        </li>
-      );
-    })}
-  </ol>
-
-  <p class="transcript-count">— {turns.length} turn{turns.length === 1 ? '' : 's'} —</p>
-</aside>
+          <div class="content" set:html={block.turnsHtml} />
+        </div>
+      ))}
+    </div>
+  </article>
+</section>
 
 <style>
+  .chat-transcript {
+    container-type: inline-size;
+    margin: var(--space-6) 0;
+  }
+  .chat-transcript.mode-breakout {
+    /* Hook for future case-study layouts to extend past prose column width.
+       Styling parity with inline for now. */
+  }
+
   .transcript {
-    background: var(--royal-3);
-    border: 1px solid var(--royal-5);
-    border-radius: var(--radius);
-    padding: var(--space-5);
-    font-size: var(--text-sm);
+    background:
+      linear-gradient(var(--transcript-frame-bg), var(--transcript-frame-bg)) padding-box,
+      var(--grad-rv) border-box;
+    border: 1px solid transparent;
+    border-radius: var(--radius-lg);
+    padding: var(--space-5) var(--space-4);
+    --hair: var(--border-hairline);
+    /* Badge-icon stroke: 2 is required for legibility at the 14px badge
+       icon size. The workspace default (1.5) reads as anemic here. Keep
+       scoped to this component. */
+    --badge-stroke: 2;
   }
 
-  .transcript--breakout {
-    margin-right: -120px;
-  }
-
-  @media (max-width: 900px) {
-    .transcript--breakout {
-      margin-right: 0;
-    }
-  }
-
-  .transcript-note {
-    font-family: var(--font-sans);
-    font-size: var(--text-sm);
-    font-style: italic;
-    color: var(--ink-dim);
-    margin: 0 0 var(--space-4);
-    line-height: var(--lh-normal);
-  }
-
-  .transcript-turns {
-    list-style: none;
-    margin: 0;
-    padding: 0;
+  .t-head {
     display: flex;
-    flex-direction: column;
-    gap: var(--space-5);
-  }
-
-  /* ── Turn: always visible gutter + body ─────────────── */
-
-  .turn {
-    display: grid;
-    grid-template-columns: 40px 1fr;
-    gap: var(--space-3);
-    align-items: start;
-  }
-
-  .turn-gutter {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--space-1);
-    padding-top: 2px;
-  }
-
-  .turn-icon {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background: var(--royal-4);
-    border: 1px solid var(--royal-6);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
-
-  .turn--user .turn-icon { color: var(--royal-11); }
-  .turn--claude .turn-icon { color: var(--royal-10); }
-
-  .turn-label {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    color: var(--ink-faint);
-    letter-spacing: 0.04em;
-    text-transform: lowercase;
-    line-height: 1;
-  }
-
-  .turn-body {
-    min-width: 0;
-  }
-
-  /* ── Tool-call labels ───────────────────────────────── */
-
-  .turn-tools {
-    list-style: none;
-    margin: 0 0 var(--space-2);
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  .turn-tool {
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    color: var(--ink-faint);
-    background: var(--royal-2);
-    border-radius: var(--radius-sm);
-    padding: 2px var(--space-2);
-    display: inline-block;
-  }
-
-  /* ── Verbatim text ──────────────────────────────────── */
-
-  .turn-text {
-    font-family: var(--font-sans);
-    font-size: var(--text-sm);
-    color: var(--ink);
-    line-height: var(--lh-loose);
-  }
-
-  .turn-text :global(p) { margin: 0 0 0.5rem; }
-  .turn-text :global(p:last-child) { margin-bottom: 0; }
-  .turn-text :global(ul), .turn-text :global(ol) { margin: 0 0 0.5rem; padding-left: 1.25rem; }
-  .turn-text :global(li) { margin-bottom: 0.25rem; }
-  .turn-text :global(code) {
-    font-family: var(--font-mono);
-    font-size: 0.85em;
-    background: var(--royal-2);
-    color: var(--royal-11);
-    padding: 0.1em 0.3em;
-    border-radius: 3px;
-  }
-  .turn-text :global(pre) {
-    background: var(--royal-2);
-    border: 1px solid var(--royal-4);
-    border-radius: 6px;
-    padding: 0.75rem 1rem;
-    overflow-x: auto;
-    margin: 0 0 0.5rem;
-  }
-  .turn-text :global(pre code) { background: none; padding: 0; color: var(--ink); }
-  .turn-text :global(strong) { color: var(--ink); font-weight: 600; }
-
-  /* ── Collapsible sections (nested WITHIN a turn) ────── */
-
-  .turn-section {
-    background: var(--royal-2);
-    border: 1px solid var(--royal-5);
-    border-radius: 6px;
-    margin: 0.5rem 0;
-  }
-
-  .turn-section-summary {
-    list-style: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
     justify-content: space-between;
-    gap: var(--space-3);
-    padding: 0.625rem 0.875rem;
-    user-select: none;
+    align-items: baseline;
+    font-family: var(--font-mono);
+    font-size: var(--text-kicker);
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--ink-dim);
+    margin-bottom: var(--space-4);
+    padding-bottom: var(--space-3);
+    border-bottom: 1px solid var(--border);
   }
+  .t-head .t-title { color: var(--ink); }
 
-  .turn-section-summary::-webkit-details-marker { display: none; }
-
-  /* Summary label for collapsed plan/skill/research */
-  .turn-section-label {
+  .t-note {
     font-family: var(--font-mono);
     font-size: var(--text-xs);
+    color: var(--ink-dim);
+    border-left: 2px solid var(--transcript-chrome-border);
+    padding: var(--space-1) 0 var(--space-1) var(--space-3);
+    margin-bottom: var(--space-4);
     font-style: italic;
-    color: var(--royal-11);
-    flex: 1;
   }
 
-  /* Heading text for headline sections */
-  .turn-heading-inline {
-    font-family: var(--font-serif);
-    font-size: var(--text-sm);
-    font-weight: 500;
-    color: var(--royal-12);
-    flex: 1;
-    letter-spacing: var(--ls-title);
+  .blocks { display: flex; flex-direction: column; }
+
+  .block {
+    display: grid;
+    grid-template-columns: 64px 1fr;
+    gap: var(--space-2);
+    padding: var(--space-4) 0;
   }
+  .block + .block { border-top: 1px solid var(--hair); }
 
-  /* Standalone heading (no collapsible body) */
-  .turn-heading {
-    font-family: var(--font-serif);
-    font-size: var(--text-sm);
-    font-weight: 500;
-    color: var(--royal-12);
-    margin: 0.75rem 0 0.375rem;
-    letter-spacing: var(--ls-title);
-  }
+  .gutter { display: flex; flex-direction: column; align-items: flex-start; }
+  .content { min-width: 0; }
 
-  .turn-heading:first-child { margin-top: 0; }
+  .sender { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-1); }
 
-  /* ── Chevron: visible, rotates on open ──────────────── */
-
-  .turn-section-chevron {
+  .badge {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: var(--royal-10);
+    width: 26px;
+    height: 26px;
+    border-radius: 999px;
     flex-shrink: 0;
-    transition: transform 0.2s ease;
+  }
+  .badge :global(svg) {
+    width: 14px;
+    height: 14px;
+    stroke-width: var(--badge-stroke);
+  }
+  .sender-label {
+    font-family: var(--font-mono);
+    font-size: var(--text-kicker);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-weight: 500;
   }
 
-  .turn-section-chevron :global(.chevron-icon) {
-    display: block;
+  .block--dylan .badge {
+    background: var(--transcript-dylan-badge-bg);
+    color: var(--transcript-dylan-badge-icon);
+    border: 1px solid var(--transcript-dylan-badge-border);
+  }
+  .block--dylan .sender-label { color: var(--transcript-dylan-label); }
+
+  .block--claude .badge {
+    background: var(--transcript-claude-badge-bg);
+    color: var(--transcript-claude-badge-icon);
+    border: 1px solid var(--transcript-claude-badge-border);
+  }
+  .block--claude .sender-label { color: var(--transcript-claude-label); }
+
+  /* Full-block accent (locked default) */
+  .transcript.dyl-full .block--dylan  { border-left: 2px solid var(--transcript-dylan-accent);  padding-left: var(--space-3); }
+  .transcript.dyl-full .block--claude { border-left: 2px solid var(--transcript-claude-accent); padding-left: var(--space-3); }
+
+  .content :global(.turn) { min-width: 0; }
+  .content :global(.turn + .turn) {
+    border-top: 1px solid var(--hair);
+    margin-top: var(--space-3);
+    padding-top: var(--space-3);
   }
 
-  .turn-section[open] > .turn-section-summary .turn-section-chevron {
-    transform: rotate(180deg);
-  }
-
-  /* Expanded body */
-  .turn-section-body {
-    padding: 0 0.875rem 0.75rem;
-    border-top: 1px solid var(--royal-4);
-    margin: 0 0.875rem;
-    padding-top: 0.75rem;
-    margin-top: 0;
-    font-family: var(--font-sans);
-    font-size: var(--text-sm);
+  /* ── Turn-body prose ──────────────────────────────────────────────── */
+  .content :global(.turn-body) {
     color: var(--ink);
-    line-height: var(--lh-loose);
+    font-size: 0.9375rem;
   }
-
-  .turn-section-body :global(p) { margin: 0 0 0.5rem; }
-  .turn-section-body :global(p:last-child) { margin-bottom: 0; }
-  .turn-section-body :global(ul), .turn-section-body :global(ol) { margin: 0 0 0.5rem; padding-left: 1.25rem; }
-  .turn-section-body :global(li) { margin-bottom: 0.25rem; }
-  .turn-section-body :global(code) {
+  .content :global(.turn-body p) { margin: 0 0 var(--space-3); }
+  .content :global(.turn-body p:last-child) { margin-bottom: 0; }
+  .content :global(.turn-body ul),
+  .content :global(.turn-body ol) {
+    margin: 0 0 var(--space-3);
+    padding-left: var(--space-4);
+  }
+  .content :global(.turn-body li) { margin-bottom: var(--space-1); }
+  .content :global(.turn-body strong) { color: var(--ink); font-weight: 600; }
+  .content :global(.turn-body em) { color: var(--ink); font-style: italic; }
+  .content :global(.turn-body code) {
     font-family: var(--font-mono);
     font-size: 0.85em;
-    background: var(--royal-3);
-    color: var(--royal-11);
-    padding: 0.1em 0.3em;
+    background: var(--border-hairline);
+    color: var(--kicker-default-fg);
+    padding: 0.08em 0.35em;
     border-radius: 3px;
   }
-  .turn-section-body :global(pre) {
-    background: var(--royal-3);
-    border: 1px solid var(--royal-5);
+  .content :global(.turn-body pre) {
+    background: var(--bg);
+    border: 1px solid var(--transcript-chrome-border);
     border-radius: 6px;
-    padding: 0.75rem 1rem;
-    overflow-x: auto;
-    margin: 0 0 0.5rem;
-  }
-  .turn-section-body :global(pre code) { background: none; padding: 0; color: var(--ink); }
-  .turn-section-body :global(strong) { color: var(--ink); font-weight: 600; }
-
-  /* ── Turn count footer ──────────────────────────────── */
-
-  .transcript-count {
+    padding: var(--space-3) var(--space-4);
+    margin: 0 0 var(--space-3);
     font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    color: var(--ink-faint);
-    text-align: center;
-    margin: var(--space-4) 0 0;
-    letter-spacing: 0.08em;
-  }
-
-  /* Tool-call detail expanders */
-  .turn-tool-details {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-1);
-    margin: var(--space-2) 0;
-  }
-  .tool-call {
-    border: 1px solid var(--royal-6);
-    border-radius: 4px;
-    background: var(--royal-2);
-  }
-  .tool-call[open] {
-    background: var(--royal-3);
-  }
-  .tool-call-summary {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-2);
-    padding: var(--space-1) var(--space-2);
-    cursor: pointer;
-    list-style: none;
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    color: var(--ink-faint);
-  }
-  .tool-call-summary::-webkit-details-marker { display: none; }
-  .tool-call-name {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .tool-call-body {
-    padding: var(--space-2);
-    border-top: 1px solid var(--royal-6);
-  }
-  .tool-call-label {
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    color: var(--ink-faint);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin: var(--space-2) 0 var(--space-1);
-  }
-  .tool-call-label:first-child { margin-top: 0; }
-  .tool-call-pre {
-    background: var(--royal-1);
-    border: 1px solid var(--royal-5);
-    border-radius: 2px;
-    padding: var(--space-2);
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
+    font-size: 0.8125rem;
     line-height: 1.5;
-    color: var(--ink);
-    overflow-x: auto;
     white-space: pre-wrap;
     word-break: break-word;
-    margin: 0;
+  }
+  .content :global(.turn-body pre code) {
+    background: none;
+    padding: 0;
+    color: var(--ink);
+  }
+  .content :global(.turn-body h1),
+  .content :global(.turn-body h2),
+  .content :global(.turn-body h3),
+  .content :global(.turn-body h4) {
+    font-family: var(--font-serif);
+    font-weight: 500;
+    color: var(--prose-heading-fg);
+    letter-spacing: -0.005em;
+    margin: var(--space-4) 0 var(--space-2);
+  }
+  .content :global(.turn-body h1) { font-size: 1.15rem; }
+  .content :global(.turn-body h2) { font-size: 1.05rem; }
+  .content :global(.turn-body h3) { font-size: 0.98rem; }
+  .content :global(.turn-body h4) { font-size: 0.9rem; color: var(--kicker-default-fg); }
+  .content :global(.turn-body h1:first-child),
+  .content :global(.turn-body h2:first-child),
+  .content :global(.turn-body h3:first-child),
+  .content :global(.turn-body h4:first-child) { margin-top: 0; }
+  .content :global(.turn-body hr) {
+    border: none;
+    border-top: 1px solid var(--transcript-chrome-border);
+    margin: var(--space-4) 0;
+  }
+
+  /* ── Wrap-up pill ─────────────────────────────────────────────────── */
+  .content :global(.wrapup) {
+    margin-top: var(--space-3);
+    padding: var(--space-2) var(--space-3);
+    background: var(--bg);
+    border: 1px solid var(--transcript-chrome-border);
+    border-left: 2px solid var(--transcript-wrapup-accent);
+    border-radius: 4px;
+    font-size: var(--text-sm);
+    color: var(--ink);
+  }
+  .content :global(.wrapup p) { margin: 0; }
+
+  /* ── Expander (flat variant, locked default) ──────────────────────── */
+  .content :global(details.exp) {
+    background: transparent;
+    border: none;
+    border-left: 2px solid var(--transcript-chrome-border);
+    border-radius: 0;
+    padding: var(--space-1) 0 var(--space-1) var(--space-3);
+    margin: 0 0 var(--space-2);
+  }
+  .content :global(details.exp + details.exp) { margin-top: var(--space-2); }
+  .content :global(details.exp > summary) {
+    list-style: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+  .content :global(details.exp > summary::-webkit-details-marker) { display: none; }
+  .content :global(details.exp[open] > summary) {
+    padding-bottom: var(--space-1);
+  }
+  .content :global(.exp-kind) {
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    padding: 2px var(--space-2);
+    border: 1px solid var(--expander-pill-bg-border);
+    border-radius: 3px;
+    color: var(--expander-pill-bg-fg);
+    flex-shrink: 0;
+  }
+  .content :global(.exp-kind.high) {
+    color: var(--expander-pill-high-fg);
+    border-color: var(--expander-pill-high-border);
+  }
+  .content :global(.exp-title) {
+    flex: 1;
+    font-family: var(--font-sans);
+    font-weight: 500;
+    color: var(--ink);
+    font-size: 0.9rem;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .content :global(.exp-meta) {
+    font-family: var(--font-mono);
+    font-size: var(--text-kicker);
+    color: var(--ink-faint);
+    flex-shrink: 0;
+  }
+  .content :global(.chevron) {
+    display: inline-flex;
+    color: var(--ink-faint);
+    transition: transform 0.18s ease;
+    flex-shrink: 0;
+  }
+  .content :global(.chev-svg) {
+    width: 14px;
+    height: 14px;
+    stroke-width: var(--badge-stroke);
+  }
+  .content :global(details.exp[open] > summary .chevron) { transform: rotate(180deg); }
+  .content :global(details.exp .exp-body) { padding-top: 2px; }
+
+  /* ── Cluster expander: consecutive tool-heavy turns merged ────────── */
+  .content :global(.cluster-turn + .cluster-turn) {
+    border-top: 1px solid var(--border-hairline);
+    margin-top: var(--space-3);
+    padding-top: var(--space-3);
+  }
+
+  /* ── Tool calls ───────────────────────────────────────────────────── */
+  .content :global(.toolcalls) {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin-top: var(--space-3);
+  }
+  .content :global(.toolcall) {
+    padding: var(--space-2) var(--space-3);
+    background: var(--bg);
+    border: 1px solid var(--transcript-chrome-border);
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--ink-dim);
+    word-break: break-word;
+  }
+  .content :global(.toolcall .tc-name) {
+    color: var(--kicker-default-fg);
+    font-weight: 500;
+  }
+  .content :global(.toolcall .tc-preview) {
+    color: var(--ink-faint);
+    display: block;
+    margin-top: var(--space-1);
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .content :global(details.tc-details) { margin-top: var(--space-1); }
+  .content :global(details.tc-details > summary) {
+    list-style: none;
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--transcript-fullinput-fg);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    display: inline-block;
+  }
+  .content :global(details.tc-details > summary::-webkit-details-marker) { display: none; }
+  .content :global(details.tc-details > summary:hover),
+  .content :global(details.tc-details[open] > summary) {
+    color: var(--transcript-fullinput-fg-hover);
+  }
+  .content :global(details.tc-details pre) {
+    margin-top: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    background: var(--bg);
+    border: 1px solid var(--transcript-chrome-border);
+    border-radius: 4px;
+    font-size: 0.7rem;
+    max-height: 320px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  /* ── Mobile — WCAG 1.4.1: role label must remain visible ──────────── */
+  @media (max-width: 640px) {
+    .block { grid-template-columns: 1fr; gap: var(--space-2); }
+    .sender { flex-direction: row; align-items: center; gap: var(--space-2); }
+    .transcript.dyl-full .block--dylan,
+    .transcript.dyl-full .block--claude { padding-left: var(--space-2); }
   }
 </style>

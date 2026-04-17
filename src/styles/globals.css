@@ -112,6 +112,32 @@
   --expander-pill-bg-fg:       var(--ink-dim);
   --expander-pill-bg-border:   var(--royal-4);
 
+  /* ChatTranscript — role identity + inner chrome. Scoped family because
+     the transcript is the one place in the system that carries two
+     distinct identity registers (Dylan/violet vs Claude/royal) with
+     WCAG 1.4.1 implications. See portfolio-design-tokens.md §ChatTranscript. */
+  --transcript-frame-bg:              var(--royal-1);
+  --transcript-chrome-border:         var(--royal-4);
+
+  --transcript-dylan-badge-bg:        rgba(140, 59, 219, 0.15);
+  --transcript-dylan-badge-icon:      var(--violet-10);
+  --transcript-dylan-badge-border:    var(--violet-8);
+  --transcript-dylan-label:           var(--violet-11);
+  --transcript-dylan-accent:          var(--violet-10);
+
+  --transcript-claude-badge-bg:       var(--royal-4);
+  --transcript-claude-badge-icon:     var(--royal-10);
+  --transcript-claude-badge-border:   var(--royal-7);
+  --transcript-claude-label:          var(--royal-11);
+  --transcript-claude-accent:         var(--royal-10);
+
+  --transcript-wrapup-accent:         var(--royal-10);
+  --transcript-fullinput-fg:          var(--royal-11);
+  --transcript-fullinput-fg-hover:    var(--violet-11);
+
+  /* Prose — usable beyond ChatTranscript. h4 continues to use --kicker-default-fg. */
+  --prose-heading-fg:                 var(--royal-12);
+
   /* ============================================================
      Typography
      ============================================================ */

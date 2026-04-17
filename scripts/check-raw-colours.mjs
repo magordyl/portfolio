@@ -8,16 +8,13 @@
  * Allowed locations for raw-scale references:
  *   - src/styles/globals.css         (the token layer itself)
  *   - design.tokens.ts                (mirror for tooling)
- *   - src/components/astro/ChatTranscript.astro (deferred to 4c.1 v3 port)
  */
 import { readdir, readFile } from 'node:fs/promises';
 import { join, relative, sep } from 'node:path';
 
 const ROOT = new URL('..', import.meta.url).pathname.replace(/^\//, '');
 const SCAN_DIRS = ['src/components', 'src/layouts', 'src/pages'];
-const ALLOWLIST = new Set([
-  'src/components/astro/ChatTranscript.astro',
-]);
+const ALLOWLIST = new Set();
 const PATTERN = /var\(--(royal|violet)-\d+\b/;
 
 async function walk(dir, out = []) {

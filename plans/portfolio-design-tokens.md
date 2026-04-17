@@ -195,6 +195,63 @@ Used inside `<ChatTranscript>` expanders to label what's inside (plan / tool cal
 
 Tokens: `--expander-pill-high-{fg,border}`, `--expander-pill-bg-{fg,border}`.
 
+### ChatTranscript — role identity + inner chrome
+
+The `<ChatTranscript>` component has its own role-token family because it's the one place in the system that carries two distinct identity registers (Dylan = violet, Claude = royal) with WCAG 1.4.1 implications. Frame, badges, labels, and accent lines are all scoped tokens; inner chrome (pre, wrap-up, tool-call containers) reuses `--bg` and a single shared border token for consistency inside the transcript.
+
+Locked design: royal-3 hairlines, full-block accent (`dyl-full`), flat expander (`exp-flat`). The dev-explorer toggles (`dyl-cont`, `exp-card`, hair-7) do not ship.
+
+**Frame:**
+
+| Token | Value | Use |
+|---|---|---|
+| `--transcript-frame-bg` | `--royal-1` | Inner content fill inside the gradient border (padding-box fill) |
+| `--transcript-chrome-border` | `--royal-4` | Inner container borders shared by `pre`, wrap-up pill, tool-call card, `tc-details` pre, expander-flat stripe, and transcript-body `<hr>` |
+
+**Role identity — Dylan (violet register):**
+
+| Token | Value | Use |
+|---|---|---|
+| `--transcript-dylan-badge-bg` | `rgba(140, 59, 219, 0.15)` | Circular badge fill (scale-step 8 at 15% alpha for WCAG contrast with icon) |
+| `--transcript-dylan-badge-icon` | `--violet-10` | `lucide-user` stroke inside the badge |
+| `--transcript-dylan-badge-border` | `--violet-8` | Badge ring |
+| `--transcript-dylan-label` | `--violet-11` | "Dylan" label text under the badge |
+| `--transcript-dylan-accent` | `--violet-10` | 2px left accent on Dylan blocks in `dyl-full` mode |
+
+**Role identity — Claude (royal register):**
+
+| Token | Value | Use |
+|---|---|---|
+| `--transcript-claude-badge-bg` | `--royal-4` | Circular badge fill |
+| `--transcript-claude-badge-icon` | `--royal-10` | `lucide-bot` stroke inside the badge |
+| `--transcript-claude-badge-border` | `--royal-7` | Badge ring |
+| `--transcript-claude-label` | `--royal-11` | "Claude" label text under the badge |
+| `--transcript-claude-accent` | `--royal-10` | 2px left accent on Claude blocks in `dyl-full` mode |
+
+**Wrap-up and full-input link (specific transcript accents):**
+
+| Token | Value | Use |
+|---|---|---|
+| `--transcript-wrapup-accent` | `--royal-10` | 2px left stripe on the wrap-up pill. Acts as an "answer this / act on this" cue at the end of a Claude turn. |
+| `--transcript-fullinput-fg` | `--royal-11` | Default colour for the "full input" underlined link inside a tool-call card. Starts brighter than a standard link because it lives inside secondary chrome. |
+| `--transcript-fullinput-fg-hover` | `--violet-11` | Hover + open state for the same link. Shifts to the violet register to signal "this will unfold more content". Do not generalise — it's the only place in the system where a link hovers across the royal/violet boundary. |
+
+**Prose (usable beyond ChatTranscript):**
+
+| Token | Value | Use |
+|---|---|---|
+| `--prose-heading-fg` | `--royal-12` | Inline prose h1/h2/h3 inside turn bodies. Portable to future long-form surfaces (case study body, writing posts). h4 continues to use `--kicker-default-fg`. |
+
+**Reuses (not new tokens — documented so the mapping is explicit):**
+
+| Surface | Reused token |
+|---|---|
+| Block separators, turn separators, cluster-turn separators, inline-code bg | `--border-hairline` |
+| Outer head/foot dividers (`.t-head`, `.t-foot`) | `--border` |
+| Inline-code fg, tool-call name, prose h4 | `--kicker-default-fg` |
+| `pre` bg, wrap-up bg, tool-call bg, `tc-details` pre bg | `--bg` |
+| Expander-kind pills inside transcript expanders | `--expander-pill-{high,bg}-{fg,border}` |
+
 ### Other role tokens (not variant families, one value each)
 
 | Token | Value | Use |
