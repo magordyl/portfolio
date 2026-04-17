@@ -96,17 +96,18 @@ The ChatTranscript pill churn (four colours → two) surfaced that components re
 - `src/content/projects/workspace-audit.mdx` placeholder still needs removing next time chunk 2 is touched.
 
 **Next priorities (session order):**
-1. **4c.0** — component colour-role rationalisation (new gate). Produces the role-token layer that 4c.1 and 4d components will use.
-2. **4c.0.5** — `/design-system` kit scaffold (new, 2026-04-17). Moved forward from old chunk 7 so the kit doubles as the dev surface for every component built from 4c.1 onward. Each subsequent component chunk has a standing "update the kit" acceptance step.
-3. **4d (continued)** — Dylan writes prose for each section against the locked structure in `plans/the-weekly-case-study-draft.md`.
-4. **4c.1** — case study design explorers; now building `<ChatTranscript>`, `<ProjectTimeline>`, sample transcripts against the rationalised tokens. Both components land in the kit as part of acceptance.
-5. **4c.2-4c.5** — remaining page layout explorers (/projects index, /writing, /log, /404+/privacy).
+1. **4c.1a** — `<ChatTranscript>` v3 port (the locked 2026-04-14 design). Near-total rewrite of the existing pre-v3 stub against role tokens; removes the last `check-raw-colours` allowlist entry; lands in the kit in both inline + breakout modes. Opens once 4c.0.5 ships.
+2. **4c.1b** — case study page layout explorers (`case-study-v1.html`, `case-study-v2.html`). Uses `<ChatTranscript>` from 4c.1a. No `<ProjectTimeline>` (deferred — see below).
+3. **4c.2-4c.5** — remaining page layout explorers (/projects index, /writing, /log, /404+/privacy).
+4. **4d** — the-weekly case study workshop (prose + case study layout build).
+
+**`<ProjectTimeline>` deferred to post-launch (chunk 7.5).** Originally bundled into 4c.1 but removed on 2026-04-17 — a timeline is a case-study enhancement, not a shipping prerequisite. Case study layout explorers leave a stub slot; retrofitting post-launch is acceptable.
 
 **Deployed** — Cloudflare Pages / Workers, `magordyl/portfolio` (`main` branch). Live at `dylan-portfolio.magordyl.workers.dev`.
 
-**Chunks remaining:** 4c.0 (gate), 4c.0.5 (kit scaffold — new), 4c.1, 4c.2-4c.5, 4d, 5, 5.5, 5.6, 6, 7 (showcase polish — slimmed stub), 8 (design-system retrofit, opportunistic).
+**Chunks remaining:** 4c.1a (ChatTranscript port), 4c.1b (layout explorers), 4c.2-4c.5, 4d, 5, 5.5, 5.6, 6, 7 (showcase polish — slimmed stub), 7.5 (ProjectTimeline — post-launch), 8 (design-system retrofit, opportunistic).
 
 ## Implementation Plan
 
-Full plan: `plans/portfolio-implementation.md` (chunks 1–3 complete, then 4a → 4b → 4c [incl. 4c.0 → 4c.0.5 → 4c.1-4c.5] → 4d → 5 → 5.5 → 5.6 → 6 → 7 → 8). Component kit scaffold moved forward to 4c.0.5 on 2026-04-17; chunk 7 slimmed to a post-launch polish stub. Chunk 8 (design-system retrofit) remains opportunistic post-launch.
+Full plan: `plans/portfolio-implementation.md` (chunks 1–3 complete, then 4a → 4b → 4c [incl. 4c.0 → 4c.0.5 → 4c.1a → 4c.1b → 4c.2-4c.5] → 4d → 5 → 5.5 → 5.6 → 6 → 7 → 7.5 → 8). Component kit scaffold moved forward to 4c.0.5 on 2026-04-17; chunk 7 slimmed to a post-launch polish stub; `<ProjectTimeline>` split out to new chunk 7.5 (post-launch) on 2026-04-17. Chunk 8 (design-system retrofit) remains opportunistic post-launch.
 Current status tracked in `DIARY.md`.

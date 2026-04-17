@@ -388,7 +388,7 @@ Before chunk 4c.1 opens:
 - Allowlists are documented
 - `npm run check` passes on main
 
-`<ChatTranscript>`, `<ProjectTimeline>`, `<VersionedEmbed>` (4c.1, 4c.1, 4d) must all be built against the rationalised token layer — the v3 ChatTranscript design maps cleanly onto the proposed variant set, but the implementation step should pick up the role-token names, not the raw scale that v3.html currently uses.
+`<ChatTranscript>` and `<VersionedEmbed>` (4c.1a, 4d) must both be built against the rationalised token layer — the v3 ChatTranscript design maps cleanly onto the proposed variant set, but the implementation step should pick up the role-token names, not the raw scale that v3.html currently uses. (`<ProjectTimeline>` deferred to chunk 7.5 — not required for v1 ship.)
 
 **Commit:** `portfolio: rationalise colour tokens with per-component variant allowlists`
 
@@ -405,7 +405,7 @@ Before chunk 4c.1 opens:
 - Sections, in order: **Colour** (raw Royal Tonal scale + violet additions + semantic aliases + role tokens from 4c.0, grouped), **Typography** (every `--text-*` slot rendered at size with slot name, family, weight, use context), **Spacing** (8-value visual strip with px labels), **Radius** (each token rendered as a sample), **Icon stroke** (the project's lucide stroke-width rendered on a sample icon set), **Components** (chunk-3 set migrated against role tokens — `CaseStudyCard`, `BuildLogTicker`, `KickerLabel`, tag variants).
 - Each component section: live render imported from `src/components/`, not screenshots. One-line role description. For components with allowlisted variants, render every variant side by side (e.g. tag `default` / `active` / `signal` / `status`).
 
-**Standing rule — "Update the kit":** every chunk that introduces a new component (4c.1 `<ChatTranscript>`, `<ProjectTimeline>`; 4d `<VersionedEmbed>`) must add that component to `design-system.astro` as part of its acceptance. A component shipping to a case study before it ships to the kit is a process failure, not a sequencing nuance. Chunk 7 (post-launch polish) exists only to curate, not to build.
+**Standing rule — "Update the kit":** every chunk that introduces a new component (4c.1a `<ChatTranscript>`; 4d `<VersionedEmbed>`; 7.5 `<ProjectTimeline>` post-launch) must add that component to `design-system.astro` as part of its acceptance. A component shipping to a case study before it ships to the kit is a process failure, not a sequencing nuance. Chunk 7 (post-launch polish) exists only to curate, not to build.
 
 **Acceptance:**
 - `/design-system` renders on the production URL with all six sections (colour, typography, spacing, radius, icon stroke, components) present.
@@ -417,17 +417,13 @@ Before chunk 4c.1 opens:
 
 ---
 
-### Step 4c.1 — Case study page layout (primary focus)
+### Step 4c.1a — `<ChatTranscript>` component (locked port)
 
-This is the most important layout in the portfolio. It needs to:
-- Fit the content hierarchy from 4b exactly
-- Handle both full (400–600w) and lightweight (200–350w) variants gracefully
-- Integrate imagery slots per 4a.3 (hero image, inline screenshots, diagrams)
-- Integrate **transcript slots** per 4a.3 ("Chat transcripts" section) — the `<ChatTranscript>` component is a required layout element alongside `<Screenshot>`
-- Work on mobile without degrading the reading experience
-- End with a clear "next" artefact (related writing post or next case study)
+**Deliverable:** v3-spec `<ChatTranscript>` ported from `chat-transcript-explorer-v3.html` to `src/components/astro/ChatTranscript.astro`, migrated to role tokens, rendering the planner-stitch transcript at visual parity, with both modes (inline + breakout) landed in the `/design-system` kit. The layout explorers and page-level integration move to 4c.1b.
 
-**`<ChatTranscript>` component — locked design, built here in 4c.1:**
+**Gate:** 4c.0 complete (role tokens exist). 4c.0.5 complete (kit exists as the dev surface). The current `ChatTranscript.astro` is a pre-v3 stub on the `check-raw-colours` allowlist — this chunk replaces it and removes the allowlist entry.
+
+**`<ChatTranscript>` component — locked design, built here in 4c.1a:**
 
 Design locked via `plans/portfolio-stitch-assets/chat-transcript-explorer-v3.html` (2026-04-14). Iteration trail lives at v1 → v2 → v3 in the same folder; v3 is the canonical spec. Selected variant: **royal-3 hairline + full-block accent + flat expander**.
 
@@ -478,27 +474,38 @@ Design locked via `plans/portfolio-stitch-assets/chat-transcript-explorer-v3.htm
 4. Extend the transcript Zod schema (`src/content.config.ts`) with the optional fields the renderer relies on: `kind?: 'plan' | 'skill' | 'research' | 'headline'`, `summary?: string`, `toolCalls?: ToolCall[]`, `collapsedTools?: string[]`, `clusterTitle?: string`.
 5. Test with the `planner-stitch-batch-40-renders` transcript — it exercises every shape (kind variants, tool calls, cluster merging, filtered turns, wrap-up extraction). Visual parity with v3 is the acceptance bar.
 6. Add `<ChatTranscript>` to the `/design-system` kit (scaffolded in 4c.0.5) — one inline mode + one breakout mode, using the same planner-stitch transcript. Part of this chunk's acceptance, not deferred.
+7. Remove `src/components/astro/ChatTranscript.astro` from the `scripts/check-raw-colours.mjs` allowlist. `npm run check` must pass with the allowlist size reduced to zero.
 
 *Acceptance:*
 - Renders the planner-stitch transcript with visual parity to v3.html (winning variant: full-block accent, flat expander, royal-3 hairlines).
 - Zero client-side JS emitted — everything is static HTML with `<details>` for progressive disclosure.
 - Mobile (<640px) collapses to single column with icon + label on one row, accent line moves to block left edge at `--s2` padding.
 - WCAG 1.4.1 compliant: role labels are never hidden, icon + label + colour work together (colour alone is never the differentiator).
-
-**`<ProjectTimeline>` component — explore in 4c.1 design explorer:**
-- A linear horizontal (desktop) / vertical (mobile) timeline showing key milestones and pivot points for a project.
-- Each node is a highlighted point: label + short descriptor. Nodes can be marked as milestone (standard) or pivot (visually distinct — e.g. filled vs outlined, or accent colour).
-- Reads data from frontmatter (`timeline` array field in the projects schema — `date`, `label`, `type: 'milestone' | 'pivot'`). Static render, no JS.
-- Design exploration goal: keep it simple. No fancy animation, no branches. The interest is in the data, not the chrome.
-- Include at least one `<ProjectTimeline>` in both `case-study-v1.html` and `case-study-v2.html` design explorers using placeholder data from the-weekly build log.
-- Lives at `src/components/ProjectTimeline.astro`. Add `timeline` as an optional array field to the `projects` Zod schema (chunk 2 will need a minor update — add it then).
-- Add `<ProjectTimeline>` to the `/design-system` kit (4c.0.5) — one milestone-only variant + one with a pivot node. Part of this chunk's acceptance.
-
-**Sample transcripts in the design explorers:** both `case-study-v1.html` and `case-study-v2.html` must render at least one `inline` transcript and one `breakout` transcript using placeholder turns (e.g. from an early portfolio session, bookmarked via 4a.6). This is how we pick the layout — on how the transcripts read in context, not in isolation.
+- `check-raw-colours` allowlist is empty — no `--royal-*` / `--violet-*` references outside `globals.css` and `design.tokens.ts`.
 
 **Sender colour emphasis — resolved 2026-04-14 (Option B).** Dylan wears violet, Claude wears royal. Rationale: the portfolio frames Dylan as the thinker and Claude as the tool; the signal colour (violet) belongs with the thinker, and royal is the chrome palette. Rejected Option A (Claude prominent) would have inverted the signal. Design trail: `chat-transcript-explorer-v1.html` (initial) → `v2.html` (multi-tier expanders, wrong role colours) → `v3.html` (locked spec, role swap, grouping, clustering).
 
+**Commit:** `portfolio: ChatTranscript v3 port (role tokens, planner-stitch parity, kit entry)`
+
+---
+
+### Step 4c.1b — Case study page layout explorers
+
+This is the most important layout in the portfolio. It needs to:
+- Fit the content hierarchy from 4b exactly
+- Handle both full (400–600w) and lightweight (200–350w) variants gracefully
+- Integrate imagery slots per 4a.3 (hero image, inline screenshots, diagrams)
+- Integrate **transcript slots** per 4a.3 ("Chat transcripts" section) — the `<ChatTranscript>` component (now built in 4c.1a) is a required layout element alongside `<Screenshot>`
+- Work on mobile without degrading the reading experience
+- End with a clear "next" artefact (related writing post or next case study)
+
+**Gate:** 4c.1a complete. The component is now available to drop into the explorer HTMLs.
+
+**Sample transcripts in the design explorers:** both `case-study-v1.html` and `case-study-v2.html` must render at least one `inline` transcript and one `breakout` transcript using placeholder turns (e.g. from an early portfolio session, bookmarked via 4a.6). This is how we pick the layout — on how the transcripts read in context, not in isolation.
+
 Produce 2 layout options, pick one. Save both (`case-study-v1.html`, `case-study-v2.html`) — rejected options are part of the design trail.
+
+**Note on `<ProjectTimeline>`:** originally bundled into 4c.1, now deferred to chunk 7.5 (post-launch). The case study layout explorers should leave a stub/placeholder slot where a timeline might land later, but do not attempt to design it here. Shipping the portfolio without a timeline is acceptable.
 
 ### Step 4c.2 — /projects index page layout
 
@@ -709,7 +716,7 @@ User rewrites in voice. Iterate. Same 2-iteration hard stop.
 
 ## Chunk 7 — Design system showcase polish (post-launch)
 
-**Context.** The `/design-system` page was scaffolded in 4c.0.5 and grew incrementally — every component chunk (4c.1, 4d) added its component to the kit as part of its acceptance. By the time chunk 6 ships, the kit is already complete and on production.
+**Context.** The `/design-system` page was scaffolded in 4c.0.5 and grew incrementally — every component chunk (4c.1a, 4d) added its component to the kit as part of its acceptance. By the time chunk 6 ships, the kit is already complete and on production. (`<ProjectTimeline>` lands in 7.5 post-launch.)
 
 This chunk is a post-launch curation pass, not a build. Skip entirely if the kit already reads as portfolio-grade.
 
@@ -723,6 +730,26 @@ This chunk is a post-launch curation pass, not a build. Skip entirely if the kit
 **Gate:** Chunk 6 shipped. Kit is already live; this is paint, not build.
 
 **Commit (if run):** `portfolio: design system showcase polish`
+
+---
+
+## Chunk 7.5 — `<ProjectTimeline>` component (deferred from 4c.1)
+
+**Deliverable:** horizontal (desktop) / vertical (mobile) timeline component rendering milestones and pivot nodes from project frontmatter, plus a kit entry and retro-application to shipped case studies.
+
+**Gate:** Chunk 6 shipped (portfolio live). This was originally scoped into 4c.1 but deferred in 2026-04-17 planning — a timeline is a case-study enhancement, not a shipping prerequisite. Retrofitting post-launch means the v1 ship is not blocked by a component design pass.
+
+**Spec (carried from 4c.1):**
+- A linear horizontal (desktop) / vertical (mobile) timeline showing key milestones and pivot points for a project.
+- Each node is a highlighted point: label + short descriptor. Nodes can be marked as milestone (standard) or pivot (visually distinct — e.g. filled vs outlined, or accent colour).
+- Reads data from frontmatter (`timeline` array field in the projects schema — `date`, `label`, `type: 'milestone' | 'pivot'`). Static render, no JS.
+- Keep it simple. No fancy animation, no branches. The interest is in the data, not the chrome.
+- Lives at `src/components/astro/ProjectTimeline.astro`. Add `timeline` as an optional array field to the `projects` Zod schema.
+- Add `<ProjectTimeline>` to the `/design-system` kit — one milestone-only variant + one with a pivot node. Part of this chunk's acceptance.
+
+**Integration:** once shipped, retro-apply to each case study (the-weekly, planner-app, portfolio) that has enough timeline data to be worth showing. Not every case study needs one.
+
+**Commit:** `portfolio: ProjectTimeline component (retrofit post-launch)`
 
 ---
 
