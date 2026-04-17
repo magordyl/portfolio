@@ -1,0 +1,931 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import KickerLabel from '../components/astro/KickerLabel.astro';
+import BuildLogTicker from '../components/astro/BuildLogTicker.astro';
+import CaseStudyCard from '../components/astro/CaseStudyCard.astro';
+
+const allProjects = await getCollection('projects');
+const sortedProjects = allProjects.sort((a, b) => b.data.weight - a.data.weight);
+const fullProject = sortedProjects.find(p => p.data.depth === 'full') ?? sortedProjects[0];
+const lightProject = sortedProjects.find(p => p.data.depth === 'lightweight') ?? sortedProjects[0];
+
+const royalScale = [
+  { step: 1,  hex: '#0E0F1C' }, { step: 2,  hex: '#121428' },
+  { step: 3,  hex: '#181B36' }, { step: 4,  hex: '#1E2346' },
+  { step: 5,  hex: '#252C58' }, { step: 6,  hex: '#2D366C' },
+  { step: 7,  hex: '#364280' }, { step: 8,  hex: '#3B5BDB' },
+  { step: 9,  hex: '#4D6DE8' }, { step: 10, hex: '#6C85FF' },
+  { step: 11, hex: '#A5B4FF' }, { step: 12, hex: '#D5DCFA' },
+];
+
+const violetScale = [
+  { step: 8,  hex: '#8C3BDB' }, { step: 9,  hex: '#9D4DE8' },
+  { step: 10, hex: '#B47CFF' }, { step: 11, hex: '#C89BFF' },
+  { step: 12, hex: '#E6D4FF' },
+];
+
+const inkScale = [
+  { name: 'ink',       hex: '#E6E2D9', use: 'body text' },
+  { name: 'ink-dim',   hex: '#9C968A', use: 'secondary text, tags' },
+  { name: 'ink-faint', hex: '#5E584F', use: 'placeholder labels' },
+];
+
+const semantic = [
+  { name: '--bg',            role: 'page background' },
+  { name: '--bg-subtle',     role: 'subtle surface' },
+  { name: '--card',          role: 'card surface' },
+  { name: '--card-hover',    role: 'card surface on hover' },
+  { name: '--border',        role: 'default border' },
+  { name: '--border-strong', role: 'hovered / emphasised border' },
+  { name: '--primary',       role: 'brand colour, CTA background' },
+  { name: '--primary-hover', role: 'CTA hover' },
+  { name: '--link',          role: 'link colour' },
+];
+
+const roleTokens = [
+  {
+    group: 'Link + button',
+    items: [
+      { name: '--link-hover',  role: 'link colour on hover' },
+      { name: '--button-fg',   role: 'CTA text on --primary (#FFFFFF — royal-12 fails WCAG AA)' },
+    ],
+  },
+  {
+    group: 'Placeholder (chunk 5 replaces with real hero imagery)',
+    items: [
+      { name: '--placeholder-bg',        role: 'placeholder solid' },
+      { name: '--placeholder-gradient',  role: 'placeholder gradient (135° royal-3 → royal-5)' },
+    ],
+  },
+  {
+    group: 'Tags (4 variants)',
+    items: [
+      { name: '--tag-default-*',  role: 'neutral tag, ink-dim on royal-4 border' },
+      { name: '--tag-active-*',   role: 'active tag, royal-11 on royal-8 border + 8% wash' },
+      { name: '--tag-signal-*',   role: 'signal tag, violet-11 on violet-8 border + 10% wash' },
+      { name: '--tag-status-*',   role: 'status tag, ink-dim on royal-7 border' },
+    ],
+  },
+  {
+    group: 'Kickers (2 variants)',
+    items: [
+      { name: '--kicker-default-fg', role: 'section label, royal-11' },
+      { name: '--kicker-signal-fg',  role: 'section label on ChatTranscript signal blocks, violet-11' },
+    ],
+  },
+  {
+    group: 'Status dots (3 variants)',
+    items: [
+      { name: '--dot-neutral',   role: 'inactive state, ink-dim' },
+      { name: '--dot-active',    role: 'active state, royal-10' },
+      { name: '--dot-attention', role: 'attention state, violet-10' },
+    ],
+  },
+  {
+    group: 'Borders',
+    items: [
+      { name: '--border-hairline', role: 'in-component separator, royal-3' },
+    ],
+  },
+  {
+    group: 'Expander pills (2 variants)',
+    items: [
+      { name: '--expander-pill-high-*', role: 'high-signal pill, royal-11 on royal-8' },
+      { name: '--expander-pill-bg-*',   role: 'chrome pill, ink-dim on royal-4' },
+    ],
+  },
+];
+
+const typeSlots = [
+  { var: '--text-hero',    px: 72, family: 'serif', weight: 400, use: 'landing headline' },
+  { var: '--text-display', px: 48, family: 'serif', weight: 400, use: 'case study titles, pull quotes' },
+  { var: '--text-case',    px: 32, family: 'serif', weight: 400, use: 'card titles, section heads' },
+  { var: '--text-h3',      px: 24, family: 'serif', weight: 400, use: 'subsection heads' },
+  { var: '--text-h4',      px: 20, family: 'sans',  weight: 400, use: 'supporting body, intro paragraphs' },
+  { var: '--text-body',    px: 16, family: 'sans',  weight: 400, use: 'default body text' },
+  { var: '--text-sm',      px: 14, family: 'sans',  weight: 400, use: 'tldrs, card descriptions, tags' },
+  { var: '--text-xs',      px: 12, family: 'sans',  weight: 400, use: 'timestamps, captions' },
+  { var: '--text-kicker',  px: 11, family: 'sans',  weight: 500, use: 'uppercase section labels' },
+];
+
+const spacingSlots = [
+  { var: '--space-1',  px: 4 },   { var: '--space-2',  px: 8 },
+  { var: '--space-3',  px: 12 },  { var: '--space-4',  px: 16 },
+  { var: '--space-5',  px: 24 },  { var: '--space-6',  px: 32 },
+  { var: '--space-7',  px: 48 },  { var: '--space-8',  px: 72 },
+  { var: '--space-9',  px: 96 },  { var: '--space-10', px: 144 },
+];
+
+const radiusSlots = [
+  { var: '--radius-sm', px: 2,  use: 'tags' },
+  { var: '--radius',    px: 8,  use: 'cards, default' },
+  { var: '--radius-lg', px: 12, use: 'large containers, ChatTranscript frame' },
+];
+
+const sampleTags: Array<{ variant: 'default' | 'active' | 'signal' | 'status'; label: string }> = [
+  { variant: 'default', label: 'default' },
+  { variant: 'active',  label: 'active' },
+  { variant: 'signal',  label: 'signal' },
+  { variant: 'status',  label: 'status' },
+];
+
+const statusDots: Array<{ variant: 'neutral' | 'active' | 'attention'; label: string }> = [
+  { variant: 'neutral',   label: 'neutral' },
+  { variant: 'active',    label: 'active' },
+  { variant: 'attention', label: 'attention' },
+];
+---
+
+<BaseLayout
+  title="Design System — Portfolio"
+  description="Tokens, typography, spacing, and components that build this site."
+>
+  <div class="kit">
+
+    <header class="kit-header">
+      <KickerLabel label="Design System" />
+      <h1 class="kit-title">Tokens and components</h1>
+      <p class="kit-sub">
+        The Royal Tonal colour scale, type slots, spacing units, radii, icon stroke, and the
+        first-generation component set that ships the landing page. This page is the working
+        surface — new components land here first and grow the kit incrementally.
+      </p>
+    </header>
+
+    <!-- 1. Colour -->
+    <section class="kit-section" id="colour">
+      <KickerLabel label="01 — Colour" />
+      <h2 class="kit-section-title">Colour</h2>
+
+      <h3 class="kit-sub-title">Royal Tonal — raw scale</h3>
+      <p class="kit-para">
+        The 12-step scale anchored on royal-8 (<code>#3B5BDB</code>). Components never
+        reference raw steps; they reach for semantic aliases and role tokens below.
+      </p>
+      <ul class="swatch-grid swatch-grid--12">
+        {royalScale.map(s => (
+          <li class="swatch">
+            <div class="swatch-chip" style={`background: ${s.hex};`} />
+            <div class="swatch-meta">
+              <span class="swatch-name">royal-{s.step}</span>
+              <span class="swatch-hex">{s.hex}</span>
+            </div>
+          </li>
+        ))}
+      </ul>
+
+      <h3 class="kit-sub-title">Violet Signal — secondary accent</h3>
+      <p class="kit-para">
+        A 5-step secondary accent used only by <code>&lt;ChatTranscript&gt;</code> to give
+        Dylan's turns a distinct register from Claude's royal turns. Any new usage requires
+        design review.
+      </p>
+      <ul class="swatch-grid swatch-grid--5">
+        {violetScale.map(s => (
+          <li class="swatch">
+            <div class="swatch-chip" style={`background: ${s.hex};`} />
+            <div class="swatch-meta">
+              <span class="swatch-name">violet-{s.step}</span>
+              <span class="swatch-hex">{s.hex}</span>
+            </div>
+          </li>
+        ))}
+      </ul>
+
+      <h3 class="kit-sub-title">Ink — off-white text scale</h3>
+      <ul class="swatch-grid swatch-grid--3">
+        {inkScale.map(s => (
+          <li class="swatch">
+            <div class="swatch-chip" style={`background: ${s.hex};`} />
+            <div class="swatch-meta">
+              <span class="swatch-name">{s.name}</span>
+              <span class="swatch-hex">{s.hex}</span>
+              <span class="swatch-use">{s.use}</span>
+            </div>
+          </li>
+        ))}
+      </ul>
+
+      <h3 class="kit-sub-title">Semantic aliases</h3>
+      <p class="kit-para">
+        Named roles that structural elements reach for — surfaces, borders, the primary
+        accent, links. These never carry component-specific variants.
+      </p>
+      <ul class="token-list">
+        {semantic.map(t => (
+          <li class="token-row">
+            <code class="token-name">{t.name}</code>
+            <span class="token-role">{t.role}</span>
+          </li>
+        ))}
+      </ul>
+
+      <h3 class="kit-sub-title">Role tokens — per-component variants</h3>
+      <p class="kit-para">
+        Components reference these, never the raw scale. The allowlist lives in
+        <code>plans/portfolio-design-tokens.md §Component variant allowlists</code> —
+        adding a new variant requires updating the doc first.
+      </p>
+      {roleTokens.map(group => (
+        <div class="token-group">
+          <h4 class="token-group-name">{group.group}</h4>
+          <ul class="token-list">
+            {group.items.map(t => (
+              <li class="token-row">
+                <code class="token-name">{t.name}</code>
+                <span class="token-role">{t.role}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </section>
+
+    <!-- 2. Typography -->
+    <section class="kit-section" id="type">
+      <KickerLabel label="02 — Typography" />
+      <h2 class="kit-section-title">Typography</h2>
+      <p class="kit-para">
+        Three families: Fraunces for display, Geist Variable for body, Geist Mono for code and
+        timestamps. Every size is a named slot — ad-hoc <code>rem</code> or <code>px</code> in
+        components is a workspace rule violation.
+      </p>
+
+      <ul class="type-list">
+        {typeSlots.map(t => (
+          <li class="type-row">
+            <div
+              class="type-sample"
+              style={`
+                font-family: var(--font-${t.family});
+                font-size: var(${t.var});
+                font-weight: ${t.weight};
+              `}
+            >
+              Builder notes in {t.family === 'serif' ? 'Fraunces' : 'Geist'}
+            </div>
+            <div class="type-meta">
+              <code class="type-var">{t.var}</code>
+              <span class="type-px">{t.px}px</span>
+              <span class="type-family">{t.family === 'serif' ? 'Fraunces' : 'Geist Variable'} · {t.weight}</span>
+              <span class="type-use">{t.use}</span>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <!-- 3. Spacing -->
+    <section class="kit-section" id="spacing">
+      <KickerLabel label="03 — Spacing" />
+      <h2 class="kit-section-title">Spacing</h2>
+      <p class="kit-para">
+        A ten-slot scale on a 4px base. Components pick from this list — hardcoded
+        <code>px</code> or <code>rem</code> outside the scale is a workspace rule violation.
+      </p>
+
+      <ul class="spacing-list">
+        {spacingSlots.map(s => (
+          <li class="spacing-row">
+            <div class="spacing-bar" style={`width: ${s.px}px;`} />
+            <code class="spacing-var">{s.var}</code>
+            <span class="spacing-px">{s.px}px</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <!-- 4. Radius -->
+    <section class="kit-section" id="radius">
+      <KickerLabel label="04 — Radius" />
+      <h2 class="kit-section-title">Radius</h2>
+      <p class="kit-para">
+        Three radii. Tags use <code>sm</code>; cards and most surfaces use the default;
+        ChatTranscript and hero-sized containers use <code>lg</code>.
+      </p>
+
+      <ul class="radius-list">
+        {radiusSlots.map(r => (
+          <li class="radius-row">
+            <div class="radius-sample" style={`border-radius: var(${r.var});`} />
+            <code class="radius-var">{r.var}</code>
+            <span class="radius-px">{r.px}px</span>
+            <span class="radius-use">{r.use}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <!-- 5. Icon stroke -->
+    <section class="kit-section" id="icons">
+      <KickerLabel label="05 — Icon stroke" />
+      <h2 class="kit-section-title">Icon stroke</h2>
+      <p class="kit-para">
+        Workspace rule: <code>lucide</code> is the only icon library; stroke width is fixed
+        at <code>1.5</code> via <code>tokens.icons.strokeWidth</code>. Samples below use
+        Lucide's geometry rendered inline.
+      </p>
+
+      <ul class="icon-list">
+        {/* user */}
+        <li class="icon-row">
+          <div class="icon-cell">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+              <circle cx="12" cy="7" r="4" />
+            </svg>
+          </div>
+          <span class="icon-name">user</span>
+        </li>
+        {/* arrow-right */}
+        <li class="icon-row">
+          <div class="icon-cell">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12h14" />
+              <path d="m12 5 7 7-7 7" />
+            </svg>
+          </div>
+          <span class="icon-name">arrow-right</span>
+        </li>
+        {/* check */}
+        <li class="icon-row">
+          <div class="icon-cell">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 6 9 17l-5-5" />
+            </svg>
+          </div>
+          <span class="icon-name">check</span>
+        </li>
+        {/* terminal */}
+        <li class="icon-row">
+          <div class="icon-cell">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="4 17 10 11 4 5" />
+              <line x1="12" y1="19" x2="20" y2="19" />
+            </svg>
+          </div>
+          <span class="icon-name">terminal</span>
+        </li>
+        {/* external-link */}
+        <li class="icon-row">
+          <div class="icon-cell">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M15 3h6v6" />
+              <path d="M10 14 21 3" />
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+            </svg>
+          </div>
+          <span class="icon-name">external-link</span>
+        </li>
+        {/* file-text */}
+        <li class="icon-row">
+          <div class="icon-cell">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+              <line x1="16" y1="13" x2="8" y2="13" />
+              <line x1="16" y1="17" x2="8" y2="17" />
+              <line x1="10" y1="9" x2="8" y2="9" />
+            </svg>
+          </div>
+          <span class="icon-name">file-text</span>
+        </li>
+      </ul>
+    </section>
+
+    <!-- 6. Components -->
+    <section class="kit-section" id="components">
+      <KickerLabel label="06 — Components" />
+      <h2 class="kit-section-title">Components</h2>
+      <p class="kit-para">
+        The first-generation set that ships the landing page. Each component below is rendered
+        live from <code>src/components/astro/</code> — not a screenshot. New components land
+        here as part of their chunk's acceptance.
+      </p>
+
+      <!-- KickerLabel -->
+      <div class="component-block">
+        <h3 class="kit-sub-title">KickerLabel</h3>
+        <p class="kit-para kit-para--tight">
+          Small uppercase section label. Two variants: <code>default</code> (royal) and
+          <code>signal</code> (violet, reserved for ChatTranscript signal blocks).
+        </p>
+        <div class="component-demo">
+          <div class="demo-variant">
+            <span class="demo-variant-label">default</span>
+            <KickerLabel label="Case Study" />
+          </div>
+          <div class="demo-variant">
+            <span class="demo-variant-label">signal</span>
+            <KickerLabel label="Chat Transcript" variant="signal" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Tags -->
+      <div class="component-block">
+        <h3 class="kit-sub-title">Tags</h3>
+        <p class="kit-para kit-para--tight">
+          Four allowlisted variants. Cards use <code>default</code> for topic tags; the other
+          three are reserved for specific states (active filter, signal highlight, status).
+        </p>
+        <div class="component-demo component-demo--tags">
+          {sampleTags.map(t => (
+            <span class={`tag tag--${t.variant}`}>{t.label}</span>
+          ))}
+        </div>
+      </div>
+
+      <!-- Status dots -->
+      <div class="component-block">
+        <h3 class="kit-sub-title">Status dots</h3>
+        <p class="kit-para kit-para--tight">
+          Three allowlisted states. Used inline with labels in the build log and on
+          forthcoming status indicators.
+        </p>
+        <div class="component-demo component-demo--dots">
+          {statusDots.map(d => (
+            <span class="dot-row">
+              <span class={`dot dot--${d.variant}`} />
+              <span class="dot-label">{d.label}</span>
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <!-- BuildLogTicker -->
+      <div class="component-block">
+        <h3 class="kit-sub-title">BuildLogTicker</h3>
+        <p class="kit-para kit-para--tight">
+          Aside column on the landing page — renders the five most recent entries from the
+          <code>log</code> collection.
+        </p>
+        <div class="component-demo component-demo--aside">
+          <BuildLogTicker />
+        </div>
+      </div>
+
+      <!-- CaseStudyCard -->
+      <div class="component-block">
+        <h3 class="kit-sub-title">CaseStudyCard</h3>
+        <p class="kit-para kit-para--tight">
+          Landing page grid item. The kicker label switches between <em>Case Study</em> (full
+          depth) and <em>Lightweight</em> based on the project's <code>depth</code> field.
+        </p>
+        <div class="component-demo component-demo--cards">
+          <CaseStudyCard project={fullProject} />
+          {lightProject && lightProject.id !== fullProject.id && (
+            <CaseStudyCard project={lightProject} />
+          )}
+        </div>
+      </div>
+    </section>
+
+  </div>
+</BaseLayout>
+
+<style>
+  .kit {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: var(--space-9) var(--space-6);
+  }
+
+  .kit-header {
+    margin-bottom: var(--space-9);
+    max-width: 60ch;
+  }
+
+  .kit-title {
+    font-family: var(--font-serif);
+    font-size: var(--text-display);
+    font-weight: 400;
+    letter-spacing: var(--ls-title);
+    line-height: var(--lh-tight);
+    color: var(--ink);
+    margin: var(--space-4) 0 var(--space-4);
+  }
+
+  .kit-sub {
+    font-family: var(--font-sans);
+    font-size: var(--text-h4);
+    color: var(--ink-dim);
+    line-height: var(--lh-normal);
+    margin: 0;
+  }
+
+  .kit-section {
+    padding: var(--space-8) 0;
+    border-top: 1px solid var(--border);
+  }
+
+  .kit-section-title {
+    font-family: var(--font-serif);
+    font-size: var(--text-case);
+    font-weight: 400;
+    letter-spacing: var(--ls-title);
+    color: var(--ink);
+    margin: var(--space-3) 0 var(--space-5);
+  }
+
+  .kit-sub-title {
+    font-family: var(--font-sans);
+    font-size: var(--text-h4);
+    font-weight: 500;
+    color: var(--ink);
+    margin: var(--space-6) 0 var(--space-3);
+    letter-spacing: var(--ls-title);
+  }
+
+  .kit-section > .kit-sub-title:first-of-type {
+    margin-top: var(--space-4);
+  }
+
+  .kit-para {
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    color: var(--ink-dim);
+    line-height: var(--lh-normal);
+    max-width: 70ch;
+    margin: 0 0 var(--space-4);
+  }
+
+  .kit-para--tight {
+    margin-bottom: var(--space-4);
+  }
+
+  code {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+    color: var(--ink);
+    background: var(--bg-subtle);
+    padding: 1px 6px;
+    border-radius: var(--radius-sm);
+  }
+
+  /* Swatches */
+  .swatch-grid {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--space-6);
+    display: grid;
+    gap: var(--space-3);
+  }
+  .swatch-grid--12 { grid-template-columns: repeat(6, 1fr); }
+  .swatch-grid--5  { grid-template-columns: repeat(5, 1fr); }
+  .swatch-grid--3  { grid-template-columns: repeat(3, 1fr); }
+
+  .swatch {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .swatch-chip {
+    height: 72px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border-hairline);
+  }
+
+  .swatch-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: var(--space-2) 0 0;
+  }
+
+  .swatch-name {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--ink);
+  }
+
+  .swatch-hex {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--ink-dim);
+    text-transform: uppercase;
+  }
+
+  .swatch-use {
+    font-family: var(--font-sans);
+    font-size: var(--text-xs);
+    color: var(--ink-faint);
+  }
+
+  /* Token list */
+  .token-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--space-5);
+    border-top: 1px solid var(--border-hairline);
+  }
+
+  .token-row {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: var(--space-4);
+    padding: var(--space-3) 0;
+    border-bottom: 1px solid var(--border-hairline);
+    align-items: baseline;
+  }
+
+  .token-name {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--ink);
+    background: transparent;
+    padding: 0;
+  }
+
+  .token-role {
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    color: var(--ink-dim);
+    line-height: var(--lh-normal);
+  }
+
+  .token-group {
+    margin-bottom: var(--space-5);
+  }
+
+  .token-group-name {
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--ink);
+    text-transform: uppercase;
+    letter-spacing: var(--ls-caps);
+    margin: var(--space-4) 0 var(--space-2);
+  }
+
+  /* Typography */
+  .type-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .type-row {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: var(--space-5);
+    align-items: baseline;
+    padding: var(--space-4) 0;
+    border-bottom: 1px solid var(--border-hairline);
+  }
+
+  .type-sample {
+    color: var(--ink);
+    line-height: var(--lh-snug);
+  }
+
+  .type-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding-top: var(--space-2);
+  }
+
+  .type-var {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--ink);
+    background: transparent;
+    padding: 0;
+  }
+
+  .type-px,
+  .type-family,
+  .type-use {
+    font-family: var(--font-sans);
+    font-size: var(--text-xs);
+    color: var(--ink-dim);
+  }
+
+  .type-use {
+    color: var(--ink-faint);
+  }
+
+  /* Spacing */
+  .spacing-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .spacing-row {
+    display: grid;
+    grid-template-columns: 160px 120px 80px;
+    gap: var(--space-4);
+    align-items: center;
+    padding: var(--space-2) 0;
+  }
+
+  .spacing-bar {
+    height: 12px;
+    background: var(--primary);
+    border-radius: var(--radius-sm);
+  }
+
+  .spacing-var {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--ink);
+    background: transparent;
+    padding: 0;
+  }
+
+  .spacing-px {
+    font-family: var(--font-sans);
+    font-size: var(--text-xs);
+    color: var(--ink-dim);
+  }
+
+  /* Radius */
+  .radius-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-6);
+  }
+
+  .radius-row {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+    min-width: 200px;
+  }
+
+  .radius-sample {
+    width: 96px;
+    height: 96px;
+    background: var(--card);
+    border: 1px solid var(--border);
+  }
+
+  .radius-var {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--ink);
+    background: transparent;
+    padding: 0;
+  }
+
+  .radius-px,
+  .radius-use {
+    font-family: var(--font-sans);
+    font-size: var(--text-xs);
+    color: var(--ink-dim);
+  }
+
+  /* Icons */
+  .icon-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-5);
+  }
+
+  .icon-row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .icon-cell {
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--ink);
+  }
+
+  .icon-name {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--ink-dim);
+  }
+
+  /* Components */
+  .component-block {
+    margin-bottom: var(--space-7);
+  }
+
+  .component-demo {
+    padding: var(--space-5);
+    background: var(--bg-subtle);
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-5);
+  }
+
+  .component-demo--tags {
+    gap: var(--space-3);
+  }
+
+  .component-demo--cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-5);
+    align-items: stretch;
+  }
+
+  .component-demo--aside {
+    max-width: 360px;
+  }
+
+  .demo-variant {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .demo-variant-label {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--ink-faint);
+  }
+
+  /* Tag variants */
+  .tag {
+    font-family: var(--font-sans);
+    font-size: var(--text-xs);
+    border-radius: var(--radius-sm);
+    padding: 2px var(--space-2);
+    letter-spacing: 0.02em;
+  }
+  .tag--default {
+    color: var(--tag-default-fg);
+    background: var(--tag-default-bg);
+    border: 1px solid var(--tag-default-border);
+  }
+  .tag--active {
+    color: var(--tag-active-fg);
+    background: var(--tag-active-bg);
+    border: 1px solid var(--tag-active-border);
+  }
+  .tag--signal {
+    color: var(--tag-signal-fg);
+    background: var(--tag-signal-bg);
+    border: 1px solid var(--tag-signal-border);
+  }
+  .tag--status {
+    color: var(--tag-status-fg);
+    background: var(--tag-status-bg);
+    border: 1px solid var(--tag-status-border);
+  }
+
+  /* Status dots */
+  .dot-row {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .dot--neutral   { background: var(--dot-neutral); }
+  .dot--active    { background: var(--dot-active); }
+  .dot--attention { background: var(--dot-attention); }
+
+  .dot-label {
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    color: var(--ink-dim);
+  }
+
+  /* Mobile */
+  @media (max-width: 768px) {
+    .swatch-grid--12 { grid-template-columns: repeat(4, 1fr); }
+    .swatch-grid--5  { grid-template-columns: repeat(3, 1fr); }
+    .swatch-grid--3  { grid-template-columns: repeat(2, 1fr); }
+
+    .token-row,
+    .type-row {
+      grid-template-columns: 1fr;
+      gap: var(--space-2);
+    }
+
+    .component-demo--cards {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

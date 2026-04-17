@@ -1,21 +1,23 @@
 ---
 interface Props {
   label: string;
+  variant?: 'default' | 'signal';
   class?: string;
 }
-const { label, class: className = '' } = Astro.props;
+const { label, variant = 'default', class: className = '' } = Astro.props;
+const fg = variant === 'signal' ? 'var(--kicker-signal-fg)' : 'var(--kicker-default-fg)';
 ---
 
 <span
   class:list={['kicker-label', className]}
-  style="
+  style={`
     font-family: var(--font-sans);
     font-size: var(--text-kicker);
     font-weight: 500;
     letter-spacing: var(--ls-caps);
     text-transform: uppercase;
-    color: var(--kicker-default-fg);
-  "
+    color: ${fg};
+  `}
 >
   {label}
 </span>
