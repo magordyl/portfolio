@@ -1,5 +1,5 @@
-import type { DesignTokens } from '../design-system/types';
-import { defaultTokens } from '../design-system/defaults';
+import type { DesignTokens } from './src/design-system/types';
+import { defaultTokens } from './src/design-system/defaults';
 
 /**
  * Portfolio design tokens — Royal Tonal palette, dark-mode only.
