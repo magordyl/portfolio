@@ -1,5 +1,19 @@
 # Development Diary
 
+## 2026-04-18 — Chunk 2 of CI/CD improvements: branch preview deploys
+
+Commits `3ce4707` (on `preview-test`, merged to `main`). Part of the workspace CI/CD improvement plan at `plans/cicd-improvements.md`.
+
+The portfolio has no `wrangler.toml` in the repo — it was originally deployed via Cloudflare's git-connected Workers Builds system (dashboard-only config). Branch preview support required writing the config file and a GHA workflow.
+
+Added `wrangler.toml` with production config (`name = "dylan-portfolio"`, static assets, SPA fallback) and a `[env.preview]` block targeting a separate Worker `dylan-portfolio-preview`. Preview URL is always `https://dylan-portfolio-preview.magordyl.workers.dev` — last push wins, which is acceptable for a single-user workflow.
+
+Added `.github/workflows/preview-deploy.yml` that triggers on any non-`main` branch push: `npm ci` → `npm run build` → `wrangler deploy --env preview`. Requires two GitHub secrets: `CLOUDFLARE_API_TOKEN` (reuse from planner-app) and `CLOUDFLARE_ACCOUNT_ID` (`89af4bb31c6edfd9fc2e3c3cc51463c2`). Until the user adds these, the preview workflow fails at the deploy step — check workflow still runs and succeeds independently.
+
+The Cloudflare auto-config PR (#1, `cloudflare/workers-autoconfig`, open since 2026-04-11) proposes migrating to the `@astrojs/cloudflare` adapter. That PR uses `"name": "portfolio"` which would create a new Worker rather than deploying to the existing `dylan-portfolio` project. Leave it unmerged — our `wrangler.toml` covers the same ground without the adapter overhead.
+
+---
+
 ## 2026-04-18 — Chunk 1 of CI/CD improvements: GitHub Actions check workflow
 
 Commit `49d0aad` (workflow), `2d75d68` (fix). Part of the workspace CI/CD improvement plan at `plans/cicd-improvements.md`.
