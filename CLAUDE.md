@@ -63,9 +63,24 @@ npm run deploy:preview       # builds + deploys to dylan-portfolio-preview.magor
 
 Astro uses `@tailwindcss/vite` (Vite plugin), NOT `@astrojs/tailwind`. The `astro add tailwind` command sets this up automatically. No `tailwind.config.mjs` needed — tokens live as CSS variables in `globals.css`. If you need Tailwind utility classes for token values, add `@theme { --text-hero: 4.5rem; }` blocks inside `globals.css`.
 
-## Current Status (2026-04-17)
+## Current Status (2026-04-18)
 
-**Last session (2026-04-17 evening) — Chunks 4c.0.5 + 4c.1a shipped: /design-system kit scaffold + ChatTranscript v3 port.**
+**Last session (2026-04-18) — CI/CD chunks 1 + 2 shipped (workspace plan `plans/cicd-improvements.md`).**
+
+- `49d0aad` — GHA check workflow (Node 22, `npm run check` on every push + PR)
+- `2d75d68` — bundled `src/design-system/{types,defaults}.ts` into portfolio repo (CI exposed `../design-system/` cross-repo import)
+- `3ce4707` — `wrangler.toml` + `preview-deploy.yml` + deploy scripts + CLAUDE.md deploy docs
+- GitHub secrets added: `CLOUDFLARE_ACCOUNT_ID` (set), `CLOUDFLARE_API_TOKEN` (user-set). Preview deploy verified live on phone.
+
+**Preview URL:** `https://dylan-portfolio-preview.magordyl.workers.dev` (last non-main branch push). Production still auto-deploys on `main` push via Workers Builds dashboard.
+
+**Open PR #1** (`cloudflare/workers-autoconfig`) — leave unmerged. Our `wrangler.toml` covers the same ground without the `@astrojs/cloudflare` adapter overhead it proposes.
+
+**Next (CI/CD plan):** chunk 3 — planner preview environment (Opus session). Then chunks 4+5+6.
+
+**Next (portfolio):** chunk 4c.1b — case study page layout explorers.
+
+**Prior session (2026-04-17 evening) — Chunks 4c.0.5 + 4c.1a shipped: /design-system kit scaffold + ChatTranscript v3 port.**
 
 Three commits on `main` (pushed; Cloudflare auto-deploy kicked):
 - `3e68c07` — `/design-system` kit scaffold (tokens, type, spacing, radius, icons, chunk-3 components live-rendered).
