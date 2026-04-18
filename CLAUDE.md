@@ -39,6 +39,26 @@ npm run check   # astro check && astro build — must pass before every commit
 
 Set up a pre-commit hook at `.git/hooks/pre-commit` that runs `npm run check`.
 
+## Deploy Workflow
+
+Cloudflare Workers project: `dylan-portfolio`. Account ID: `89af4bb31c6edfd9fc2e3c3cc51463c2`.
+
+```bash
+# Production (from portfolio/):
+npm run deploy:prod          # builds + deploys to dylan-portfolio.magordyl.workers.dev
+
+# Preview (from portfolio/):
+npm run deploy:preview       # builds + deploys to dylan-portfolio-preview.magordyl.workers.dev
+```
+
+**GHA preview deploy** runs automatically on every push to a non-`main` branch (`.github/workflows/preview-deploy.yml`). Preview URL is always `https://dylan-portfolio-preview.magordyl.workers.dev` (last push wins — single-track for single-user workflow).
+
+**Required GitHub secrets** (add once in repo Settings → Secrets → Actions):
+- `CLOUDFLARE_API_TOKEN` — Workers:Edit scope (reuse from planner-app if already created)
+- `CLOUDFLARE_ACCOUNT_ID` — `89af4bb31c6edfd9fc2e3c3cc51463c2`
+
+**CI** (`.github/workflows/check.yml`) runs `npm run check` on every push and PR. Both CI and preview deploy must pass before merging to `main`.
+
 ## Tailwind v4 note
 
 Astro uses `@tailwindcss/vite` (Vite plugin), NOT `@astrojs/tailwind`. The `astro add tailwind` command sets this up automatically. No `tailwind.config.mjs` needed — tokens live as CSS variables in `globals.css`. If you need Tailwind utility classes for token values, add `@theme { --text-hero: 4.5rem; }` blocks inside `globals.css`.

@@ -11,6 +11,8 @@
     "preview": "astro preview",
     "check": "node scripts/check-raw-colours.mjs && astro check && astro build",
     "test": "echo \"No tests yet\"",
+    "deploy:prod": "npm run build && wrangler deploy --env=\"\"",
+    "deploy:preview": "npm run build && wrangler deploy --env preview",
     "astro": "astro"
   },
   "dependencies": {
