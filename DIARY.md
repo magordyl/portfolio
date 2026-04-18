@@ -1,5 +1,21 @@
 # Development Diary
 
+## 2026-04-18 — Chunk 1 of CI/CD improvements: GitHub Actions check workflow
+
+Commit `49d0aad` (workflow), `2d75d68` (fix). Part of the workspace CI/CD improvement plan at `plans/cicd-improvements.md`.
+
+The workflow itself was straightforward — `npm ci` → `npm run check` on every push and PR, Node 22 to match the `engines >= 22.12.0` constraint. The interesting part was the failure it immediately exposed.
+
+First CI run failed with `ts(2307): Cannot find module '../design-system/types'`. The portfolio's `design.tokens.ts` imported types and defaults from the workspace sibling directory (`../design-system/`). That path works locally because both repos live in the same workspace folder on disk. In GitHub Actions, only the portfolio repo is checked out — the sibling doesn't exist.
+
+Fix: copied `design-system/types.ts` and `design-system/defaults.ts` into `src/design-system/` inside the portfolio repo, updated the two import lines. The portfolio overrides almost everything in `defaultTokens` anyway (Royal Tonal palette vs. the dark neutral defaults), so this is a stable copy with no meaningful drift risk.
+
+The alternative was a sparse checkout of the workspace repo inside the CI workflow. That approach would have required either making the workspace repo public or creating a PAT — more moving parts for what is essentially two small stable files.
+
+Second CI run: green.
+
+---
+
 ## 2026-04-17 — Chunks 4c.0.5 + 4c.1a shipped: /design-system kit + ChatTranscript v3 port
 
 Three commits: `3e68c07` (kit scaffold), `428f905` (plan restructure), `41fac2c` (ChatTranscript port). The kit is now the dev surface every downstream component renders into first, and the first real component — ChatTranscript — landed there against the locked tokens.
