@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mermaid Diagram Samples v2 — Royal Tonal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  @font-face {
+    font-family: 'Geist';
+    src: local('Geist');
+    font-weight: 100 900;
+  }
+
+  :root {
+    --royal-1:  #0E0F1C;
+    --royal-2:  #121428;
+    --royal-3:  #181B36;
+    --royal-4:  #1E2346;
+    --royal-5:  #252C58;
+    --royal-6:  #2D366C;
+    --royal-7:  #364280;
+    --royal-8:  #3B5BDB;
+    --royal-9:  #4D6DE8;
+    --royal-10: #6C85FF;
+    --royal-11: #A5B4FF;
+    --royal-12: #D5DCFA;
+    --ink:       #E6E2D9;
+    --ink-dim:   #9C968A;
+    --ink-faint: #5E584F;
+    --bg:        var(--royal-2);
+    --diagram-min-width: 490px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--royal-1);
+    color: var(--ink);
+    font-family: 'Geist', -apple-system, system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page-header {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 48px 32px 24px;
+    border-bottom: 1px solid var(--royal-5);
+  }
+  .page-header h1 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 32px;
+    font-weight: 400;
+    color: var(--royal-12);
+    margin-bottom: 8px;
+  }
+  .page-header p {
+    color: var(--ink-dim);
+    font-size: 14px;
+    max-width: 640px;
+  }
+
+  .section {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 48px 32px;
+    border-bottom: 1px solid var(--royal-3);
+  }
+  .section:last-child { border-bottom: none; }
+
+  .section h2 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 24px;
+    font-weight: 400;
+    color: var(--royal-12);
+    margin-bottom: 8px;
+  }
+  .section-desc {
+    color: var(--ink-dim);
+    font-size: 14px;
+    margin-bottom: 24px;
+    max-width: 640px;
+  }
+
+  /* ------------------------------------------------------------ */
+  /* Diagram container — enforces min-width + scroll on mobile    */
+  /* This mirrors the <Diagram> Astro component behaviour.        */
+  /* ------------------------------------------------------------ */
+
+  .diagram-card {
+    background: var(--royal-2);
+    border: 1px solid var(--royal-5);
+    border-radius: 8px;
+    margin: 24px 0;
+    overflow-x: auto;
+    position: relative;
+  }
+  .diagram-inner {
+    min-width: var(--diagram-min-width);
+    padding: 32px;
+  }
+  .diagram-inner .mermaid {
+    display: flex;
+    justify-content: center;
+  }
+
+  /* Scroll hint — visible only when container overflows */
+  .scroll-hint {
+    display: none;
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-faint);
+    text-align: right;
+    padding: 8px 16px 0;
+  }
+
+  .diagram-caption {
+    font-family: 'Geist Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-dim);
+    margin-top: 12px;
+    text-align: center;
+    padding: 0 32px 16px;
+  }
+
+  .comparison {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin: 24px 0;
+  }
+  @media (max-width: 768px) {
+    .comparison { grid-template-columns: 1fr; }
+  }
+
+  .comparison .diagram-card { margin: 0; }
+
+  .col-label {
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px;
+    color: var(--royal-11);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    margin-bottom: 12px;
+  }
+
+  .notes {
+    background: var(--royal-3);
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin: 24px 0;
+    font-size: 14px;
+    color: var(--ink-dim);
+    line-height: 1.6;
+  }
+  .notes strong { color: var(--ink); }
+  .notes code {
+    font-family: 'Geist Mono', monospace;
+    font-size: 12px;
+    background: var(--royal-4);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--royal-11);
+  }
+  .notes ul { margin: 8px 0 0 20px; }
+  .notes li { margin: 4px 0; }
+
+  /* Mobile simulation frame */
+  .mobile-frame {
+    max-width: 390px;
+    border: 2px solid var(--royal-5);
+    border-radius: 12px;
+    overflow: hidden;
+    margin: 24px auto;
+  }
+  .mobile-frame-bar {
+    background: var(--royal-3);
+    padding: 6px 12px;
+    font-family: 'Geist Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-faint);
+    text-align: center;
+    border-bottom: 1px solid var(--royal-5);
+  }
+  .mobile-frame .diagram-card {
+    margin: 0;
+    border: none;
+    border-radius: 0;
+  }
+
+  /* ------------------------------------------------------------ */
+  /* Mermaid overrides                                            */
+  /* ------------------------------------------------------------ */
+
+  /* Kill Mermaid's uppercase transform on all labels */
+  .mermaid .nodeLabel,
+  .mermaid .label,
+  .mermaid .edgeLabel,
+  .mermaid .cluster-label,
+  .mermaid span,
+  .mermaid tspan,
+  .mermaid text,
+  .mermaid foreignObject span,
+  .mermaid foreignObject div {
+    text-transform: none !important;
+  }
+
+  /* Edge label background */
+  .mermaid .edgeLabel {
+    color: var(--royal-11) !important;
+  }
+
+  .mermaid svg {
+    max-width: 100%;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>Mermaid Diagram Samples v2</h1>
+  <p>Fixes from v1: sentence-case labels (was uppercase), mobile legibility via min-width scroll container (490px floor). All diagram types share the same container with <code>scroll &rarr;</code> hint when overflowing.</p>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 1: Architecture Diagram — Planner V1 -->
+<!-- ============================================================ -->
+
+<div class="section">
+  <h2>1. Architecture Diagram — Planner V1</h2>
+  <p class="section-desc">Three-tier node treatment via <code>classDef</code>. Labels now sentence case. Subgraph label ("Cloudflare Worker") is the only intentionally-uppercase element, matching the hand-authored SVG convention for group labels.</p>
+
+  <div class="diagram-card">
+    <div class="scroll-hint">scroll &rarr;</div>
+    <div class="diagram-inner">
+      <pre class="mermaid">
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "primaryColor": "#1E2346",
+    "primaryBorderColor": "#3B5BDB",
+    "primaryTextColor": "#E6E2D9",
+    "lineColor": "#3B5BDB",
+    "secondaryColor": "#121428",
+    "tertiaryColor": "#181B36",
+    "fontFamily": "Geist, -apple-system, system-ui, sans-serif",
+    "fontSize": "13px",
+    "clusterBkg": "transparent",
+    "clusterBorder": "#252C58",
+    "edgeLabelBackground": "#121428"
+  }
+}}%%
+flowchart TD
+  browser["Browser (React SPA)"]
+
+  subgraph worker ["CLOUDFLARE WORKER"]
+    direction LR
+    auth["Auth"]
+    tasks["Tasks"]
+    reviews["Reviews"]
+    sms["SMS"]
+    notify["Notify"]
+  end
+
+  db[("D1 (SQLite)")]
+  gateway["Vendor Gateway\nkillswitch → budget → dedup → send"]
+
+  cron(["Cron Trigger"])
+  google["Google OAuth"]
+  twilio["Twilio"]
+  haiku["Claude Haiku"]
+
+  browser --> worker
+  cron --> notify
+
+  auth & tasks & reviews & sms & notify --> db
+  sms --> gateway
+  notify --> gateway
+
+  auth -.-> google
+  gateway -.-> twilio
+  gateway -.-> haiku
+
+  classDef owned fill:#1E2346,stroke:#3B5BDB,stroke-width:1.5px,color:#E6E2D9,rx:8,ry:8
+  classDef highlighted fill:#252C58,stroke:#4D6DE8,stroke-width:2px,color:#E6E2D9,rx:8,ry:8
+  classDef external fill:none,stroke:#364280,stroke-width:1.5px,stroke-dasharray:6 4,color:#E6E2D9,rx:8,ry:8
+  classDef trigger fill:none,stroke:#364280,stroke-width:1.5px,stroke-dasharray:6 4,color:#E6E2D9
+
+  class browser,auth,tasks,reviews,sms,notify,db owned
+  class gateway highlighted
+  class google,twilio,haiku external
+  class cron trigger
+      </pre>
+    </div>
+    <div class="diagram-caption">Planner V1 system architecture. The Vendor Gateway (bright stroke) is the single path to all paid APIs.</div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 2: Flowchart — The Weekly Consolidation -->
+<!-- ============================================================ -->
+
+<div class="section">
+  <h2>2. Flowchart — The Weekly</h2>
+  <p class="section-desc">Simple left-to-right data flow. Baseline diagram type from the imagery standards.</p>
+
+  <div class="diagram-card">
+    <div class="scroll-hint">scroll &rarr;</div>
+    <div class="diagram-inner">
+      <pre class="mermaid">
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "primaryColor": "#1E2346",
+    "primaryBorderColor": "#3B5BDB",
+    "primaryTextColor": "#E6E2D9",
+    "lineColor": "#3B5BDB",
+    "secondaryColor": "#121428",
+    "tertiaryColor": "#181B36",
+    "fontFamily": "Geist, -apple-system, system-ui, sans-serif",
+    "fontSize": "13px",
+    "edgeLabelBackground": "#121428"
+  }
+}}%%
+flowchart LR
+  A["Browse recipes"] --> B["Pick 3 meals"]
+  B --> C["Consolidate"]
+  C --> D{"Optional\ngarnishes?"}
+  D -->|yes| E["Include"]
+  D -->|no| F["Skip"]
+  E --> G["Review trolley"]
+  F --> G
+  G --> H["Checkout"]
+
+  classDef default fill:#1E2346,stroke:#3B5BDB,stroke-width:1.5px,color:#E6E2D9,rx:8,ry:8
+      </pre>
+    </div>
+    <div class="diagram-caption">The Weekly: recipe selection to checkout flow.</div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 3: Quadrant Chart — 2x2 Matrix -->
+<!-- ============================================================ -->
+
+<div class="section">
+  <h2>3. Quadrant Chart — 2x2 Matrix</h2>
+  <p class="section-desc">Mermaid <code>quadrantChart</code> for simple prioritisation matrices. Royal Tonal fills, sentence-case labels.</p>
+
+  <div class="diagram-card">
+    <div class="scroll-hint">scroll &rarr;</div>
+    <div class="diagram-inner">
+      <pre class="mermaid">
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "quadrant1Fill": "#252C58",
+    "quadrant2Fill": "#1E2346",
+    "quadrant3Fill": "#181B36",
+    "quadrant4Fill": "#1E2346",
+    "quadrant1TextFill": "#D5DCFA",
+    "quadrant2TextFill": "#A5B4FF",
+    "quadrant3TextFill": "#A5B4FF",
+    "quadrant4TextFill": "#A5B4FF",
+    "quadrantPointFill": "#4D6DE8",
+    "quadrantPointTextFill": "#E6E2D9",
+    "quadrantXAxisTextFill": "#A5B4FF",
+    "quadrantYAxisTextFill": "#A5B4FF",
+    "quadrantTitleFill": "#D5DCFA",
+    "quadrantInternalBorderStrokeFill": "#364280",
+    "quadrantExternalBorderStrokeFill": "#364280",
+    "fontFamily": "Geist, -apple-system, system-ui, sans-serif",
+    "fontSize": "13px"
+  }
+}}%%
+quadrantChart
+    title Planner V1 Feature Prioritisation
+    x-axis Low effort --> High effort
+    y-axis Low impact --> High impact
+    quadrant-1 Ship first
+    quadrant-2 Plan carefully
+    quadrant-3 Deprioritise
+    quadrant-4 Quick wins
+    SMS reminders: [0.7, 0.9]
+    Weekly review: [0.5, 0.8]
+    Vendor Gateway: [0.8, 0.95]
+    Google OAuth: [0.6, 0.7]
+    Budget caps: [0.3, 0.85]
+    Task CRUD: [0.2, 0.6]
+    Dark mode: [0.15, 0.2]
+    Export CSV: [0.4, 0.3]
+      </pre>
+    </div>
+    <div class="diagram-caption">Planner V1 feature prioritisation. Top-right quadrant = ship first.</div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 4: Mobile Legibility — Scroll Container Demo -->
+<!-- ============================================================ -->
+
+<div class="section">
+  <h2>4. Mobile Legibility</h2>
+  <p class="section-desc">All diagrams share the same scroll container: <code>min-width: 490px</code> on the inner element, <code>overflow-x: auto</code> on the card. When the viewport is narrower than the diagram, horizontal scroll activates with a "scroll &rarr;" hint. Diagram text stays at 13px rendered — never shrinks. Try resizing the browser window to see the scroll activate.</p>
+
+  <div class="comparison">
+    <div>
+      <div class="col-label">Desktop — full width</div>
+      <div class="diagram-card">
+        <div class="scroll-hint">scroll &rarr;</div>
+        <div class="diagram-inner">
+          <pre class="mermaid">
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "primaryColor": "#1E2346",
+    "primaryBorderColor": "#3B5BDB",
+    "primaryTextColor": "#E6E2D9",
+    "lineColor": "#3B5BDB",
+    "secondaryColor": "#121428",
+    "tertiaryColor": "#181B36",
+    "fontFamily": "Geist, -apple-system, system-ui, sans-serif",
+    "fontSize": "13px",
+    "clusterBkg": "transparent",
+    "clusterBorder": "#252C58",
+    "edgeLabelBackground": "#121428"
+  }
+}}%%
+flowchart TD
+  browser["Browser (React SPA)"]
+  subgraph worker ["CLOUDFLARE WORKER"]
+    direction LR
+    auth["Auth"]
+    tasks["Tasks"]
+    reviews["Reviews"]
+    sms["SMS"]
+    notify["Notify"]
+  end
+  db[("D1 (SQLite)")]
+  gateway["Vendor Gateway\nkillswitch → budget → dedup → send"]
+  cron(["Cron Trigger"])
+  google["Google OAuth"]
+  twilio["Twilio"]
+  haiku["Claude Haiku"]
+
+  browser --> worker
+  cron --> notify
+  auth & tasks & reviews & sms & notify --> db
+  sms --> gateway
+  notify --> gateway
+  auth -.-> google
+  gateway -.-> twilio
+  gateway -.-> haiku
+
+  classDef owned fill:#1E2346,stroke:#3B5BDB,stroke-width:1.5px,color:#E6E2D9
+  classDef highlighted fill:#252C58,stroke:#4D6DE8,stroke-width:2px,color:#E6E2D9
+  classDef external fill:none,stroke:#364280,stroke-width:1.5px,stroke-dasharray:6 4,color:#E6E2D9
+  classDef trigger fill:none,stroke:#364280,stroke-width:1.5px,stroke-dasharray:6 4,color:#E6E2D9
+  class browser,auth,tasks,reviews,sms,notify,db owned
+  class gateway highlighted
+  class google,twilio,haiku external
+  class cron trigger
+          </pre>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="col-label">Mobile simulation — 390px</div>
+      <div class="mobile-frame">
+        <div class="mobile-frame-bar">390 × viewport</div>
+        <div class="diagram-card">
+          <div class="scroll-hint">scroll &rarr;</div>
+          <div class="diagram-inner">
+            <pre class="mermaid">
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "primaryColor": "#1E2346",
+    "primaryBorderColor": "#3B5BDB",
+    "primaryTextColor": "#E6E2D9",
+    "lineColor": "#3B5BDB",
+    "secondaryColor": "#121428",
+    "tertiaryColor": "#181B36",
+    "fontFamily": "Geist, -apple-system, system-ui, sans-serif",
+    "fontSize": "13px",
+    "clusterBkg": "transparent",
+    "clusterBorder": "#252C58",
+    "edgeLabelBackground": "#121428"
+  }
+}}%%
+flowchart TD
+  browser["Browser (React SPA)"]
+  subgraph worker ["CLOUDFLARE WORKER"]
+    direction LR
+    auth["Auth"]
+    tasks["Tasks"]
+    reviews["Reviews"]
+    sms["SMS"]
+    notify["Notify"]
+  end
+  db[("D1 (SQLite)")]
+  gateway["Vendor Gateway\nkillswitch → budget → dedup → send"]
+  cron(["Cron Trigger"])
+  google["Google OAuth"]
+  twilio["Twilio"]
+  haiku["Claude Haiku"]
+
+  browser --> worker
+  cron --> notify
+  auth & tasks & reviews & sms & notify --> db
+  sms --> gateway
+  notify --> gateway
+  auth -.-> google
+  gateway -.-> twilio
+  gateway -.-> haiku
+
+  classDef owned fill:#1E2346,stroke:#3B5BDB,stroke-width:1.5px,color:#E6E2D9
+  classDef highlighted fill:#252C58,stroke:#4D6DE8,stroke-width:2px,color:#E6E2D9
+  classDef external fill:none,stroke:#364280,stroke-width:1.5px,stroke-dasharray:6 4,color:#E6E2D9
+  classDef trigger fill:none,stroke:#364280,stroke-width:1.5px,stroke-dasharray:6 4,color:#E6E2D9
+  class browser,auth,tasks,reviews,sms,notify,db owned
+  class gateway highlighted
+  class google,twilio,haiku external
+  class cron trigger
+            </pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="notes">
+    <strong>How the mobile legibility system works:</strong>
+    <ul>
+      <li><code>.diagram-inner</code> has <code>min-width: 490px</code> — the diagram never renders narrower than this</li>
+      <li><code>.diagram-card</code> has <code>overflow-x: auto</code> — horizontal scroll activates when the card is narrower than 490px</li>
+      <li>The "scroll &rarr;" hint appears only when overflow is detected (via JS after render)</li>
+      <li>Mermaid's <code>fontSize: "13px"</code> stays constant — text size is never reduced on mobile</li>
+      <li>At 490px rendered width, 13px Mermaid text stays at 13px CSS — well above the 9px legibility floor</li>
+      <li>In the production <code>&lt;Diagram&gt;</code> component, diagrams also bleed to full container width on mobile (negative margins cancel card padding) before scroll kicks in</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 5: All Three Types at Mobile Width -->
+<!-- ============================================================ -->
+
+<div class="section">
+  <h2>5. All Types at Mobile Width</h2>
+  <p class="section-desc">Each diagram type in a 390px mobile frame, demonstrating that the scroll container works consistently across flowcharts, architecture diagrams, and quadrant charts.</p>
+
+  <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;">
+    <div>
+      <div class="col-label">Flowchart</div>
+      <div class="mobile-frame">
+        <div class="mobile-frame-bar">390px</div>
+        <div class="diagram-card">
+          <div class="scroll-hint">scroll &rarr;</div>
+          <div class="diagram-inner">
+            <pre class="mermaid">
+%%{init: {"theme": "base", "themeVariables": {"primaryColor": "#1E2346", "primaryBorderColor": "#3B5BDB", "primaryTextColor": "#E6E2D9", "lineColor": "#3B5BDB", "secondaryColor": "#121428", "fontFamily": "Geist, sans-serif", "fontSize": "13px", "edgeLabelBackground": "#121428"}}}%%
+flowchart LR
+  A["Browse"] --> B["Pick 3"]
+  B --> C["Consolidate"]
+  C --> D{"Garnishes?"}
+  D -->|yes| E["Include"]
+  D -->|no| F["Skip"]
+  E --> G["Trolley"]
+  F --> G
+  classDef default fill:#1E2346,stroke:#3B5BDB,stroke-width:1.5px,color:#E6E2D9
+            </pre>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="col-label">Architecture</div>
+      <div class="mobile-frame">
+        <div class="mobile-frame-bar">390px</div>
+        <div class="diagram-card">
+          <div class="scroll-hint">scroll &rarr;</div>
+          <div class="diagram-inner">
+            <pre class="mermaid">
+%%{init: {"theme": "base", "themeVariables": {"primaryColor": "#1E2346", "primaryBorderColor": "#3B5BDB", "primaryTextColor": "#E6E2D9", "lineColor": "#3B5BDB", "secondaryColor": "#121428", "fontFamily": "Geist, sans-serif", "fontSize": "13px", "clusterBkg": "transparent", "clusterBorder": "#252C58", "edgeLabelBackground": "#121428"}}}%%
+flowchart TD
+  browser["Browser"]
+  subgraph w ["WORKER"]
+    direction LR
+    auth["Auth"]
+    tasks["Tasks"]
+    sms["SMS"]
+  end
+  db[("D1")]
+  gw["Vendor Gateway"]
+  ext["Twilio"]
+  browser --> w
+  auth & tasks & sms --> db
+  sms --> gw
+  gw -.-> ext
+  classDef owned fill:#1E2346,stroke:#3B5BDB,stroke-width:1.5px,color:#E6E2D9
+  classDef highlighted fill:#252C58,stroke:#4D6DE8,stroke-width:2px,color:#E6E2D9
+  classDef external fill:none,stroke:#364280,stroke-width:1.5px,stroke-dasharray:6 4,color:#E6E2D9
+  class browser,auth,tasks,sms,db owned
+  class gw highlighted
+  class ext external
+            </pre>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="col-label">Quadrant</div>
+      <div class="mobile-frame">
+        <div class="mobile-frame-bar">390px</div>
+        <div class="diagram-card">
+          <div class="scroll-hint">scroll &rarr;</div>
+          <div class="diagram-inner">
+            <pre class="mermaid">
+%%{init: {"theme": "base", "themeVariables": {"quadrant1Fill": "#252C58", "quadrant2Fill": "#1E2346", "quadrant3Fill": "#181B36", "quadrant4Fill": "#1E2346", "quadrant1TextFill": "#D5DCFA", "quadrant2TextFill": "#A5B4FF", "quadrant3TextFill": "#A5B4FF", "quadrant4TextFill": "#A5B4FF", "quadrantPointFill": "#4D6DE8", "quadrantPointTextFill": "#E6E2D9", "quadrantXAxisTextFill": "#A5B4FF", "quadrantYAxisTextFill": "#A5B4FF", "quadrantTitleFill": "#D5DCFA", "quadrantInternalBorderStrokeFill": "#364280", "quadrantExternalBorderStrokeFill": "#364280", "fontFamily": "Geist, sans-serif", "fontSize": "13px"}}}%%
+quadrantChart
+    title Feature Priority
+    x-axis Low effort --> High effort
+    y-axis Low impact --> High impact
+    quadrant-1 Ship first
+    quadrant-2 Plan
+    quadrant-3 Deprioritise
+    quadrant-4 Quick wins
+    SMS: [0.7, 0.9]
+    Gateway: [0.8, 0.95]
+    OAuth: [0.6, 0.7]
+    Budget: [0.3, 0.85]
+            </pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+
+  mermaid.initialize({
+    startOnLoad: true,
+    securityLevel: 'loose',
+    theme: 'base',
+    flowchart: {
+      htmlLabels: true,
+      curve: 'basis',
+      padding: 16,
+      nodeSpacing: 30,
+      rankSpacing: 50,
+      useMaxWidth: false,
+    },
+    themeVariables: {
+      darkMode: true,
+      background: '#121428',
+    }
+  });
+
+  // After Mermaid renders, check each diagram-card for overflow
+  // and show the scroll hint if the inner content is wider than the card.
+  mermaid.run().then(() => {
+    document.querySelectorAll('.diagram-card').forEach(card => {
+      const hint = card.querySelector('.scroll-hint');
+      if (!hint) return;
+      if (card.scrollWidth > card.clientWidth) {
+        hint.style.display = 'block';
+      }
+    });
+  });
+</script>
+
+</body>
+</html>

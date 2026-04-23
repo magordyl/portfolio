@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Architecture Diagram Explorer v2 — Planner V1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --royal-1:  #0E0F1C;
+    --royal-2:  #121428;
+    --royal-3:  #181B36;
+    --royal-4:  #1E2346;
+    --royal-5:  #252C58;
+    --royal-6:  #2D366C;
+    --royal-7:  #364280;
+    --royal-8:  #3B5BDB;
+    --royal-9:  #4D6DE8;
+    --royal-10: #6C85FF;
+    --royal-11: #A5B4FF;
+    --royal-12: #D5DCFA;
+    --ink:       #E6E2D9;
+    --ink-dim:   #9C968A;
+    --ink-faint: #5E584F;
+    --bg:        var(--royal-2);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--royal-1);
+    color: var(--ink);
+    font-family: 'Geist', -apple-system, system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page-header {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 48px 32px 24px;
+    border-bottom: 1px solid var(--royal-5);
+  }
+  .page-header h1 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 32px;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    line-height: 1.1;
+    margin-bottom: 8px;
+  }
+  .page-header p {
+    color: var(--ink-dim);
+    font-size: 14px;
+    max-width: 640px;
+  }
+
+  .variation {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 48px 32px;
+    border-bottom: 1px solid var(--royal-4);
+  }
+  .variation:last-child { border-bottom: none; }
+
+  .var-label {
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--royal-11);
+    margin-bottom: 8px;
+  }
+  .var-title {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 24px;
+    font-weight: 400;
+    line-height: 1.25;
+    margin-bottom: 8px;
+  }
+  .var-desc {
+    color: var(--ink-dim);
+    font-size: 14px;
+    max-width: 640px;
+    margin-bottom: 32px;
+  }
+
+  /* Mock case study context */
+  .case-context {
+    background: var(--bg);
+    border-radius: 12px;
+    padding: 40px;
+    max-width: 720px;
+  }
+  .case-context.mobile-sim {
+    max-width: 390px;
+    padding: 16px;
+    border: 1px solid var(--royal-5);
+  }
+  .case-context.mobile-sim .section-heading {
+    font-size: 20px;
+  }
+
+  .section-kicker {
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--royal-11);
+    margin-bottom: 12px;
+  }
+  .section-heading {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 24px;
+    font-weight: 400;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    margin-bottom: 16px;
+  }
+  .section-prose {
+    color: var(--ink-dim);
+    font-size: 15px;
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+  .section-prose.after-diagram {
+    margin-top: 24px;
+    margin-bottom: 0;
+  }
+
+  /* Diagram scroll container for mobile */
+  .diagram-scroll {
+    position: relative;
+    overflow-x: auto;
+    overflow-y: hidden;
+    margin: 24px -8px;
+    padding: 0 8px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .diagram-scroll::after {
+    content: '';
+    position: sticky;
+    right: 0;
+    top: 0;
+    width: 40px;
+    height: 100%;
+    pointer-events: none;
+    display: none;
+  }
+
+  .diagram-wrap {
+    min-width: 480px;
+  }
+
+  .diagram-caption {
+    font-family: 'Geist Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-dim);
+    margin-top: 12px;
+    min-width: 0;
+    white-space: normal;
+  }
+
+  svg.arch-diagram {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  /* Scroll hint on mobile */
+  .scroll-hint {
+    display: none;
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-faint);
+    margin-bottom: 8px;
+    text-align: right;
+  }
+
+  @media (max-width: 520px) {
+    .scroll-hint { display: block; }
+  }
+
+  /* Mobile bleed option */
+  .case-context.mobile-bleed {
+    max-width: 390px;
+    padding: 16px;
+    border: 1px solid var(--royal-5);
+  }
+  .case-context.mobile-bleed .diagram-scroll {
+    margin-left: -16px;
+    margin-right: -16px;
+    padding: 0;
+  }
+  .case-context.mobile-bleed .diagram-wrap {
+    padding: 0 8px;
+  }
+  .case-context.mobile-bleed .diagram-caption {
+    padding: 0 16px;
+  }
+
+  .notes {
+    background: var(--royal-3);
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin-top: 24px;
+    font-size: 13px;
+    color: var(--ink-dim);
+    line-height: 1.6;
+  }
+  .notes strong { color: var(--ink); font-weight: 500; }
+  .notes ul { margin: 8px 0 0 16px; }
+  .notes li { margin-bottom: 4px; }
+
+  .side-by-side {
+    display: flex;
+    gap: 32px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .side-by-side > * {
+    flex: 1 1 390px;
+    min-width: 320px;
+  }
+
+  /* Colour contrast comparison */
+  .contrast-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin: 16px 0;
+  }
+  .contrast-card {
+    background: var(--royal-2);
+    border-radius: 8px;
+    padding: 16px;
+  }
+  .contrast-card .label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 8px;
+  }
+  .contrast-card svg {
+    width: 100%;
+    height: auto;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>Architecture Diagram Explorer v2</h1>
+  <p>Iterating on Variation B from v1. Fixes: colour contrast, mobile legibility, simplified labels, cleaner arrow routing, Vendor Gateway wording. Shows the diagram at desktop and simulated mobile widths.</p>
+</div>
+
+<!-- ============================================================
+     SECTION 1 — Colour contrast comparison
+     ============================================================ -->
+<div class="variation">
+  <div class="var-label">Colour Fixes</div>
+  <div class="var-title">Contrast improvements</div>
+  <div class="var-desc">v1 used royal-3 fill + royal-7 stroke for owned nodes. On a royal-2 background, the fill was barely visible and the stroke was too subtle at small sizes. v2 bumps the palette up.</div>
+
+  <div class="contrast-grid">
+    <div class="contrast-card">
+      <div class="label" style="color: var(--ink-faint);">v1 — too subtle</div>
+      <svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
+        <rect width="200" height="120" fill="#121428" rx="6"/>
+        <!-- Owned node (v1) -->
+        <rect x="12" y="12" width="80" height="36" rx="8" fill="#181B36" stroke="#364280" stroke-width="1.5"/>
+        <text x="52" y="34" text-anchor="middle" fill="#E6E2D9" font-family="Geist, sans-serif" font-size="11" font-weight="500">Owned</text>
+        <!-- External (v1) -->
+        <rect x="108" y="12" width="80" height="36" rx="8" fill="none" stroke="#2D366C" stroke-width="1.5" stroke-dasharray="6,4"/>
+        <text x="148" y="34" text-anchor="middle" fill="#9C968A" font-family="Geist, sans-serif" font-size="11" font-weight="500">External</text>
+        <!-- Highlighted (v1) -->
+        <rect x="12" y="64" width="80" height="40" rx="8" fill="#1E2346" stroke="#3B5BDB" stroke-width="2"/>
+        <text x="52" y="88" text-anchor="middle" fill="#E6E2D9" font-family="Geist, sans-serif" font-size="11" font-weight="500">Key node</text>
+        <!-- Arrow (v1) -->
+        <line x1="108" y1="84" x2="168" y2="84" stroke="#364280" stroke-width="1.5"/>
+        <text x="148" y="78" text-anchor="middle" fill="#A5B4FF" font-family="Geist Mono, monospace" font-size="9">arrow</text>
+      </svg>
+    </div>
+
+    <div class="contrast-card">
+      <div class="label" style="color: var(--royal-11);">v2 — improved</div>
+      <svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
+        <rect width="200" height="120" fill="#121428" rx="6"/>
+        <!-- Owned node (v2): royal-4 fill, royal-8 stroke -->
+        <rect x="12" y="12" width="80" height="36" rx="8" fill="#1E2346" stroke="#3B5BDB" stroke-width="1.5"/>
+        <text x="52" y="34" text-anchor="middle" fill="#E6E2D9" font-family="Geist, sans-serif" font-size="11" font-weight="500">Owned</text>
+        <!-- External (v2): royal-7 dashed stroke -->
+        <rect x="108" y="12" width="80" height="36" rx="8" fill="none" stroke="#364280" stroke-width="1.5" stroke-dasharray="6,4"/>
+        <text x="148" y="34" text-anchor="middle" fill="#E6E2D9" font-family="Geist, sans-serif" font-size="11" font-weight="500">External</text>
+        <!-- Highlighted (v2): royal-5 fill, royal-9 stroke -->
+        <rect x="12" y="64" width="80" height="40" rx="8" fill="#252C58" stroke="#4D6DE8" stroke-width="2"/>
+        <text x="52" y="88" text-anchor="middle" fill="#E6E2D9" font-family="Geist, sans-serif" font-size="11" font-weight="500">Key node</text>
+        <!-- Arrow (v2) -->
+        <line x1="108" y1="84" x2="168" y2="84" stroke="#3B5BDB" stroke-width="1.5"/>
+        <text x="148" y="78" text-anchor="middle" fill="#A5B4FF" font-family="Geist Mono, monospace" font-size="9">arrow</text>
+      </svg>
+    </div>
+  </div>
+
+  <div class="notes" style="margin-top: 0;">
+    <strong>Changes:</strong>
+    <ul>
+      <li><strong>Owned nodes:</strong> royal-3 fill + royal-7 stroke → royal-4 fill + royal-8 stroke. The fill now has visible contrast against the background, and the stroke matches the brand blue.</li>
+      <li><strong>Highlighted node:</strong> royal-4 fill + royal-8 stroke → royal-5 fill + royal-9 stroke. One step brighter than owned nodes, so it still stands out when everything else also uses royal-8.</li>
+      <li><strong>External nodes:</strong> royal-6 stroke → royal-7 stroke. Still dashed, still recessive, but now actually visible at small sizes.</li>
+      <li><strong>External labels:</strong> ink-dim → ink (full contrast). At mobile sizes, dimmed labels on dashed-stroke nodes were unreadable. The dashed stroke already signals "external"; the label doesn't need to be dim too.</li>
+      <li><strong>Arrow base colour:</strong> royal-7 → royal-8. Arrows need to be visible at 50% scale on mobile.</li>
+      <li><strong>Highlighted arrows:</strong> royal-8 → royal-9. Keeps the hierarchy: base arrows are royal-8, highlighted path is royal-9.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION 2 — Refined B at desktop width
+     ============================================================ -->
+<div class="variation">
+  <div class="var-label">B2 — Desktop</div>
+  <div class="var-title">Refined diagram (720px prose column)</div>
+  <div class="var-desc">Simplified labels, cleaned arrow routing, fixed Vendor Gateway wording, improved colour contrast. Sub-labels removed from all nodes except the Gateway.</div>
+
+  <div class="case-context">
+    <div class="section-kicker">Architecture</div>
+    <div class="section-heading">Four layers between a bug and your wallet</div>
+
+    <div class="diagram-scroll">
+      <div class="diagram-wrap">
+        <svg class="arch-diagram" viewBox="0 0 600 400" xmlns="http://www.w3.org/2000/svg">
+          <rect width="600" height="400" fill="#121428" rx="8"/>
+
+          <!-- Browser -->
+          <rect x="228" y="20" width="144" height="44" rx="8" fill="#1E2346" stroke="#3B5BDB" stroke-width="1.5"/>
+          <text x="300" y="47" text-anchor="middle" fill="#E6E2D9" font-family="Geist, sans-serif" font-size="13" font-weight="500">Browser</text>
+
+          <!-- Arrow: Browser → Worker group -->
+          <line x1="300" y1="64" x2="300" y2="96" stroke="#3B5BDB" stroke-width="1.5" marker-end="url(#arr)"/>
+
+          <!-- Worker group box -->
+          <rect x="40" y="96" width="520" height="80" rx="8" fill="none" stroke="#252C58" stroke-width="1" stroke-dasharray="6,4"/>
+          <text x="52" y="112" fill="#A5B4FF" font-family="Geist, sans-serif" font-size="10" font-weight="500" letter-spacing="0.14em">CLOUDFLARE WORKER</text>
+
+          <!-- Worker modules — simplified, no sub-labels -->
+          <rect x="56" y="124" width="72" height="38" rx="8" fill="#1E2346" stroke="#3B5BDB" stroke-width="1.5"/>
+          <text x="92" y="148" text-anchor="middle" fill="#E6E2D9" font-family="Geist, sans-serif" font-size="12" font-weight="500">Auth</text>
+
+          <rect x="144" y="124" width="100" height="38" rx="8" fill="#1E2346" stroke="#3B5BDB" stroke-width="1.5"/>
+          <text x="194" y="148" text-anchor="middle" fill="#E6E2D9" font-family="Geist, sans-serif" font-size="12" font-weight="500">Tasks</text>
+
+          <rect x="260" y="124" width="100" height="38" rx="8" fill="#1E2346" stroke="#3B5BDB" stroke-width="1.5"/>
+          <text x="310" y="148" text-anchor="middle" fill="#E6E2D9" font-family="Geist, sans-serif" font-size="12" font-weight="500">Reviews</text>
+
+          <rect x="376" y="124" width="72" height="38" rx="8" fill="#1E2346" stroke="#3B5BDB" stroke-width="1.5"/>
+          <text x="412" y="148" text-anchor="middle" fill="#E6E2D9" font-family="Geist, sans-serif" font-size="12" font-weight="500">SMS</text>
+
+          <rect x="464" y="124" width="80" height="38" rx="8" fill="#1E2346" stroke="#3B5BDB" stroke-width="1.5"/>
+          <text x="504" y="148" text-anchor="middle" fill="#E6E2D9" font-family="Geist, sans-serif" font-size="12" font-weight="500">Notify</text>
+
+          <!-- D1 Database -->
+          <rect x="56" y="220" width="140" height="48" rx="8" fill="#1E2346" stroke="#3B5BDB" stroke-width="1.5"/>
+          <text x="126" y="249" text-anchor="middle" fill="#E6E2D9" font-family="Geist, sans-serif" font-size="13" font-weight="500">D1 (SQLite)</text>
+          <ellipse cx="126" cy="222" rx="70" ry="5" fill="none" stroke="#3B5BDB" stroke-width="1.5"/>
+
+          <!-- Arrow: modules → D1 -->
+          <path d="M194,162 L194,196 L150,196 L150,220" fill="none" stroke="#3B5BDB" stroke-width="1.5" marker-end="url(#arr)"/>
+
+          <!-- VENDOR GATEWAY — highlighted -->
+          <rect x="280" y="210" width="260" height="68" rx="8" fill="#252C58" stroke="#4D6DE8" stroke-width="2"/>
+          <text x="410" y="237" text-anchor="middle" fill="#E6E2D9" font-family="Geist, sans-serif" font-size="13" font-weight="500">Vendor Gateway</text>
+          <text x="410" y="256" text-anchor="middle" fill="#A5B4FF" font-family="Geist Mono, monospace" font-size="10">single path to all paid APIs</text>
+          <text x="410" y="270" text-anchor="middle" fill="#6C85FF" font-family="Geist Mono, monospace" font-size="9">killswitch → budget cap → dedup → send</text>
+
+          <!-- Arrow: SMS → Gateway -->
+          <path d="M412,162 L412,210" fill="none" stroke="#4D6DE8" stroke-width="2" marker-end="url(#arr-hi)"/>
+
+          <!-- Arrow: Notify → Gateway -->
+          <path d="M504,162 L504,194 L480,194 L480,210" fill="none" stroke="#4D6DE8" stroke-width="2" marker-end="url(#arr-hi)"/>
+
+          <!-- Cron trigger -->
+          <rect x="496" y="82" width="56" height="24" rx="12" fill="none" stroke="#364280" stroke-width="1.5" stroke-dasharray="5,3"/>
+          <text x="524" y="98" text-anchor="middle" fill="#E6E2D9" font-family="Geist, sans-serif" font-size="10" font-weight="500">Cron</text>
+          <line x1="516" y1="106" x2="510" y2="124" stroke="#364280" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr-ext)"/>
+
+          <!-- External services -->
+          <rect x="24" y="326" width="120" height="44" rx="8" fill="none" stroke="#364280" stroke-width="1.5" stroke-dasharray="6,4"/>
+          <text x="84" y="353" text-anchor="middle" fill="#E6E2D9" font-family="Geist, sans-serif" font-size="12" font-weight="500">Google OAuth</text>
+
+          <rect x="240" y="326" width="120" height="44" rx="8" fill="none" stroke="#364280" stroke-width="1.5" stroke-dasharray="6,4"/>
+          <text x="300" y="353" text-anchor="middle" fill="#E6E2D9" font-family="Geist, sans-serif" font-size="12" font-weight="500">Twilio</text>
+
+          <rect x="456" y="326" width="120" height="44" rx="8" fill="none" stroke="#364280" stroke-width="1.5" stroke-dasharray="6,4"/>
+          <text x="516" y="353" text-anchor="middle" fill="#E6E2D9" font-family="Geist, sans-serif" font-size="12" font-weight="500">Claude Haiku</text>
+
+          <!-- Auth → Google -->
+          <path d="M92,162 L92,310 L84,326" fill="none" stroke="#364280" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr-ext)"/>
+
+          <!-- Gateway → Twilio -->
+          <path d="M340,278 L300,326" fill="none" stroke="#364280" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr-ext)"/>
+
+          <!-- Gateway → Claude -->
+          <path d="M480,278 L516,326" fill="none" stroke="#364280" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr-ext)"/>
+
+          <!-- Twilio webhook inbound (clean routing, right margin) -->
+          <path d="M300,370 L300,390 L584,390 L584,148 L464,148" fill="none" stroke="#364280" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr-ext)"/>
+          <text x="572" y="280" fill="#9C968A" font-family="Geist Mono, monospace" font-size="9" transform="rotate(-90, 572, 280)">webhook inbound</text>
+
+          <defs>
+            <marker id="arr" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8" fill="none" stroke="#3B5BDB" stroke-width="1.2"/>
+            </marker>
+            <marker id="arr-hi" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8" fill="none" stroke="#4D6DE8" stroke-width="1.2"/>
+            </marker>
+            <marker id="arr-ext" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8" fill="none" stroke="#364280" stroke-width="1.2"/>
+            </marker>
+          </defs>
+        </svg>
+      </div>
+      <div class="diagram-caption">Planner V1 system architecture. The Vendor Gateway (bright stroke) is the single path to all paid APIs.</div>
+    </div>
+
+    <p class="section-prose after-diagram">The Vendor Gateway is the single choke point for every paid API call. Four layers fire in sequence: killswitch (boolean, instant), global budget cap (atomic counter), per-user budget cap (20 SMS/day), and idempotency (UNIQUE constraint INSERT before the vendor call). A bug in the scheduler can loop forever, but it cannot send two reminders for the same task on the same day.</p>
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION 3 — Mobile presentation options
+     ============================================================ -->
+<div class="variation">
+  <div class="var-label">Mobile</div>
+  <div class="var-title">Diagram at mobile width (390px viewport)</div>
+  <div class="var-desc">Two options for handling diagrams on narrow screens. Both use the same B2 diagram. The difference is how the container treats horizontal overflow.</div>
+
+  <div class="side-by-side">
+    <!-- Option 1: Horizontal scroll -->
+    <div>
+      <div class="var-label" style="margin-bottom: 16px;">Option M1: Horizontal scroll</div>
+      <div class="case-context mobile-sim">
+        <div class="section-kicker">Architecture</div>
+        <div class="section-heading">Four layers between a bug and your wallet</div>
+
+        <div class="scroll-hint" style="display: block;">scroll →</div>
+        <div class="diagram-scroll" style="overflow-x: auto;">
+          <div class="diagram-wrap" style="min-width: 480px;">
+            <svg class="arch-diagram" viewBox="0 0 600 400" xmlns="http://www.w3.org/2000/svg">
+              <rect width="600" height="400" fill="#121428" rx="8"/>
+              <rect x="228" y="20" width="144" height="44" rx="8" fill="#1E2346" stroke="#3B5BDB" stroke-width="1.5"/>
+              <text x="300" y="47" text-anchor="middle" fill="#E6E2D9" font-family="Geist, sans-serif" font-size="13" font-weight="500">Browser</text>
+              <line x1="300" y1="64" x2="300" y2="96" stroke="#3B5BDB" stroke-width="1.5" marker-end="url(#arr-m1)"/>
+              <rect x="40" y="96" width="520" height="80" rx="8" fill="none" stroke="#252C58" stroke-width="1" stroke-dasharray="6,4"/>
+              <text x="52" y="112" fill="#A5B4FF" font-family="Geist, sans-serif" font-size="10" font-weight="500" letter-spacing="0.14em">CLOUDFLARE WORKER</text>
+              <rect x="56" y="124" width="72" height="38" rx="8" fill="#1E2346" stroke="#3B5BDB" stroke-width="1.5"/>
+              <text x="92" y="148" text-anchor="middle" fill="#E6E2D9" font-family="Geist, sans-serif" font-size="12" font-weight="500">Auth</text>
+              <rect x="144" y="124" width="100" height="38" rx="8" fill="#1E2346" stroke="#3B5BDB" stroke-width="1.5"/>
+              <text x="194" y="148" text-anchor="middle" fill="#E6E2D9" font-family="Geist, sans-serif" font-size="12" font-weight="500">Tasks</text>
+              <rect x="260" y="124" width="100" height="38" rx="8" fill="#1E2346" stroke="#3B5BDB" stroke-width="1.5"/>
+              <text x="310" y="148" text-anchor="middle" fill="#E6E2D9" font-family="Geist, sans-serif" font-size="12" font-weight="500">Reviews</text>
+              <rect x="376" y="124" width="72" height="38" rx="8" fill="#1E2346" stroke="#3B5BDB" stroke-width="1.5"/>
+              <text x="412" y="148" text-anchor="middle" fill="#E6E2D9" font-family="Geist, sans-serif" font-size="12" font-weight="500">SMS</text>
+              <rect x="464" y="124" width="80" height="38" rx="8" fill="#1E2346" stroke="#3B5BDB" stroke-width="1.5"/>
+              <text x="504" y="148" text-anchor="middle" fill="#E6E2D9" font-family="Geist, sans-serif" font-size="12" font-weight="500">Notify</text>
+              <rect x="56" y="220" width="140" height="48" rx="8" fill="#1E2346" stroke="#3B5BDB" stroke-width="1.5"/>
+              <text x="126" y="249" text-anchor="middle" fill="#E6E2D9" font-family="Geist, sans-serif" font-size="13" font-weight="500">D1 (SQLite)</text>
+              <ellipse cx="126" cy="222" rx="70" ry="5" fill="none" stroke="#3B5BDB" stroke-width="1.5"/>
+              <path d="M194,162 L194,196 L150,196 L150,220" fill="none" stroke="#3B5BDB" stroke-width="1.5" marker-end="url(#arr-m1)"/>
+              <rect x="280" y="210" width="260" height="68" rx="8" fill="#252C58" stroke="#4D6DE8" stroke-width="2"/>
+              <text x="410" y="237" text-anchor="middle" fill="#E6E2D9" font-family="Geist, sans-serif" font-size="13" font-weight="500">Vendor Gateway</text>
+              <text x="410" y="256" text-anchor="middle" fill="#A5B4FF" font-family="Geist Mono, monospace" font-size="10">single path to all paid APIs</text>
+              <text x="410" y="270" text-anchor="middle" fill="#6C85FF" font-family="Geist Mono, monospace" font-size="9">killswitch → budget cap → dedup → send</text>
+              <path d="M412,162 L412,210" fill="none" stroke="#4D6DE8" stroke-width="2" marker-end="url(#arr-hi-m1)"/>
+              <path d="M504,162 L504,194 L480,194 L480,210" fill="none" stroke="#4D6DE8" stroke-width="2" marker-end="url(#arr-hi-m1)"/>
+              <rect x="496" y="82" width="56" height="24" rx="12" fill="none" stroke="#364280" stroke-width="1.5" stroke-dasharray="5,3"/>
+              <text x="524" y="98" text-anchor="middle" fill="#E6E2D9" font-family="Geist, sans-serif" font-size="10" font-weight="500">Cron</text>
+              <line x1="516" y1="106" x2="510" y2="124" stroke="#364280" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr-ext-m1)"/>
+              <rect x="24" y="326" width="120" height="44" rx="8" fill="none" stroke="#364280" stroke-width="1.5" stroke-dasharray="6,4"/>
+              <text x="84" y="353" text-anchor="middle" fill="#E6E2D9" font-family="Geist, sans-serif" font-size="12" font-weight="500">Google OAuth</text>
+              <rect x="240" y="326" width="120" height="44" rx="8" fill="none" stroke="#364280" stroke-width="1.5" stroke-dasharray="6,4"/>
+              <text x="300" y="353" text-anchor="middle" fill="#E6E2D9" font-family="Geist, sans-serif" font-size="12" font-weight="500">Twilio</text>
+              <rect x="456" y="326" width="120" height="44" rx="8" fill="none" stroke="#364280" stroke-width="1.5" stroke-dasharray="6,4"/>
+              <text x="516" y="353" text-anchor="middle" fill="#E6E2D9" font-family="Geist, sans-serif" font-size="12" font-weight="500">Claude Haiku</text>
+              <path d="M92,162 L92,310 L84,326" fill="none" stroke="#364280" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr-ext-m1)"/>
+              <path d="M340,278 L300,326" fill="none" stroke="#364280" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr-ext-m1)"/>
+              <path d="M480,278 L516,326" fill="none" stroke="#364280" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr-ext-m1)"/>
+              <path d="M300,370 L300,390 L584,390 L584,148 L464,148" fill="none" stroke="#364280" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr-ext-m1)"/>
+              <text x="572" y="280" fill="#9C968A" font-family="Geist Mono, monospace" font-size="9" transform="rotate(-90, 572, 280)">webhook inbound</text>
+              <defs>
+                <marker id="arr-m1" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8" fill="none" stroke="#3B5BDB" stroke-width="1.2"/></marker>
+                <marker id="arr-hi-m1" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8" fill="none" stroke="#4D6DE8" stroke-width="1.2"/></marker>
+                <marker id="arr-ext-m1" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8" fill="none" stroke="#364280" stroke-width="1.2"/></marker>
+              </defs>
+            </svg>
+          </div>
+          <div class="diagram-caption">Planner V1 system architecture.</div>
+        </div>
+
+        <p class="section-prose after-diagram" style="font-size: 14px;">The Vendor Gateway is the single choke point for every paid API call. Four layers fire in sequence.</p>
+      </div>
+
+      <div class="notes">
+        <strong>M1: Horizontal scroll</strong>
+        <ul>
+          <li>Diagram has a 480px minimum width and scrolls horizontally when the container is narrower.</li>
+          <li>"scroll →" hint appears on narrow viewports.</li>
+          <li>Keeps the same diagram at all breakpoints: one SVG to maintain.</li>
+          <li>Common pattern on technical blogs (Stripe, Vercel, Linear).</li>
+          <li>Downside: part of the diagram is hidden until the user scrolls. First impression may not include the most interesting part.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Option 2: Bleed + scaled -->
+    <div>
+      <div class="var-label" style="margin-bottom: 16px;">Option M2: Full-width bleed</div>
+      <div class="case-context mobile-bleed">
+        <div class="section-kicker">Architecture</div>
+        <div class="section-heading">Four layers between a bug and your wallet</div>
+
+        <div class="diagram-scroll">
+          <div class="diagram-wrap" style="min-width: 0;">
+            <svg class="arch-diagram" viewBox="0 0 600 400" xmlns="http://www.w3.org/2000/svg">
+              <rect width="600" height="400" fill="#121428" rx="8"/>
+              <rect x="228" y="20" width="144" height="44" rx="8" fill="#1E2346" stroke="#3B5BDB" stroke-width="1.5"/>
+              <text x="300" y="47" text-anchor="middle" fill="#E6E2D9" font-family="Geist, sans-serif" font-size="13" font-weight="500">Browser</text>
+              <line x1="300" y1="64" x2="300" y2="96" stroke="#3B5BDB" stroke-width="1.5" marker-end="url(#arr-m2)"/>
+              <rect x="40" y="96" width="520" height="80" rx="8" fill="none" stroke="#252C58" stroke-width="1" stroke-dasharray="6,4"/>
+              <text x="52" y="112" fill="#A5B4FF" font-family="Geist, sans-serif" font-size="10" font-weight="500" letter-spacing="0.14em">CLOUDFLARE WORKER</text>
+              <rect x="56" y="124" width="72" height="38" rx="8" fill="#1E2346" stroke="#3B5BDB" stroke-width="1.5"/>
+              <text x="92" y="148" text-anchor="middle" fill="#E6E2D9" font-family="Geist, sans-serif" font-size="12" font-weight="500">Auth</text>
+              <rect x="144" y="124" width="100" height="38" rx="8" fill="#1E2346" stroke="#3B5BDB" stroke-width="1.5"/>
+              <text x="194" y="148" text-anchor="middle" fill="#E6E2D9" font-family="Geist, sans-serif" font-size="12" font-weight="500">Tasks</text>
+              <rect x="260" y="124" width="100" height="38" rx="8" fill="#1E2346" stroke="#3B5BDB" stroke-width="1.5"/>
+              <text x="310" y="148" text-anchor="middle" fill="#E6E2D9" font-family="Geist, sans-serif" font-size="12" font-weight="500">Reviews</text>
+              <rect x="376" y="124" width="72" height="38" rx="8" fill="#1E2346" stroke="#3B5BDB" stroke-width="1.5"/>
+              <text x="412" y="148" text-anchor="middle" fill="#E6E2D9" font-family="Geist, sans-serif" font-size="12" font-weight="500">SMS</text>
+              <rect x="464" y="124" width="80" height="38" rx="8" fill="#1E2346" stroke="#3B5BDB" stroke-width="1.5"/>
+              <text x="504" y="148" text-anchor="middle" fill="#E6E2D9" font-family="Geist, sans-serif" font-size="12" font-weight="500">Notify</text>
+              <rect x="56" y="220" width="140" height="48" rx="8" fill="#1E2346" stroke="#3B5BDB" stroke-width="1.5"/>
+              <text x="126" y="249" text-anchor="middle" fill="#E6E2D9" font-family="Geist, sans-serif" font-size="13" font-weight="500">D1 (SQLite)</text>
+              <ellipse cx="126" cy="222" rx="70" ry="5" fill="none" stroke="#3B5BDB" stroke-width="1.5"/>
+              <path d="M194,162 L194,196 L150,196 L150,220" fill="none" stroke="#3B5BDB" stroke-width="1.5" marker-end="url(#arr-m2)"/>
+              <rect x="280" y="210" width="260" height="68" rx="8" fill="#252C58" stroke="#4D6DE8" stroke-width="2"/>
+              <text x="410" y="237" text-anchor="middle" fill="#E6E2D9" font-family="Geist, sans-serif" font-size="13" font-weight="500">Vendor Gateway</text>
+              <text x="410" y="256" text-anchor="middle" fill="#A5B4FF" font-family="Geist Mono, monospace" font-size="10">single path to all paid APIs</text>
+              <text x="410" y="270" text-anchor="middle" fill="#6C85FF" font-family="Geist Mono, monospace" font-size="9">killswitch → budget cap → dedup → send</text>
+              <path d="M412,162 L412,210" fill="none" stroke="#4D6DE8" stroke-width="2" marker-end="url(#arr-hi-m2)"/>
+              <path d="M504,162 L504,194 L480,194 L480,210" fill="none" stroke="#4D6DE8" stroke-width="2" marker-end="url(#arr-hi-m2)"/>
+              <rect x="496" y="82" width="56" height="24" rx="12" fill="none" stroke="#364280" stroke-width="1.5" stroke-dasharray="5,3"/>
+              <text x="524" y="98" text-anchor="middle" fill="#E6E2D9" font-family="Geist, sans-serif" font-size="10" font-weight="500">Cron</text>
+              <line x1="516" y1="106" x2="510" y2="124" stroke="#364280" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr-ext-m2)"/>
+              <rect x="24" y="326" width="120" height="44" rx="8" fill="none" stroke="#364280" stroke-width="1.5" stroke-dasharray="6,4"/>
+              <text x="84" y="353" text-anchor="middle" fill="#E6E2D9" font-family="Geist, sans-serif" font-size="12" font-weight="500">Google OAuth</text>
+              <rect x="240" y="326" width="120" height="44" rx="8" fill="none" stroke="#364280" stroke-width="1.5" stroke-dasharray="6,4"/>
+              <text x="300" y="353" text-anchor="middle" fill="#E6E2D9" font-family="Geist, sans-serif" font-size="12" font-weight="500">Twilio</text>
+              <rect x="456" y="326" width="120" height="44" rx="8" fill="none" stroke="#364280" stroke-width="1.5" stroke-dasharray="6,4"/>
+              <text x="516" y="353" text-anchor="middle" fill="#E6E2D9" font-family="Geist, sans-serif" font-size="12" font-weight="500">Claude Haiku</text>
+              <path d="M92,162 L92,310 L84,326" fill="none" stroke="#364280" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr-ext-m2)"/>
+              <path d="M340,278 L300,326" fill="none" stroke="#364280" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr-ext-m2)"/>
+              <path d="M480,278 L516,326" fill="none" stroke="#364280" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr-ext-m2)"/>
+              <path d="M300,370 L300,390 L584,390 L584,148 L464,148" fill="none" stroke="#364280" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr-ext-m2)"/>
+              <text x="572" y="280" fill="#9C968A" font-family="Geist Mono, monospace" font-size="9" transform="rotate(-90, 572, 280)">webhook inbound</text>
+              <defs>
+                <marker id="arr-m2" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8" fill="none" stroke="#3B5BDB" stroke-width="1.2"/></marker>
+                <marker id="arr-hi-m2" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8" fill="none" stroke="#4D6DE8" stroke-width="1.2"/></marker>
+                <marker id="arr-ext-m2" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8" fill="none" stroke="#364280" stroke-width="1.2"/></marker>
+              </defs>
+            </svg>
+          </div>
+          <div class="diagram-caption">Planner V1 system architecture.</div>
+        </div>
+
+        <p class="section-prose after-diagram" style="font-size: 14px;">The Vendor Gateway is the single choke point for every paid API call. Four layers fire in sequence.</p>
+      </div>
+
+      <div class="notes">
+        <strong>M2: Full-width bleed</strong>
+        <ul>
+          <li>Diagram bleeds to container edges (negative margins cancel the card padding).</li>
+          <li>Uses the full 390px viewport width instead of ~234px (after padding).</li>
+          <li>SVG scales to fit: at 390px, the 600-unit viewBox renders labels at ~8px equivalent. Borderline readable.</li>
+          <li>No scrolling required: the full diagram is visible at once.</li>
+          <li>Downside: still small. Labels are tight at this scale. Works for simple diagrams; may fail for denser ones.</li>
+          <li>Could combine with M1: bleed to full width AND scroll if even that's not enough.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION 4 — Recommendation
+     ============================================================ -->
+<div class="variation" style="border-top: 2px solid var(--royal-5);">
+  <div class="var-label">Recommendation</div>
+  <div class="var-title">Mobile strategy: bleed + scroll fallback</div>
+
+  <div class="notes" style="margin-top: 0;">
+    <strong>Use both M1 and M2 together:</strong>
+    <ul>
+      <li>Diagrams always bleed to full container width on mobile (negative margins on the diagram wrapper cancel card padding). This gets you from ~234px to ~358px usable width on a 390px screen.</li>
+      <li>Set a minimum readable width per diagram (480px for architecture diagrams, possibly lower for simpler flowcharts). If the container is narrower than the minimum, enable horizontal scroll.</li>
+      <li>Show a "scroll →" hint when scroll is active (Geist Mono 11px, ink-faint, right-aligned above the diagram).</li>
+      <li>On desktop (>640px), neither bleed nor scroll applies. Diagram sits within the prose column normally.</li>
+    </ul>
+
+    <strong>Implementation in the Astro component:</strong>
+    <ul>
+      <li>A <code>&lt;Diagram&gt;</code> component wraps all diagram SVGs. It handles the scroll container, bleed margins, and scroll hint.</li>
+      <li>Props: <code>minWidth</code> (default 480), <code>caption</code> (string).</li>
+      <li>CSS-only scroll detection via <code>@container</code> or <code>@media</code> query on the wrapper width.</li>
+      <li>No JavaScript needed. The scroll hint is always present on narrow viewports; the diagram is always scrollable if its min-width exceeds the container.</li>
+    </ul>
+
+    <strong>Updated colour standards (v2):</strong>
+    <ul>
+      <li>Owned nodes: royal-4 fill + royal-8 stroke (up from royal-3 + royal-7)</li>
+      <li>Highlighted subsystem: royal-5 fill + royal-9 stroke (was royal-4 + royal-8)</li>
+      <li>External services: no fill + royal-7 dashed stroke, full-contrast labels (was royal-6 + ink-dim labels)</li>
+      <li>Base arrows: royal-8 (was royal-7)</li>
+      <li>Highlighted arrows: royal-9 (was royal-8)</li>
+      <li>External arrows: royal-7 dashed (was royal-6)</li>
+      <li>Every colour bumped up one step from v1. The whole palette reads at 60% scale.</li>
+    </ul>
+  </div>
+</div>
+
+</body>
+</html>
