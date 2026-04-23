@@ -31,6 +31,10 @@ Three collections: `projects`, `writing`, `log`. Schemas in `src/content.config.
 - **Case Study Workshop** (chunk 4) must complete before any case study body content is written
 - Placeholder frontmatter is fine in chunks 1-3; body content comes in chunk 4-5
 
+## When Authoring Case Studies or Writing Posts
+
+Read `.claude/rules/imagery-standards.md` before drafting or editing case study bodies, writing posts, or any artefact that will contain diagrams, screenshots, or transcript blocks. Covers diagram aesthetic (Royal Tonal, four archetypes), screenshot framing rules, and verbatim transcript standards. The full reasoning, tooling specs, and file-layout details are in `plans/portfolio-imagery-standards.md` — read on demand if the rules file points there.
+
 ## Check Script
 
 ```bash
