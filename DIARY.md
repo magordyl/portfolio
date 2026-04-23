@@ -1,5 +1,19 @@
 # Development Diary
 
+## 2026-04-23 — Chunk 4d kickoff: the-weekly scaffold + transcript cap spec
+
+Two things shipped this session: a write-in scaffold for the-weekly case study, and a small spec correction on transcript length.
+
+**The scaffold pattern.** Locked structure via an interview pass that stressed the 2026-04-12 draft against today's position. Middle zone collapsed to Decisions only. The template's Planned Middle Zone table had listed Design+Architecture+Decisions for the-weekly, but the 2026-04-13 evolution-showcase plan had already moved Design's visible evidence into Lessons (via `<VersionedEmbed>`), and there is no architecture worth a diagram on a frontend-only POC. Three decisions locked: picking an idea that fit the frontend-only constraint (Coles public trolley URL as the pre-solved-integration insight), automation-first testing (not TDD: the stated belief is that automated testing is key to stable AI code outputs), and opinionated UX. "Feature gravity" became the named recurring tension across D1, D3, and Lesson 2. Outcome leads with the user-time claim: 5 meals to a Coles trolley in under 2 minutes. Lesson 2 lands on "baby's first UI" as the concrete admission before the evolution embed.
+
+**Sub-slot breakdown.** v1 of the scaffold had one "write here" block per section. Dylan asked for sub-slots at 20-50w per beat. Applied: Decisions into 6 (D1 / D2a belief / D2b evidence / D3a belief / D3b cuts / D3c principle+tension), Outcome into 3 (user-time claim / real data / reactions), Lessons into 3 (L1 / L2 admission / L2 belief+rule+embed setup). Problem stayed whole because it was already drafted. Each sub-slot has a one-line cue header naming what that chunk should do. Beat-sized targets are easier to write against than section-level targets. Pattern worth keeping for every downstream case study.
+
+**Transcript cap spec.** Session-end Step 0.5 surfaced a 14-turn draft (`planner-onboarding-interview`) that exceeded the documented 2-8 cap. Checked the enforcement layer before acting. The Zod schema in `content.config.ts` and the structural validator in `promote-transcript.mjs` both enforce only `.min(2)`, no `.max`. The prose rule had drifted from the code. Reconciled by splitting: 2-8 stays advisory for case study embeds (reader attention inside a claim-bearing section), no hard cap for writing posts and standalone transcripts where the transcript is the artefact. Promoted the 14-turn draft unchanged. ChatTranscript cluster collapsing already compresses tool-heavy runs, so long verbatim sessions render visually short. Files touched: `.claude/rules/imagery-standards.md`, `plans/portfolio-case-study-template.md` (two locations), `plans/portfolio-imagery-standards.md`.
+
+**Meta-lesson.** A spec rule that lives only in prose but not in code drifts invisibly. Next time a doc-stated cap is reconsidered, grep for whether a schema or script already enforces it. If not, the cap was aspirational. Reconciling docs to code is cheaper than changing either direction blindly.
+
+---
+
 ## 2026-04-18 — Chunk 2 of CI/CD improvements: branch preview deploys
 
 Commits `3ce4707` (on `preview-test`, merged to `main`). Part of the workspace CI/CD improvement plan at `plans/cicd-improvements.md`.

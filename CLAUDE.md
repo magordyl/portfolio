@@ -67,7 +67,25 @@ npm run deploy:preview       # builds + deploys to dylan-portfolio-preview.magor
 
 Astro uses `@tailwindcss/vite` (Vite plugin), NOT `@astrojs/tailwind`. The `astro add tailwind` command sets this up automatically. No `tailwind.config.mjs` needed — tokens live as CSS variables in `globals.css`. If you need Tailwind utility classes for token values, add `@theme { --text-hero: 4.5rem; }` blocks inside `globals.css`.
 
-## Current Status (2026-04-18)
+## Current Status (2026-04-23)
+
+**Last session (2026-04-23) — Chunk 4d kicked off: the-weekly case study scaffold + transcript cap spec tweak.**
+
+Scaffold written to `plans/the-weekly-case-study-scaffold.md`. Locked structure: middle zone is Decisions only (three sub-decisions: Coles URL pre-solved integration / automation-first testing / opinionated UX). Design evolution embedded in Lessons via `<VersionedEmbed>` built in 4d.4. No transcript embeds, no architecture diagram. "Feature gravity" picked as the recurring tension label across D1, D3, and Lesson 2. Outcome leads with the user-time claim: 5 meals to Coles trolley in under 2 minutes. Lesson 2 admission lands on "baby's first UI".
+
+Each section broken into sub-slots of 20-50w per beat (Problem 1 slot / Decisions 6 / Outcome 3 / Lessons 3 / Next 1) with one-line cues per slot. Dylan drafted the Problem section inside the scaffold (rough first pass, 4 paragraphs). Remaining sub-slots empty.
+
+**Next session:** Dylan finishes remaining slots (Decisions / Outcome / Lessons / Next), then Claude runs the edit pass (AI-tells grep, structure checks, word-count calibration). After lock, prose migrates to `src/content/projects/the-weekly.mdx` and 4d.4 (CaseStudyLayout + VersionedEmbed + Workers deploys for Stages 1/2/3) starts.
+
+**Transcript cap spec change** (docs only, no code change). The documented "2-8 turns" cap was prose-only; the Zod schema and `promote-transcript.mjs` both enforce only `.min(2)`. Reconciled: 2-8 is advisory for case study embeds (reader attention inside claim-bearing prose); writing posts and standalone transcripts have no hard cap. Touched `.claude/rules/imagery-standards.md`, `plans/portfolio-case-study-template.md` (two locations), `plans/portfolio-imagery-standards.md`.
+
+**Promoted** `planner-onboarding-interview.json` (14 turns) to `src/content/transcripts/` for a future writing post. `context` field left empty — fill when the writing post is drafted.
+
+**Plan tweak:** `plans/portfolio-case-study-template.md` §Planned Middle Zone now correctly lists the-weekly as Decisions only with Design-in-Lessons (was Design+Architecture+Decisions). `plans/the-weekly-case-study-draft.md` marked as superseded by the scaffold.
+
+**Commits this session:** `7afdbce` (docs: point CLAUDE.md at imagery-standards rule for case-study/writing authoring). Scaffold + spec updates + DIARY committed together at session-end.
+
+---
 
 **Last session (2026-04-18) — CI/CD chunks 1 + 2 shipped (workspace plan `plans/cicd-improvements.md`).**
 

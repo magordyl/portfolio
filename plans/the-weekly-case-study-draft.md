@@ -2,7 +2,7 @@
 
 Locked in session 2026-04-12. Dylan populates the words; this doc captures the agreed structure, key messages, and interview context.
 
-**Status:** Structure approved. Ready for Dylan to write.
+**Status:** Superseded 2026-04-23 by `plans/the-weekly-case-study-scaffold.md` (the write-in template with sub-slots). This file retains the original interview context and key messages map for reference, but the scaffold carries the fine-tuned structure decisions from the 2026-04-23 interview pass — Decision 1 is now framed around the Coles trolley URL insight rather than "frontend-only as a decision"; Decision 2 is "automation-first testing" not TDD; Decision 3 now names the concrete cuts Dylan made; "Feature gravity" is the named recurring tension. Use the scaffold for the actual writing; use this file only to pull context that didn't make it into the scaffold.
 
 ---
 

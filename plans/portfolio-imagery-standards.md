@@ -257,13 +257,14 @@ The capture workflow runs an automated regex pass before writing the draft:
 
 Hand-review is mandatory after the automated pass. The draft lives in `src/content/transcripts/drafts/` until it's been reviewed; only then does it move to `src/content/transcripts/`. No exceptions — a transcript that hasn't been hand-reviewed must not appear in a published page.
 
-### Embed length — min 2, max ~8 turns
+### Transcript length — min 2, editorial above
 
 - **Fewer than 2 turns** is a quote, not a transcript. Use a pull-quote styled block instead.
-- **More than 8 turns** loses the reader. Pick the pivotal sub-range, or split into two separate embeds with prose between them.
+- **Case study embeds** aim for 2-8 turns. More than 8 loses the reader inside a claim-bearing section where prose is carrying the argument. Pick the pivotal sub-range, or split into two embeds with prose between them.
+- **Writing posts and standalone transcripts** have no hard cap. When the transcript is the artefact rather than evidence for an adjacent claim, editorial judgment applies. Cluster collapsing in the ChatTranscript component compresses tool-heavy runs, so a 14-turn session with 2-3 clusters may render as visually short as an 8-turn verbatim embed.
 - Tool calls count as zero turns for this budget — only user/assistant prose counts.
 
-The `/bookmark` skill defaults to capturing the last 6 turns, which hits this range comfortably.
+The `/bookmark` skill defaults to capturing the last 6 turns, which hits the case study embed range comfortably.
 
 ### Frame specification — `<ChatTranscript>` component
 

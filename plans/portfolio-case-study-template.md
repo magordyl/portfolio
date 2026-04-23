@@ -181,7 +181,7 @@ The order is per-project. A project with a strong migration story might lead wit
 **Transcript rules (Lessons):**
 - Shows a *mistake or pivot*: the reader sees an assumption fail and the belief update
 - Must have a note explaining the mistake and what changed
-- 2-8 turns, verbatim, hand-reviewed
+- 2-8 turns advisory (case study embed, reader attention), verbatim, hand-reviewed
 - Counts as 50 words against section budget
 
 ---
@@ -224,7 +224,7 @@ These rules are locked in `portfolio-imagery-standards.md`. Restated here for te
 
 1. **Placement:** Decisions section (decision moments) or Lessons (mistake moments) only. Never Hero, Problem, or Outcome. Those are claim sections; a transcript in a claim section invites the reader to audit the dialogue instead of trusting the prose.
 2. **Budget cost:** each embed counts as 50 words against the host section's word budget, regardless of actual turn length. This prevents padding and discourages over-embedding.
-3. **Turn count:** 2-8 turns per embed. Fewer than 2 is a pull-quote. More than 8 loses the reader.
+3. **Turn count:** 2 turns minimum. Case study embeds aim for 2-8 turns; more than 8 loses the reader inside a claim section. Writing posts and standalone transcripts have no hard cap.
 4. **Verbatim only.** No edits, reorders, combinations, or fabrication. Automated redaction pass + mandatory hand-review before promotion.
 5. **Note required.** Every embed must have an editorial note explaining why the moment was marked. "Here's a conversation" is not enough.
 6. **Full projects:** up to 2 embeds total, max 1 in breakout mode.
@@ -310,7 +310,7 @@ Every signal from the diary audit and style guide has a designated home. No orph
 
 | Project | Depth | Middle zone sections (tentative order) | Rationale |
 |---------|-------|---------------------------------------|-----------|
-| The Weekly (#1) | Full | Design, Architecture, Decisions | Strong design iteration trail; architecture is simple but interesting (no backend); product decisions secondary |
+| The Weekly (#1) | Full | Decisions only (Design evolution lives in Lessons via `<VersionedEmbed>`) | Decisions is the richer middle zone on a frontend-only POC; the design iteration trail lands in Lessons as visible evidence for the "skipped design" admission; no backend means no architecture diagram worth including. Scaffold: `plans/the-weekly-case-study-scaffold.md`. |
 | Planner POC (#2) | Full | Architecture, Decisions | Migration story + spending guard are the headline; no significant design exploration to show |
 | Workspace Audit (#3) | Lightweight | Decisions | Tooling/process project; no architecture or design to speak of |
 | This Portfolio (#4) | Lightweight | Design | Meta case study; the design system is the interesting part |

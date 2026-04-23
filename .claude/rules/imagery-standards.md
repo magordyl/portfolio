@@ -31,7 +31,7 @@ First-class artefact. The portfolio is largely about learning to ship with Claud
 
 - **Verbatim only.** Never edit turn text beyond the redaction pass. Never reorder turns. Never combine turns from different sessions. Never add turns that didn't happen.
 - **Tool calls collapsed** to a one-line label (`[Read package.json]`, `[Edit src/foo.ts]`). Never expanded JSON.
-- **Length:** 2 to 8 turns of user/assistant prose. Fewer than 2 is a pull-quote, not a transcript. More than 8 loses the reader.
+- **Length:** 2 turns minimum. Case study embeds aim for 2-8 turns (reader attention inside claim-bearing prose). Writing posts and standalone transcripts have no hard cap: editorial judgment applies when the transcript is the artefact, not evidence for an adjacent claim. ChatTranscript cluster collapsing compresses tool-heavy runs, so a 14-turn session may render as visually short as an 8-turn verbatim embed.
 - **Placement:** Process or Lessons sections only. Never Hero, Problem, or Outcome. Those are claim sections, and a transcript in a claim section invites the reader to scan the dialogue for validation instead of trusting the prose.
 - **Redaction:** automated regex pass (secrets, absolute paths, emails) followed by mandatory hand-review before promotion from draft to published. No exceptions. A transcript that has not been hand-reviewed does not appear in a published page.
 - **Budget per case study or essay:** up to two breakout transcripts (the pivotal moments) and up to two inline transcripts (routine dialogue).
